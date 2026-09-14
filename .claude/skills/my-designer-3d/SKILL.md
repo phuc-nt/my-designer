@@ -13,6 +13,44 @@ primitives into editable meshes, fuse them into smooth organic shapes,
 loft revolved forms, sculpt, cut loops, paint UV layers, import GLB, rig
 and animate.
 
+## Choose your geometry before you build
+
+For anything beyond a handful of blocks, decide per shape which tool makes
+it, and say so in your plan. Stacking scaled primitives is the right
+answer for slabs, walls and simple boxes — and the wrong answer for every
+curved, tapered or fused form, where it produces the faceted look people
+describe as "obviously made of boxes".
+
+| Shape | Build it with |
+| --- | --- |
+| Wall, slab, beam, plinth, simple column | primitive `box` / `cylinder` |
+| Conical or pitched roof, spire, turret cap | `loft` (rings from wide base to a near-zero apex) |
+| Vase, dome, column with entasis, tree trunk, limb, tower that swells | `loft` |
+| Two forms that must *join* (roof into tower, tower into wall, rock into rock) | `remesh` over the overlapping primitives — `blend` is what rounds the junction |
+| Boulder, terrain, cushion, anything hand-shaped | `convert` → `insert-loop` ×N → `sculpt` → `relax` |
+| Rounded corner or fillet anywhere | `remesh` blend, or loops + `relax` — there is no bevel command |
+
+A build of more than ~100 nodes that contains **zero** meshes is a signal
+you defaulted to primitives without deciding. Either use the mesh
+commands, or tell the human plainly that you chose blocky primitives and
+why (speed, a deliberate low-poly style, a budget you were given). Never
+let "it's only primitives" be a silent default.
+
+Worked example — a conical tower roof, which is one `loft`, not a `cone`
+primitive perched on a cylinder:
+
+```json
+{"action":"loft","outputId":"astro-roof","segments":24,"color":"#3B4250",
+ "rings":[{"center":[0,11.4,0],"radius":1.05},{"center":[0,11.7,0],"radius":1.0},
+          {"center":[0,12.6,0],"radius":0.62},{"center":[0,13.6,0],"radius":0.24},
+          {"center":[0,14.1,0],"radius":0.03}]}
+```
+
+Rings are in world/page space, so put the first ring exactly on the
+tower's rim height — that alone removes the "floating roof" class of bug.
+Then `remesh` the roof with the shaft if you want the junction fused
+rather than butted.
+
 ## Scene anatomy
 
 Page `scene` (edit with `update-page` — send the **whole** object):
@@ -43,7 +81,11 @@ A `model3d` node:
 ```
 
 - `data.geometry`: `box` (default) `sphere` `torus` `torusKnot` `cone`
-  `cylinder`. A unit primitive is scaled by `scene.scale`.
+  `cylinder`. `scene.scale` multiplies the built geometry, which is **not**
+  a unit cube: box and cylinder 1.6³, sphere 2³, cone 2 × 1.7 × 2, torus
+  2.2 × 0.6 × 2.2. A node's height is `scale.y × unitHeight`, so stacking
+  parts by `position.y ± scale.y / 2` misplaces every one of them — see
+  [geometry-checks.md](references/geometry-checks.md).
 - `scene.mesh` (`positions`, `indices`, optional `normals uv tangents
   colors morphTargets skinIndices skinWeights`) replaces the primitive —
   arbitrary geometry, ≤ 300 k vertices. You rarely write it by hand;
@@ -170,6 +212,15 @@ joins, clipped camera near-plane, blown highlights, fog hiding the
 subject. GLB/glTF carry geometry, PBR maps, skins and sampled clips — not
 fog, bloom, emitters or 2D page content. `render --format svg` shows 3D as
 a placeholder symbol; never present it as the scene.
+
+**Measure as well as look** — [geometry-checks.md](references/geometry-checks.md).
+Renders cannot tell a floating part from a cropped one, so run the gap
+check over the document and read `views.json` (it marks each node
+`outside-camera` / `partially-clipped` per view) before you judge from
+pixels. Where a measurement and your reading of an image disagree, the
+measurement stands until you identify the exact node those pixels belong
+to. Do not talk yourself out of a correct number because a picture looks
+convincing.
 
 ## Honest limits
 

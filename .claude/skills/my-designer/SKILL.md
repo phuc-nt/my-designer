@@ -90,6 +90,18 @@ but do not certify fonts, contrast after compositing, rotation or motion.
 For web inspect the narrow layout too; for anything animated sample
 `--time`. Do not report visual quality you have not looked at.
 
+**Measurements outrank impressions — once you have checked the
+measurement.** When numbers from the document (or `check`, or an export's
+own report) disagree with your reading of a render, do not settle it by
+which feels more convincing. First confirm the arithmetic models the
+runtime: a formula built on a wrong constant is not evidence, and a
+plausible-looking calculation over the wrong units has both hidden real
+defects and invented ones here. Then, with the numbers verified, they
+stand until you can name the exact node the contradicting pixels belong
+to — renders are easy to misread (a cropped frame, a node hidden behind
+another, a similarly named sibling). Re-measure or isolate the node; do
+not overwrite verified arithmetic with a feeling, in either direction.
+
 ## Assets, media, providers
 
 `bin/dsa assets upload <id> --file img.png` returns
