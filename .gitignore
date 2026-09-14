@@ -1,0 +1,33 @@
+node_modules/
+bun.lock
+dist/
+.wrangler/
+.data/
+*.env
+.env*
+!.env.example
+screenshots/
+test-results/
+playwright-report/
+coverage/
+*.log
+artifacts/
+tmp/
+/plans/
+public/studio-renderer.js
+public/studio-viewer.js
+data/
+
+public/studio-geometry-worker.js
+public/studio-react-runtime.json
+
+public/studio-character-worker.js
+
+public/studio-scene-worker.js
+
+# Local kit output: real API token and shell exports. Never commit.
+kit/connection.local.json
+kit/env.local.sh
+
+# my-designer local state: real token, password and server pid. Never commit.
+.local/

@@ -1,0 +1,18 @@
+import { providerIdSchema } from '../src/shared/providers';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
+import { designSystemSchema, systemApplySchema, systemUpdateSchema } from '../src/shared/design-systems';
+export function registerDesignSystemTools(server: McpServer, call: (method: string, path: string, body?: unknown) => Promise<any>) {
+  const path = (id: string) => `/api/design-systems/${encodeURIComponent(id)}`;
+  server.registerTool('list_design_systems', { description: 'List owner-scoped reusable design systems.', inputSchema: {}, annotations: { readOnlyHint: true } }, () => call('GET', '/api/design-systems'));
+  server.registerTool('get_design_system', { description: 'Read the latest or a pinned immutable version.', inputSchema: { id: z.string(), version: z.number().int().positive().optional() }, annotations: { readOnlyHint: true } }, ({ id, version }) => call('GET', path(id) + (version ? `?version=${version}` : '')));
+  server.registerTool('list_design_system_versions', { description: 'Discover immutable versions before editing or applying.', inputSchema: { id: z.string() }, annotations: { readOnlyHint: true } }, ({ id }) => call('GET', path(id) + '/versions'));
+  server.registerTool('create_design_system', { description: 'Create tokens, component variants and reusable compositions using the shared schema.', inputSchema: { definition: designSystemSchema } }, ({ definition }) => call('POST', '/api/design-systems', definition));
+  server.registerTool('update_design_system', { description: 'Append a version; expectedVersion must be the latest version actually read. Conflicts require reconciliation.', inputSchema: { id: z.string(), ...systemUpdateSchema.shape } }, ({ id, ...body }) => call('PUT', path(id), body));
+  server.registerTool('apply_design_system', { description: 'Apply a saved system version to an owned project at its observed revision. Existing content overrides are retained.', inputSchema: { id: z.string(), ...systemApplySchema.shape } }, ({ id, ...body }) => call('POST', path(id) + '/apply', body));
+  server.registerTool('insert_design_system_item', { description: 'Insert a library component or composition, preserving hierarchy and remapping IDs.', inputSchema: { id: z.string(), ...systemApplySchema.shape, pageId: z.string(), itemId: z.string() } }, ({ id, ...body }) => call('POST', path(id) + '/insert', body));
+  server.registerTool('delete_design_system', { description: 'Delete a library and its versions. Existing project content remains embedded.', inputSchema: { id: z.string() }, annotations: { destructiveHint: true } }, ({ id }) => call('DELETE', path(id)));
+  server.registerTool('list_google_fonts', { description: 'Search Google Fonts; source identifies official catalog versus fallback.', inputSchema: { query: z.string().optional() }, annotations: { readOnlyHint: true } }, ({ query }) => call('GET', '/api/fonts' + (query ? `?q=${encodeURIComponent(query)}` : '')));
+  server.registerTool('list_provider_connections', { description: 'List your configured official and custom provider IDs and masked metadata. Requires an account API key; MCP OAuth cannot access provider settings.', inputSchema: {}, annotations: { readOnlyHint: true } }, () => call('GET', '/api/providers'));
+  server.registerTool('list_provider_models', { description: 'Discover provider model IDs and capabilities. API key authentication required; no raw credential is returned.', inputSchema: { provider: providerIdSchema, query: z.string().optional() }, annotations: { readOnlyHint: true } }, ({ provider, query }) => call('GET', `/api/providers/${provider}/models` + (query ? `?q=${encodeURIComponent(query)}` : '')));
+}

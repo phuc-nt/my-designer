@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# dsa wrapper: loads the local token so an agent never has to `source` anything.
+# Usage: bin/dsa projects list
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+conn="$root/.local/connection.json"
+cli="$root/packages/cli/dist/dsa.js"
+
+if [ ! -f "$conn" ]; then
+  echo "bin/dsa: no .local/connection.json — run: node bootstrap.mjs" >&2
+  exit 1
+fi
+if [ ! -f "$cli" ]; then
+  echo "bin/dsa: CLI not built — run: node bootstrap.mjs" >&2
+  exit 1
+fi
+
+# Explicit env wins; otherwise read the saved connection. Never printed.
+if [ -z "${DESIGN_STUDIO_URL:-}" ] || [ -z "${DESIGN_STUDIO_API_KEY:-}" ]; then
+  eval "$(node -e '
+    const c = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+    const q = (s) => "'"'"'" + String(s).replace(/'"'"'/g, "'"'"'\\'"'"''"'"'") + "'"'"'";
+    console.log("export DESIGN_STUDIO_URL=${DESIGN_STUDIO_URL:-" + q(c.url) + "}");
+    console.log("export DESIGN_STUDIO_API_KEY=${DESIGN_STUDIO_API_KEY:-" + q(c.apiKey) + "}");
+  ' "$conn")"
+fi
+
+exec node "$cli" "$@"
