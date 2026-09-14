@@ -114,6 +114,8 @@ app.use("*", async (c, next) => {
   if (
     mutation &&
     (c.get("authMethod") === "session" ||
+      // Browsers always send Origin on mutations; the CLI sends none.
+      (c.get("authMethod") === "local" && c.req.header("Origin") !== undefined) ||
       c.req.path === "/api/auth/login" ||
       c.req.path === "/api/auth/register")
   ) {
@@ -262,7 +264,10 @@ app.post("/api/auth/login", async (c) => {
   c.set("user", user); c.set("authMethod", "session");
   return c.json({ user });
 });
-app.get("/api/auth/me", (c) => c.json({ user: c.get("user") }));
+app.get("/api/auth/me", (c) => {
+  const user = c.get("user");
+  return c.json({ user: user && c.get("authMethod") === "local" ? { ...user, local: true } : user });
+});
 app.post("/api/auth/logout", async (c) => {
   const token = getCookie(c, "studio_session");
   if (token)

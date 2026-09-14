@@ -1,28 +1,24 @@
 #!/usr/bin/env bash
-# dsa wrapper: loads the local token so an agent never has to `source` anything.
+# dsa wrapper for the local studio. The server runs in local single-user mode,
+# so no token exists: any request from this machine is the owner. The CLI
+# still insists on a non-empty key, so a placeholder is exported.
 # Usage: bin/dsa projects list
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-conn="$root/.local/connection.json"
 cli="$root/packages/cli/dist/dsa.js"
+envfile="$root/.env.local"
 
-if [ ! -f "$conn" ]; then
-  echo "bin/dsa: no .local/connection.json — run: node bootstrap.mjs" >&2
-  exit 1
-fi
-if [ ! -f "$cli" ]; then
-  echo "bin/dsa: CLI not built — run: node bootstrap.mjs" >&2
+if [ ! -f "$cli" ] || [ ! -f "$envfile" ]; then
+  echo "bin/dsa: not set up — run: node bootstrap.mjs" >&2
   exit 1
 fi
 
-# Explicit env wins; otherwise read the saved connection. Never printed.
-if [ -z "${DESIGN_STUDIO_URL:-}" ] || [ -z "${DESIGN_STUDIO_API_KEY:-}" ]; then
-  eval "$(node -e '
-    const c = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
-    const q = (s) => "'"'"'" + String(s).replace(/'"'"'/g, "'"'"'\\'"'"''"'"'") + "'"'"'";
-    console.log("export DESIGN_STUDIO_URL=${DESIGN_STUDIO_URL:-" + q(c.url) + "}");
-    console.log("export DESIGN_STUDIO_API_KEY=${DESIGN_STUDIO_API_KEY:-" + q(c.apiKey) + "}");
-  ' "$conn")"
+if [ -z "${DESIGN_STUDIO_URL:-}" ]; then
+  app_url="$(grep -E '^APP_URL=' "$envfile" | head -1 | cut -d= -f2-)"
+  port="$(grep -E '^PORT=' "$envfile" | head -1 | cut -d= -f2-)"
+  DESIGN_STUDIO_URL="${app_url:-http://localhost:${port:-8787}}"
 fi
+export DESIGN_STUDIO_URL
+export DESIGN_STUDIO_API_KEY="${DESIGN_STUDIO_API_KEY:-local}"
 
 exec node "$cli" "$@"

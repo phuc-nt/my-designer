@@ -13,7 +13,7 @@ Derived from [Design Studio AI](https://github.com/bestagentkits/design-studio-a
 | --- | --- |
 | Cloudflare Workers + Node runtimes | Node only |
 | Network MCP endpoint (`/mcp`) | Removed — agents use the `dsa` CLI |
-| Multi-user registration, community publishing | One account, registration closed after bootstrap |
+| Email/password accounts, registration, GitHub sign-in, community publishing | No accounts: local mode makes every request from this machine the owner |
 | Docker / GitHub Actions / smoke scripts | Removed |
 | Agent skill installed into `~/.claude/skills` | Skill ships in-repo at `.claude/skills/my-designer/` |
 
@@ -34,23 +34,32 @@ node bootstrap.mjs
 
 One command, idempotent, safe to rerun. It:
 
-1. writes `.env.local` with a generated `ENCRYPTION_KEY` (kept across reruns);
+1. writes `.env.local` with a generated `ENCRYPTION_KEY` (kept across reruns),
+   `HOST=127.0.0.1` and `LOCAL_USER=You`;
 2. installs root and CLI dependencies, builds the web app and the CLI;
 3. installs Chromium through Playwright if missing;
-4. starts the server on port 8787 (`--port N` to change) and records its pid;
-5. creates the single account (`--email`, `--password`, or a generated
-   password) and mints an API token;
-6. closes registration and restarts the server;
-7. saves everything the agent needs in `.local/connection.json` (mode 600).
+4. starts the server on port 8787 (`--port N` to change) and records its pid
+   in `.local/server.pid`.
 
 ```sh
 node bootstrap.mjs --status   # what is set up; changes nothing
 node bootstrap.mjs --stop     # stop the server this kit started
-bin/dsa projects list         # CLI with the token already loaded
+bin/dsa projects list         # CLI; nothing to configure
 ```
 
-Open the printed URL, sign in with the printed email and password, and you
-are in the workspace. A single project lives at `/?project=<id>`.
+Open the printed URL and you are in the workspace — no sign-in. A single
+project lives at `/?project=<id>`.
+
+### How "no accounts" works
+
+`LOCAL_USER` switches the server into local mode: any request without
+credentials is treated as one implicit owner (`id: local`). The browser and
+`bin/dsa` therefore share the same projects without a password or API token.
+Because that makes anyone who can reach the port the owner, the server
+refuses to start in local mode unless `HOST` is loopback. Browser mutations
+are still origin-checked, so a malicious web page cannot drive the studio
+through your browser. Unset `LOCAL_USER` to get upstream's email/password
+accounts back.
 
 ## Working with an agent
 
@@ -78,7 +87,7 @@ before claiming it is right" — are in [AGENTS.md](AGENTS.md).
 
 ```
 bootstrap.mjs          setup / status / stop
-bin/dsa                CLI wrapper that loads .local/connection.json
+bin/dsa                CLI wrapper that reads the URL from .env.local
 .claude/skills/        agent skill + design references
 server/                Hono API on Node (SQLite in data/)
 src/                   React editor and renderer

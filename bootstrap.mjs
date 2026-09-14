@@ -6,23 +6,21 @@
 //   node bootstrap.mjs --status             # report only, change nothing
 //   node bootstrap.mjs --stop               # stop the server this kit started
 //   node bootstrap.mjs --port 8790          # first run only: choose the port
-//   node bootstrap.mjs --email me@x --password '…'   # non-interactive account
 //
-// Writes .env.local and .local/ (both gitignored). Never writes a credential
-// into a tracked file.
+// There is no account: the server runs in local single-user mode, and every
+// request from this machine is the owner. Writes .env.local and .local/
+// (both gitignored).
 
 import { randomBytes } from 'node:crypto';
 import { spawn, execFile } from 'node:child_process';
 import { access, readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { promisify } from 'node:util';
-import { createInterface } from 'node:readline/promises';
 import { join, resolve } from 'node:path';
 
 const run = promisify(execFile);
 const root = resolve(import.meta.dirname);
 const envFile = join(root, '.env.local');
 const localDir = join(root, '.local');
-const connectionFile = join(localDir, 'connection.json');
 const pidFile = join(localDir, 'server.pid');
 
 const args = process.argv.slice(2);
@@ -47,22 +45,17 @@ async function readEnv() {
   return entries;
 }
 
-async function setEnv(changes) {
-  const lines = (await readFile(envFile, 'utf8')).split('\n');
-  const seen = new Set();
-  const out = lines.map((line) => {
-    const match = /^([A-Z_]+)=/.exec(line.trim());
-    if (match && match[1] in changes) { seen.add(match[1]); return `${match[1]}=${changes[match[1]]}`; }
-    return line;
-  });
-  for (const [key, value] of Object.entries(changes)) if (!seen.has(key)) out.push(`${key}=${value}`);
-  await writeFile(envFile, out.join('\n').replace(/\n*$/, '\n'));
-}
-
 async function ensureEnv() {
   const existing = await readEnv();
   if (existing?.ENCRYPTION_KEY) {
     log('  .env.local present — keeping ENCRYPTION_KEY (rotating it would strand stored provider keys)');
+    // Older .env.local files predate local mode; add the two lines it needs, never remove anything.
+    const missing = Object.entries({ LOCAL_USER: 'You', HOST: '127.0.0.1' }).filter(([key]) => !(key in existing));
+    if (missing.length) {
+      await writeFile(envFile, `${(await readFile(envFile, 'utf8')).replace(/\n*$/, '\n')}${missing.map(([k, v]) => `${k}=${v}`).join('\n')}\n`);
+      log(`  added ${missing.map(([k]) => k).join(', ')} to .env.local (local single-user mode)`);
+      return await readEnv();
+    }
     return existing;
   }
   const port = flag('--port') ?? existing?.PORT ?? '8787';
@@ -72,11 +65,14 @@ async function ensureEnv() {
     '',
     `ENCRYPTION_KEY=${randomBytes(32).toString('base64')}`,
     `PORT=${port}`,
+    'HOST=127.0.0.1',
     `APP_URL=http://localhost:${port}`,
     'DATA_DIR=./data',
     '',
-    '# Single-user: registration is open only until the first account exists.',
-    'ALLOW_REGISTRATION=true',
+    '# Local single-user mode: every request from this machine is this person.',
+    '# The server refuses to start with LOCAL_USER on a non-loopback HOST.',
+    'LOCAL_USER=You',
+    'ALLOW_REGISTRATION=false',
     'COMMUNITY_ENABLED=false',
     '',
   ].join('\n'));
@@ -156,12 +152,12 @@ async function startServer(url) {
   if (await health(url)) {
     const pid = await ownedPid();
     log(pid ? `  running (pid ${pid}, started by this kit)` : `  something already answers at ${url} — not started by this kit`);
-    return { state: 'running', owned: Boolean(pid) };
+    return true;
   }
-  if (statusOnly) { log('  not running'); return { state: 'down', owned: false }; }
+  if (statusOnly) { log('  not running'); return false; }
   const pid = await spawnServer(url);
   log(`  started (pid ${pid})`);
-  return { state: 'started', owned: true };
+  return true;
 }
 
 async function stopServer() {
@@ -172,85 +168,6 @@ async function stopServer() {
   await rm(pidFile, { force: true });
   log(alive(pid) ? `  pid ${pid} did not exit; stop it yourself` : `  stopped pid ${pid}`);
   return true;
-}
-
-// Env is read once at boot, so closing registration or granting operator
-// rights needs a restart. Only restart a process this kit started.
-async function restartServer(url, owned) {
-  if (!owned) { log('  server was not started by this kit — restart it yourself for the new .env.local to apply'); return; }
-  await stopServer();
-  const pid = await spawnServer(url);
-  log(`  restarted (pid ${pid})`);
-}
-
-// --- account and token -----------------------------------------------------
-
-async function prompt(question, { silent = false } = {}) {
-  if (!process.stdin.isTTY) return '';
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  if (!silent) { const answer = await rl.question(question); rl.close(); return answer.trim(); }
-  process.stdout.write(question);
-  process.stdin.setRawMode(true);
-  let value = '';
-  await new Promise((done) => {
-    const onData = (chunk) => {
-      const char = chunk.toString('utf8');
-      if (char === '\r' || char === '\n') { process.stdin.off('data', onData); process.stdout.write('\n'); done(); }
-      else if (char === '') process.exit(130);
-      else if (char === '') value = value.slice(0, -1);
-      else value += char;
-    };
-    process.stdin.on('data', onData);
-  });
-  process.stdin.setRawMode(false);
-  rl.close();
-  return value;
-}
-
-async function authenticate(url, env) {
-  const saved = (await exists(connectionFile)) ? JSON.parse(await readFile(connectionFile, 'utf8')) : null;
-  if (saved?.apiKey) {
-    const response = await fetch(`${url}/api/auth/me`, { headers: { Authorization: `Bearer ${saved.apiKey}` } });
-    if (response.ok) {
-      const { user } = await response.json();
-      log(`  reusing saved token for ${user.email}`);
-      return { connection: { ...saved, url, userId: user.id, email: user.email }, created: false };
-    }
-    log('  saved token no longer works — creating a new one');
-  }
-  if (statusOnly) { log('  no usable token'); return { connection: null, created: false }; }
-
-  const email = flag('--email') ?? process.env.DESIGNER_EMAIL ?? (await prompt('  email for the local account [me@local.host]: ')) ?? '';
-  let password = flag('--password') ?? process.env.DESIGNER_PASSWORD ?? saved?.password ?? (await prompt('  password (empty = generate one): ', { silent: true }));
-  let generated = false;
-  if (!password) { password = randomBytes(12).toString('base64url'); generated = true; }
-  const account = { email: email || 'me@local.host', password };
-
-  // Login, register and session-authenticated writes are CSRF-checked against APP_URL.
-  const headers = { 'content-type': 'application/json', origin: new URL(url).origin };
-  const body = JSON.stringify(account);
-  let response = await fetch(`${url}/api/auth/register`, { method: 'POST', headers, body });
-  if (response.status === 409 || response.status === 403) {
-    log(response.status === 409 ? '  account exists — signing in' : '  registration closed — signing in');
-    response = await fetch(`${url}/api/auth/login`, { method: 'POST', headers, body });
-  }
-  if (!response.ok) throw new Error(`Could not create or sign in to the account (${response.status}): ${await response.text()}`);
-  const { user } = await response.json();
-  const cookie = response.headers.getSetCookie?.().map((v) => v.split(';')[0]).join('; ');
-  if (!cookie) throw new Error('The server did not return a session cookie; cannot mint an API token.');
-
-  const minted = await fetch(`${url}/api/tokens`, {
-    method: 'POST', headers: { ...headers, cookie },
-    body: JSON.stringify({ name: `my-designer ${new Date().toISOString().slice(0, 10)}` }),
-  });
-  if (!minted.ok) throw new Error(`Token creation failed (${minted.status}): ${await minted.text()}`);
-  const token = await minted.json();
-  log(`  created API token ${token.id}`);
-  if (generated) log('  generated a password for the web UI — it is saved in .local/connection.json');
-  return {
-    connection: { url, email: account.email, password: account.password, userId: user.id, apiKey: token.token, tokenId: token.id },
-    created: true,
-  };
 }
 
 // --- main ------------------------------------------------------------------
@@ -270,34 +187,19 @@ await ensureBrowser();
 await ensureCli();
 
 step('3. Server');
-const server = await startServer(url);
+const up = await startServer(url);
 
-step('4. Account and API token');
-const { connection, created } = server.state === 'down' ? { connection: null, created: false } : await authenticate(url, env);
-if (connection && !statusOnly) {
-  await mkdir(localDir, { recursive: true, mode: 0o700 });
-  await writeFile(connectionFile, `${JSON.stringify(connection, null, 2)}\n`, { mode: 0o600 });
-  const changes = {};
-  if (env.ALLOW_REGISTRATION !== 'false') changes.ALLOW_REGISTRATION = 'false';
-  if (env.OBSERVABILITY_ADMIN_IDS !== connection.userId) changes.OBSERVABILITY_ADMIN_IDS = connection.userId;
-  if (Object.keys(changes).length) {
-    await setEnv(changes);
-    log(`  .env.local: ${Object.keys(changes).join(', ')} — closing registration, granting the activity view`);
-    await restartServer(url, server.owned);
-  }
-}
-
-if (!connection) {
+if (!up) {
   step('Incomplete');
-  log('  Start the server and re-run without --status to finish setup.');
-  process.exit(statusOnly ? 0 : 1);
+  log('  Re-run without --status to start the server.');
+  process.exit(0);
 }
 
+const me = await fetch(`${url}/api/auth/me`).then((r) => r.json()).catch(() => null);
 step('Ready');
-log(`  Web UI       ${url}`);
-log(`  Sign in      ${connection.email}  (password in .local/connection.json)`);
+log(`  Web UI       ${url}      ${me?.user?.local ? '(no sign-in: local mode)' : '(this server asks for a sign-in — LOCAL_USER is not set)'}`);
 log(`  A project    ${url}/?project=<id>      (query param — /projects/<id> is 404)`);
-log(`  Agent CLI    bin/dsa projects list      (reads .local/connection.json — nothing to export)`);
+log(`  Agent CLI    bin/dsa projects list      (no token to configure)`);
 log(`  Harness      open this folder in Claude Code or OpenCode; AGENTS.md and .claude/skills/ are picked up automatically`);
 log(`  Stop         node bootstrap.mjs --stop`);
 log('');

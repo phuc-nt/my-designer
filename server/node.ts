@@ -37,6 +37,11 @@ for (const name of (await readdir(resolve("migrations")))
   }
 }
 const port = Number(process.env.PORT ?? 8787);
+const host = process.env.HOST ?? "127.0.0.1";
+if (process.env.LOCAL_USER && !["127.0.0.1", "localhost", "::1"].includes(host)) {
+  console.error(`LOCAL_USER makes every request the owner; refusing to listen on ${host}. Use a loopback HOST or unset LOCAL_USER.`);
+  process.exit(1);
+}
 const env: Bindings = {
   GOOGLE_FONTS_API_KEY: (() => { const { env: variables } = process; return variables.GOOGLE_FONTS_API_KEY; })(),
   DB: db,
@@ -51,7 +56,8 @@ const env: Bindings = {
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
   PROVIDER_ALLOWED_ORIGINS: process.env.PROVIDER_ALLOWED_ORIGINS,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-  OBSERVABILITY_ADMIN_IDS: process.env.OBSERVABILITY_ADMIN_IDS,
+  LOCAL_USER: process.env.LOCAL_USER,
+  OBSERVABILITY_ADMIN_IDS: process.env.OBSERVABILITY_ADMIN_IDS ?? (process.env.LOCAL_USER ? "local" : undefined),
   POSTHOG_PROJECT_KEY: process.env.POSTHOG_PROJECT_KEY,
   POSTHOG_HOST: process.env.POSTHOG_HOST,
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
@@ -74,11 +80,11 @@ const server = serve(
       return app.fetch(request, env);
     },
     port,
-    hostname: process.env.HOST ?? "127.0.0.1",
+    hostname: host,
   },
   () =>
     console.log(
-      `Design Studio AI listening on http://${process.env.HOST ?? "127.0.0.1"}:${port}`,
+      `my-designer listening on http://${host}:${port}`,
     ),
 );
 let operationRunning=false, communityTurn=false;

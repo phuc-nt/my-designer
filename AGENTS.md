@@ -6,7 +6,9 @@ Read by Claude Code (via `CLAUDE.md`), OpenCode and any harness that loads `AGEN
 
 A local, single-user design studio. **You** (the agent) write and edit designs
 through the `dsa` CLI; **the human** looks at them and edits by hand in the web
-UI. One server, one SQLite file, no cloud, no MCP, no other users.
+UI. One server, one SQLite file, no cloud, no MCP, no accounts: the server
+runs in local mode (`LOCAL_USER` in `.env.local`), so every request from
+this machine is the owner and nobody signs in.
 
 ```
 you ──bin/dsa──▶ http://localhost:<port> ◀──browser── the human
@@ -19,14 +21,14 @@ skill before composing anything.
 ## Setup and daily commands
 
 ```sh
-node bootstrap.mjs            # first run: installs, builds, starts, creates the account
+node bootstrap.mjs            # first run: installs, builds, starts the server
 node bootstrap.mjs --status   # what is and isn't set up; changes nothing
 node bootstrap.mjs --stop     # stop the server this kit started
-bin/dsa projects list         # the CLI, token loaded for you
+bin/dsa projects list         # the CLI; no token to configure
 ```
 
-`bin/dsa` reads `.local/connection.json`, so there is nothing to `source` or
-export. The web UI URL and the sign-in password are in that file too.
+`bin/dsa` reads the URL from `.env.local`, so there is nothing to `source` or
+export. There is no password and no API token.
 
 If `bin/dsa` fails with a connection error, run `node bootstrap.mjs --status`
 first. Do not guess at ports.
@@ -87,8 +89,10 @@ Large JSON (a full project is ~60 KB) belongs in a file, not in your context:
 ## Things you must never do
 
 - Commit or print `.env.local`, `.local/`, or `data/` — they hold the
-  encryption key, the API token, the password and the database.
+  encryption key, the server pid and the database with any provider keys.
 - Rotate `ENCRYPTION_KEY`. Stored provider keys are encrypted with it.
+- Change `HOST` away from loopback. In local mode anyone who can reach the
+  port is the owner; the server refuses to start that way on purpose.
 - Kill a listener you did not start. `bootstrap.mjs --stop` only stops the
   pid recorded in `.local/server.pid`.
 - Hand-edit `dist/` or `public/studio-*.js`; edit sources and rebuild.

@@ -4,7 +4,7 @@ my-designer exposes one shared document contract through REST, browser WebMCP, a
 
 ## Install and connect
 
-`node bootstrap.mjs` builds the CLI and saves the local URL and API token in `.local/connection.json`. Run it as `bin/dsa …` from the repository root; the wrapper exports `DESIGN_STUDIO_URL` and `DESIGN_STUDIO_API_KEY` for one invocation and never writes them anywhere else. Explicit environment variables and `--url` / `--api-key` still override the saved values.
+`node bootstrap.mjs` builds the CLI and starts the server in local single-user mode, where every request from this machine is the owner. Run the CLI as `bin/dsa …` from the repository root; the wrapper reads the URL from `.env.local` and exports a placeholder `DESIGN_STUDIO_API_KEY` because the CLI insists on one. Explicit environment variables and `--url` / `--api-key` still override it, which is how you would point `dsa` at an upstream studio that does use tokens.
 
 The companion skill lives in-repo at [.claude/skills/my-designer/SKILL.md](../.claude/skills/my-designer/SKILL.md) and is discovered automatically by Claude Code and OpenCode when they run in this directory. Start with its [shared layout and quality reference](../.claude/skills/my-designer/references/layout-and-quality.md); the [skill index](../.claude/skills/my-designer/SKILL.md#choose-the-design-kind-guidance) links the kind-specific references.
 

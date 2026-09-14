@@ -158,9 +158,9 @@ export function Settings({
             <>
               <h3>A workspace your agents can use.</h3>
               <p className="modal-description">
-                Agents drive this studio through the <code>dsa</code> CLI and
-                the REST API with an API token. Create one below; the kit's
-                <code>bin/dsa</code> wrapper loads it automatically.
+                {user.local
+                  ? "This studio runs in local mode: bin/dsa and the REST API already act as you, no token needed. Tokens below are only for scripts that need one explicitly."
+                  : "Agents drive this studio through the dsa CLI and the REST API with an API token. Create one below."}
               </p>
               <div className="integration-note">
                 <Code2 size={20} />
@@ -274,6 +274,7 @@ export function Settings({
                 </p>
                 <ThemeToggle compact={false} />
               </section>
+              {!user.local && (
               <section
                 className="github-account"
                 aria-label="GitHub connection"
@@ -344,12 +345,15 @@ export function Settings({
                   </p>
                 )}
               </section>
+              )}
               <div className="account-copy">
                 <p>
-                  Your projects are private until you publish a snapshot.
-                  Provider connections and API tokens belong to this account.
+                  {user.local
+                    ? "Local mode: whoever opens this studio on this machine is you. There is nothing to sign in to or out of."
+                    : "Your projects are private until you publish a snapshot. Provider connections and API tokens belong to this account."}
                 </p>
               </div>
+              {!user.local && (
               <button
                 className="button"
                 disabled={busy}
@@ -357,6 +361,7 @@ export function Settings({
               >
                 <LogOut size={17} /> Sign out
               </button>
+              )}
             </>
           )}
           {error && (

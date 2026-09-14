@@ -42,6 +42,9 @@ export interface Bindings {
   GITHUB_CLIENT_SECRET?: string;
   GITHUB_CALLBACK_URL?: string;
   TRUSTED_ORIGINS?: string;
+  // Local single-user mode: every unauthenticated request acts as one implicit
+  // account named by this value. Only safe on a loopback listener.
+  LOCAL_USER?: string;
   OBSERVABILITY_ADMIN_IDS?: string;
   POSTHOG_PROJECT_KEY?: string;
   POSTHOG_HOST?: string;
@@ -53,5 +56,5 @@ export interface User {
 }
 export type Env = {
   Bindings: Bindings;
-  Variables: { user: User | null; authMethod: "session" | "token" | null; tokenKind: 'api' | 'oauth' | null; telemetrySpan?: import('./observability').TelemetrySpan; telemetryErrorCode?: string };
+  Variables: { user: User | null; authMethod: "session" | "token" | "local" | null; tokenKind: 'api' | 'oauth' | null; telemetrySpan?: import('./observability').TelemetrySpan; telemetryErrorCode?: string };
 };

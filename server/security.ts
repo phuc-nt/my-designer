@@ -103,6 +103,28 @@ export async function authenticate(c: Context<Env>) {
     c.set("user", user);
     c.set("authMethod", user ? "session" : null);
   }
+  if (!c.get("user") && c.env.LOCAL_USER) {
+    c.set("user", await localUser(c));
+    c.set("authMethod", "local");
+  }
+}
+export const localUserId = "local";
+const localUserEmail = "local@my-designer";
+const seededLocalUsers = new WeakSet<object>();
+// The implicit account is a real users row so every owner-scoped table keeps
+// its foreign keys; its password is random and never disclosed, so the
+// login route cannot reach it.
+async function localUser(c: Context<Env>): Promise<User> {
+  const name = c.env.LOCAL_USER!;
+  if (!seededLocalUsers.has(c.env.DB)) {
+    await c.env.DB.prepare(
+      "INSERT OR IGNORE INTO users(id,email,name,password,created_at) VALUES(?,?,?,?,?)",
+    )
+      .bind(localUserId, localUserEmail, name, await passwordHash(secret()), now())
+      .run();
+    seededLocalUsers.add(c.env.DB);
+  }
+  return { id: localUserId, email: localUserEmail, name };
 }
 export async function rateLimit(c: Context<Env>, action: string, limit = 10) {
   await c.env.DB.batch([
