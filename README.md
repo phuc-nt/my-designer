@@ -64,10 +64,19 @@ accounts back.
 ## Working with an agent
 
 Point your coding agent at this directory. Claude Code reads `CLAUDE.md` →
-`AGENTS.md` and picks up `.claude/skills/my-designer/SKILL.md`; OpenCode
-reads `AGENTS.md` and scans `.claude/skills/` as well. Any harness that
-honours `AGENTS.md` gets the same instructions; the skill's `references/`
-carry the per-kind design guidance.
+`AGENTS.md` and loads skills from `.claude/skills/` on demand; OpenCode
+reads `AGENTS.md` and scans the same folder. `AGENTS.md` is short (setup,
+link format, the rules that protect your edits); the skills carry the
+capability detail so the agent uses the whole kit instead of a subset:
+
+| Skill | Covers |
+| --- | --- |
+| `my-designer` | workflow, operations, 409 handling, inspection, export; references for web / slides / report / wireframe, the verified CLI flag list, and an upstream-MCP → CLI map |
+| `my-designer-3d` | scenes, lights, PBR materials, GLB import, mesh editing with `dsa scene command` (convert, remesh, loft, sculpt, loops, UV paint, rigs) |
+| `my-designer-motion` | timeline tracks and keyframes, 2D character rigs, video and frame exports |
+
+Skill + CLI replaces the MCP server: every upstream tool has a `bin/dsa`
+equivalent (`.claude/skills/my-designer/references/mcp-to-cli.md`).
 
 A typical session:
 
@@ -88,7 +97,7 @@ before claiming it is right" — are in [AGENTS.md](AGENTS.md).
 ```
 bootstrap.mjs          setup / status / stop
 bin/dsa                CLI wrapper that reads the URL from .env.local
-.claude/skills/        agent skill + design references
+.claude/skills/        agent skills (core, 3d, motion) + design references
 server/                Hono API on Node (SQLite in data/)
 src/                   React editor and renderer
 packages/cli/          the dsa CLI

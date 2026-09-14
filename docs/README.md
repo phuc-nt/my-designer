@@ -15,11 +15,11 @@ Start here when maintaining Design Studio AI. The [root README](../README.md) in
 | Maintain creative boards, paint persistence and public-source boundaries | [Creative tools](creative-tools.md) |
 | Rig and animate native 2D characters | [Character motion](character-motion.md) |
 | Configure hosting, secrets, storage, backups, or rollback | [Deployment](deployment.md) |
-| Connect an external agent through the product's API, MCP, WebMCP, or CLI | [Agent access](agents.md) |
+| Connect an external agent through the CLI (MCP/WebMCP sections describe upstream; see the in-repo skills) | [Agent access](agents.md) |
 | Understand provider setup and source-media constraints | [Providers](providers.md) |
 | Maintain the public documentation portal, beginner guide, and discovery output | [Web documentation](web-documentation.md) |
 
-[Agent access](agents.md) documents using the product. The in-repo [my-designer skill](../.claude/skills/my-designer/SKILL.md) guides agents creating designs in it. Repository coding-agent behavior belongs in [AGENTS.md](../AGENTS.md).
+[Agent access](agents.md) documents using the product. The in-repo skills — [my-designer](../.claude/skills/my-designer/SKILL.md), [my-designer-3d](../.claude/skills/my-designer-3d/SKILL.md), [my-designer-motion](../.claude/skills/my-designer-motion/SKILL.md) — guide agents creating designs in it. Repository coding-agent behavior belongs in [AGENTS.md](../AGENTS.md).
 
 Use the executable owners linked from each guide for current schemas, routes, commands, and configuration. These guides provide context and navigation; the product brief records requested scope rather than proof of completion.
 

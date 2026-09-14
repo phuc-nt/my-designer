@@ -1,133 +1,125 @@
 ---
 name: my-designer
-description: Create, inspect, refine and export structured web designs, slides, reports, wireframes, 3D scenes and timeline videos in the local my-designer studio through the dsa CLI, then hand the human a web-UI link to review and edit.
+description: Design work in this repo's local studio through the dsa CLI — create, edit, inspect and export web pages, slides, reports and wireframes, handle revision conflicts with the human's browser edits, and hand over a ?project= link. Also the entry point that routes 3D scenes to my-designer-3d and animation/video to my-designer-motion.
 ---
 
 # my-designer
 
-A local design studio. You write through `bin/dsa`; the human reviews and edits
-in the browser at `http://localhost:<port>/?project=<id>`. Everything here is
-the CLI; there is no MCP server in this kit. Where a reference file under
-`references/` mentions an MCP tool name, use the CLI command it pairs with.
+You write through `bin/dsa`; the human reviews and edits in the browser at
+`http://localhost:<port>/?project=<id>`. There is no MCP, no token, no
+sign-in. Everything below is the CLI; exact flags are in
+[cli.md](references/cli.md) (verified against this build — use it instead of
+guessing, and `bin/dsa <group> <cmd> --help` when in doubt).
 
-## Establish the brief
+## Route by kind first
 
-Reuse what you already know about audience, purpose, deliverable, dimensions,
-brand, content and success criteria. Ask only for choices that materially
-change the result. Respect supplied assets and exact copy.
+| Kind / task | Read |
+| --- | --- |
+| `web` | [web.md](references/web.md) |
+| `slides` | [slides.md](references/slides.md) |
+| `report` | [report.md](references/report.md) |
+| `wireframe` | [wireframe.md](references/wireframe.md) |
+| `3d` — anything with a camera, lights, meshes, GLB | **`../my-designer-3d/SKILL.md`** |
+| `video`, timelines, keyframes, 2D characters, mp4/webm/frames | **`../my-designer-motion/SKILL.md`** |
 
-For a prompt-driven project, `bin/dsa brief get <id>` / `brief put` persist an
-interview: a concise message, up to eight questions with stable IDs, and a
-proposed scope (objective, audience, direction, deliverables, constraints,
-acceptance criteria). Persist answers rather than guessing. Approve a scope
-only after the human explicitly agreed to that version; brief revisions are
-separate from document revisions and a 409 means re-read and reconcile.
+Read [layout-and-quality.md](references/layout-and-quality.md) once for any
+2D kind. Every kind shares the workflow below.
 
-## Connect and inspect
-
-`bin/dsa health`, then `bin/dsa catalog` (or `themes list`, `templates list
---kind slides`, `blocks list`). Inspect entries before choosing them.
-`bin/dsa schema` is the document shape; `bin/dsa schema --operations` the
-targeted-edit shapes. Both are generated from the real validators; the server
-additionally checks IDs, parents, timeline references and ownership.
+## Workflow
 
 ```sh
-bin/dsa projects create --name "Quarterly narrative" --template product-deck
-bin/dsa projects get PROJECT_ID > /tmp/project.json
+bin/dsa health                                   # server up? else: node bootstrap.mjs --status
+bin/dsa templates list --kind slides             # or catalog / themes list / blocks list
+bin/dsa projects create --name "Q3 deck" --kind slides --template product-deck
+bin/dsa projects get <id> > p.json               # {project:{id,revision,document,…}} — keep revision
+bin/dsa projects document patch <id> --file ops.json --revision <n>
+bin/dsa projects check <id>                      # deterministic preflight with node IDs
+bin/dsa projects inspect <id> --output review.png # render → OPEN THE PNG
+bin/dsa projects export <id> --format pptx --output out.pptx --revision <n>
 ```
 
-`get` returns `{project:{id,revision,document,…}}`. Keep the observed
-`revision` with the document you read. Read real page and node IDs from it;
-never invent IDs for existing elements.
+1. **Brief.** Reuse what the human already said (audience, purpose, size,
+   brand, copy). Ask only about choices that change the result. For
+   prompt-driven work `brief get/put/approve` persist questions, answers and
+   scope; approve only after the human agreed to that version. Brief
+   revisions are separate from document revisions.
+2. **Create** from a template (`projects create --template`), from a theme
+   only (`--kind --theme`), or from JSON you built offline
+   (`templates instantiate <id> --output doc.json`, edit, `projects import
+   --file doc.json`). Inspect a template before choosing it.
+3. **Read, then write small.** Use real page and node IDs from `projects get`;
+   never invent IDs for existing elements. Prefer a short operations array
+   ([operations.md](references/operations.md)) to `document put`.
+4. **Inspect** (below), fix, inspect again. Then export and open the file.
+5. **Deliver** the `?project=<id>` link, what changed, what you verified,
+   what you did not.
 
-## Choose the design-kind guidance
-
-Read [layout and quality](references/layout-and-quality.md) first, then the
-reference for the document `kind`:
-
-| Kind | Reference |
-| --- | --- |
-| `web` | [web.md](references/web.md) — flex-first reading flow, components, responsive review |
-| `slides` | [slides.md](references/slides.md) — narrative, hierarchy, audience-scale review |
-| `report` | [report.md](references/report.md) — evidence, editorial flow, page and chart review |
-| `wireframe` | [wireframe.md](references/wireframe.md) — task flows, states, interaction review |
-| `3d` | [3d.md](references/3d.md) — staging, materials, camera, mesh and export review |
-| `video` | [video.md](references/video.md) — readable beats, motion, sound, playback review |
-
-Flex for ordinary content relationships, Grid for real two-dimensional
-structure, absolute placement only for intentional overlays, fixed
-compositions, scene staging or motion. Fix overflow by fixing structure and
-space before shrinking type or changing approved copy.
-
-## Refine through targeted operations
-
-Prefer a small operations array over replacing the whole design:
+## Targeted operations — the two traps
 
 ```json
-[
-  {"op":"update-node","nodeId":"ACTUAL_NODE_ID","changes":{"text":"The next chapter","style":{"fontSize":64}}},
-  {"op":"apply-theme","themeId":"atelier"}
-]
+[{"op":"update-node","nodeId":"REAL_ID","changes":{"text":"Next chapter","style":{"fontSize":64}}},
+ {"op":"apply-theme","themeId":"atelier"}]
 ```
+
+- Shape is `{op, nodeId, changes:{…}}`, not `node:{…}`.
+- **Only `style` merges.** Every other key in `changes` replaces the node's
+  key wholesale: `changes:{scene:{material:{color}}}` deletes `position`,
+  `rotation`, `scale` and any `mesh`; `changes:{data:{…}}` or
+  `changes:{component:{…}}` likewise. Recipe: load the node from the JSON
+  you read, mutate the one field in memory, send the whole sub-object back.
+  [operations.md](references/operations.md) has the snippet.
+
+## 409 and concurrent editing
+
+A 409 (`revision_conflict` on document writes, `conflict` on scene
+commands) means the human saved from the browser. Re-read `projects get`,
+diff against what you intended, reapply only what still makes sense with
+the new `--revision`. Never raise the number blindly; never `document put`
+the old document to hide a conflict. For long sessions,
+`projects document changes <id> --since <n>` shows what changed and
+`projects document merge <id> --file {base,document,baseRevision}` does a
+three-way merge that returns conflict paths instead of clobbering.
+
+## Inspect quality
+
+Read [visual-inspection.md](references/visual-inspection.md). Page mode for
+detail (`--mode page --page 0 --max-dimension 1600`), overview contact sheet
+for coverage (`--limit`, follow `nextOffset` with `--offset`). Open every
+PNG you claim to have reviewed. `projects check` findings point at node IDs
+but do not certify fonts, contrast after compositing, rotation or motion.
+For web inspect the narrow layout too; for anything animated sample
+`--time`. Do not report visual quality you have not looked at.
+
+## Assets, media, providers
+
+`bin/dsa assets upload <id> --file img.png` returns
+`{asset:{id,url,type,mimeType}}`; the upload is library-only — add a node
+whose `src` is that `url` (images, video, audio, GLB). `assets list` /
+`assets download <assetId> --output f`. `replace-asset` swaps every use of
+one asset for another of the same media kind. Provider keys are configured
+by the human (`providers set <id> --key-env VAR`); `generate`, `brief
+interview` and `media generate` fail with `provider_unconfigured` until
+then — say so, do not treat it as broken.
+
+## Big JSON without flooding your context
+
+A project is 30–100 KB (a mesh can be 1 MB). Keep it in files and filter:
 
 ```sh
-bin/dsa projects document patch PROJECT_ID --revision OBSERVED --file ops.json
+bin/dsa projects get <id> > p.json
+python3 -c "import json;d=json.load(open('p.json'))['project'];print(d['revision']);[print(n['id'],n['type'],n.get('name')) for n in d['document']['pages'][0]['nodes']]"
 ```
 
-Two facts about `update-node` that are easy to get wrong:
+`node -e` works too, but environment variables reach it only if exported
+(`export S=…` before `node -e 'process.env.S'`), otherwise you get
+`Cannot find module 'undefined/…'`. macOS has no `timeout`; run `tsx` via
+`npx tsx`.
 
-- Only `style` is merged. **Every other field in `changes` replaces the
-  node's field wholesale.** To change one key inside `scene`, `layout`,
-  `data` or `component`, copy the whole sub-object from what you read and
-  edit the one key.
-- The shape is `{op, nodeId, changes:{…}}` — not `node:{…}`.
+## Ambition
 
-A 409 means the human changed the project. Read the new revision, compare
-your intended edits, reapply only what still makes sense. Never raise
-`--revision` blindly, never overwrite the whole document to hide a conflict.
-For longer concurrent work, `projects document changes` shows saved updates
-and `projects document merge` reconciles against the exact base you read.
-
-`bin/dsa generate` can ask a configured provider for a proposal; it does not
-save. Inspect the proposal before `document put`. Without a provider key it
-fails with `provider_unconfigured` — expected in this kit.
-
-## 3D scenes
-
-Transforms render from `scene.{position,rotation,scale,material}` only.
-`data.{position,rotation,scale}` is ignored. Rotation is in degrees about the
-object's own centre, so a rotated slab moves its edges — compute where an
-edge lands rather than eyeballing. Confirm with a render, not with the
-numbers alone. `bin/dsa scene inspect PROJECT_ID` summarises the scene;
-`references/3d.md` covers characters, lighting and export.
-
-## Assets and media
-
-`bin/dsa assets upload PROJECT_ID --file image.png` returns an asset; insert a
-node that references it. `assets list` / `assets download` inspect stored
-results. `replace-asset` swaps uses of one asset for another of the same
-media kind. Provider keys are set by the human in Settings or via
-`providers set … --key-env`; never pass raw credentials through prompts,
-documents or tool arguments.
-
-## Inspect quality and deliver
-
-Read [visual inspection](references/visual-inspection.md). Render with
-`bin/dsa projects inspect PROJECT_ID --output review.png` (page mode for
-detail) or `projects overview --output-dir review`, then **open the PNG**.
-Successful rendering, a saved revision, or JSON metadata is not visual
-evidence. Run `bin/dsa projects check PROJECT_ID` on the saved revision;
-findings carry page/node IDs for focused fixes, then check again.
-
-For web, inspect the narrow viewport first. Check contrast, text fitting,
-hierarchy, alignment, spacing, typography, asset sharpness and intact
-content. For 3D and motion, inspect the real render, not a static
-representation.
-
-Exports go through the local Chromium: `bin/dsa projects export PROJECT_ID
---format pptx --output out.pptx --revision OBSERVED`. Discover formats with
-`projects export --help`; binary formats need `--output`. Open the result and
-confirm it contains what you expect.
-
-Report the `?project=<id>` link, what changed, what you verified and what you
-did not. Do not claim export fidelity or visual quality without having looked.
+The kit does more than boxes and text: components, grids, themes and design
+systems, block libraries, 3D meshes you can sculpt and remesh, PBR maps,
+lights, keyframe timelines, 2D character rigs, PPTX/PDF/MP4/GLB exports.
+Before telling the human "this kit cannot do X", grep the relevant skill and
+`bin/dsa schema` / `bin/dsa scene schema`. Report real limits; do not invent
+them.

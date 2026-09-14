@@ -1,27 +1,53 @@
-# Review real saved images
+# Review real saved renders
 
-Start with the intended scope: one saved page/view/slide, all relevant pages of a project, or covers across the owner's workspace. Read the saved revision first and save any local browser edits before inspecting them. Visual inspection is private and read-only: it creates no publication and makes no AI provider call.
+Inspection renders **saved** server state through the kit's Chromium: it
+publishes nothing, calls no provider and changes no document. Unsaved
+browser edits are not in the image; if the human is mid-edit, ask them to
+save or wait for Live autosave, then re-read the revision.
 
-## Choose a surface
+## Commands
 
-- CLI: `dsa projects inspect PROJECT_ID --output pages.png` defaults to a project contact sheet. Add `--mode page --page 0 --revision OBSERVED_REVISION --output page.png` for the selected page. Use `dsa projects overview --output-dir review` for workspace covers.
-- MCP: discover `inspect_project` and `inspect_workspace` through `tools/list`. Project input includes `projectId` and the inspection fields. Examine their returned image content blocks alongside the text metadata.
-- WebMCP: discover `studio_api_post_projects_id_inspect` and `studio_api_post_projects_inspect` in the signed-in workspace or editor. The project tool accepts `parameters: {id: PROJECT_ID}` and `body: {mode: "page", pageIndex: 0, expectedRevision: OBSERVED_REVISION}`. These API tools render saved server state, including when the open editor has unsaved changes.
-- REST: `POST /api/projects/{id}/inspect` and `POST /api/projects/inspect` return the same metadata with PNG base64 in `images[].data`. Decode each image to a file and open it. Discover `visualInspection` / `workspaceInspection` in `/api/schema`; use the configured server's `/docs/api` for current contracts.
+```sh
+bin/dsa projects inspect ID --output pages.png                                  # contact sheet, first 6 pages
+bin/dsa projects inspect ID --output pages-2.png --offset 6                      # follow nextOffset until null
+bin/dsa projects inspect ID --mode page --page 0 --revision N --output p0.png    # one page, up to 1600 px
+bin/dsa projects inspect ID --mode page --page-id PAGE_ID --time 1.5 --max-dimension 2048 --output p.png
+bin/dsa projects overview --output-dir review                                   # cover of every project
+```
 
-CLI success metadata replaces base64 with `images[].path` and `bytes`. Actually open those files using the host's image-viewing tool. If your host cannot display images, say visual review remains unperformed instead of inferring quality from metadata or preflight findings.
+`--page` is a zero-based index, `--page-id` a saved ID; they are exclusive
+and only valid with `--mode page`. `--revision` makes the render fail
+instead of silently showing newer content. Limits: `--limit` 1–12,
+`--columns` 1–4, `--tile-size` 160–800, `--max-dimension` 256–2048,
+`--time` 0–3600 s.
 
-## Cover the requested content
+The stdout JSON lists `items[]` (projectId, kind, revision, pageId,
+pageIndex, width, height, imageIndex, bounds) and `images[].path`/`bytes`.
+**Open the PNG** with your image-viewing tool. If you cannot view images,
+say the visual review was not performed.
 
-1. Review the overview to identify hierarchy, consistency, repeated layouts and missing content. Defaults return only six pages or projects, not necessarily the whole scope.
-2. Follow `nextOffset` with `--offset` (or request `offset`) until null. Workspace covers select the first page of each owned project in ID order; empty results contain no items/images. Concurrent creation/deletion can change offset results. Each project has its own saved revision; this is not an atomic workspace snapshot.
-3. For detailed text and spacing, inspect page mode with either `pageId` / `--page-id` or zero-based `pageIndex` / `--page`. The selectors are mutually exclusive and only valid in page mode. Without either selector, page mode uses the first page.
-4. Match each item to its `projectId`, `revision`, `pageId`, `pageIndex`, and `imageIndex`. Use `bounds` for its rectangle inside a contact sheet. `width` and `height` describe the original page; the PNG may be scaled.
-5. For motion, use relevant `time` / `--time` samples and review playback separately. A still frame cannot establish sound, interpolation, interactions, responsive reflow or browser compatibility.
-6. Make focused corrections, save against the observed revision, and inspect again. A stale-revision error means read and reconcile; never replace the revision blindly just to get an image.
+## What to look at
 
-## Limits and reporting
+1. Overview first: hierarchy, consistency across pages, missing content.
+2. Page mode for text fitting, spacing, alignment, contrast, asset
+   sharpness, clipped or overlapping elements.
+3. Web: also inspect at a narrow width (resize the page or a narrow page
+   copy); one desktop frame proves nothing about reflow.
+4. Anything animated: several `--time` samples; a still frame cannot prove
+   interpolation or sound. 3D: also the multi-angle export
+   (`export --format scene-angles`) — see the 3D skill.
+5. Fix by structure (container width, wrap, gap, padding, splitting
+   content) before shrinking type or cutting approved copy. Save against
+   the observed revision, inspect again.
 
-Discover exact options in installed command help and the shared server schemas. Inspection limits are 12 items per request; time 0–3600 seconds; overview tiles 160–800 pixels; project contact sheets 1–4 columns; page longest edge 256–2048 pixels. Existing renderer asset, pixel and timeout limits still apply. Import remote media into the project first. Missing render configuration and failed rendering return errors, not substitute pictures.
+`projects check ID` complements this with deterministic findings (bounds,
+fitting estimates, media, contrast) keyed by node ID; it does not certify
+fonts, composited contrast, rotated bounds or animated extremes.
 
-Keep image files private unless sharing is authorized. Workspace output names are deterministic (`workspace-OFFSET-IMAGE_INDEX.png`) and repeated calls replace those paths; use a new directory when retaining separate review passes. Failed API requests create no image files. Report which saved revisions/pages/times you actually viewed, whether pagination covered the requested scope, and any remaining visual or rendering issue. Export and open the requested delivery format separately before claiming its fidelity.
+## Reporting
+
+Say which revisions, pages and times you actually viewed, whether
+pagination covered everything, and what still looks wrong. Export the
+delivery format and open that file separately before claiming fidelity:
+PPTX rasterises complex nodes, SVG layout is not pixel-identical to the
+browser, `render` (offline) shows 3D as a symbol.

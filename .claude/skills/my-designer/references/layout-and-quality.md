@@ -6,7 +6,7 @@ Use this with the reference for the document's `kind`. These are design judgment
 
 Read `dsa schema`, `dsa schema --operations`, and the relevant `dsa catalog` or design-system definition before editing. The document and operation validators are authoritative. A property accepted in the open-ended `style`, `data`, or component `props` record is not automatically implemented by every renderer. Verify it in the preview and intended export.
 
-The source owners are [schema](https://github.com/bestagentkits/design-studio-ai/blob/main/src/shared/schema.ts), [layout and scene validators](https://github.com/bestagentkits/design-studio-ai/blob/main/src/shared/design-capabilities.ts), [browser layout](https://github.com/bestagentkits/design-studio-ai/blob/main/src/app/document-view.tsx), [static layout](https://github.com/bestagentkits/design-studio-ai/blob/main/src/shared/layout.ts), and [component rendering](https://github.com/bestagentkits/design-studio-ai/blob/main/src/app/design-component.tsx). For a self-hosted or older server, use its live schema and matching source version.
+The source owners are in this repo: `src/shared/schema.ts`, `src/shared/design-capabilities.ts` (layout and scene validators), `src/app/document-view.tsx` (browser layout), `src/shared/layout.ts` (static layout) and `src/app/design-component.tsx` (component rendering). Grep them when the schema leaves a question open.
 
 ## Prefer relationships over unrelated coordinates
 
@@ -27,7 +27,7 @@ Keep final copy in text nodes, supported controls in component nodes, and import
 
 1. Inspect every page at its native dimensions and the intended viewing size. Check long words, multilingual text, captions, labels, and expanded component states.
 2. For overflow, first fix container width, flow direction, wrapping, gaps, padding, or available height. Split content across sections/pages when appropriate. Shorten copy only if authorized; reducing all text until it fits is a last resort.
-3. Run `dsa projects check PROJECT_ID` / MCP `inspect_design` on the saved revision. In the browser use `studio_inspect_design` for unsaved edits. Follow returned node/page IDs; distinguish intentional cropping from lost content.
+3. Run `bin/dsa projects check PROJECT_ID` on the saved revision. Follow returned node/page IDs; distinguish intentional cropping from lost content.
 4. Resolve findings, save against the observed revision, and inspect again. The checker uses bounded estimates; it does not certify fonts, composited contrast, transformed bounds, animated extremes, responsive behavior, or accessibility.
 5. Export the inspected revision and open the real artifact. Static SVG layout is not pixel-identical to browser intrinsic sizing. Structured PowerPoint content may rasterize; Google Slides has narrower native-element support. Read the main skill's export boundaries.
 
