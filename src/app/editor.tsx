@@ -20,7 +20,11 @@ import { componentIcons } from './component-icons';
 import { screenParam, useScreenState, writeScreen } from './screen-state';
 import { PanelLeftClose, PanelRightClose, PanelLeftOpen, PanelRightOpen, Presentation } from 'lucide-react';
 import { ArrangeButtons } from './arrange-buttons';
-import type { Alignment, Axis } from '../shared/alignment';
+import { boundsOf, type Alignment, type Axis, type Rect } from '../shared/alignment';
+import { snapCandidates, snapDelta, type Guide, type SnapCandidates } from './editor-snapping';
+import { nodesInRect, normalizeRect } from './editor-marquee';
+import { captureNodeSelection, remintNodeSelection, type NodeBundle } from '../shared/node-selection';
+import { duplicateCreativeEmbeds } from '../shared/creative-duplication';
 
 import { builtInProviders, isTextProvider, isCustomProvider } from '../shared/providers';
 import { trackClient } from './analytics';
@@ -366,9 +370,13 @@ export function Editor({
   const viewport = useRef<HTMLDivElement>(null),
     drag = useRef<{
       ids: string[]; x: number; y: number; original: DesignDocument;
-      resize: Handle; started: boolean;
+      resize: Handle; started: boolean; snap?: { candidates: SnapCandidates; bounds: Rect };
     } | null>(null);
   const pointerSelecting = useRef(false);
+  const marquee = useRef<{ x: number; y: number; base: string[]; additive: boolean; started: boolean } | null>(null);
+  const [marqueeRect, setMarqueeRect] = useState<Rect | null>(null);
+  const [guides, setGuides] = useState<Guide[]>([]);
+  const clipboard = useRef<NodeBundle | null>(null);
   const currentFingerprint = useMemo(() => documentFingerprint(doc), [doc]);
   const dirty = currentFingerprint !== saved,
     displayed = proposal || doc,
@@ -402,7 +410,10 @@ export function Editor({
     return true;
   }
   const viewportReady = (briefLoaded || !!briefError) && (!brief || briefManual);
-  const { pan, resetPan } = useCanvasGestures(viewport, scale, setZoom, displayed.kind === '3d', viewportReady, () => { drag.current = null; }, !doc.timeline);
+  const endDrag = () => { drag.current = null; marquee.current = null; setGuides(current => current.length ? [] : current); setMarqueeRect(current => current && null); };
+  const { pan, resetPan } = useCanvasGestures(viewport, scale, setZoom, displayed.kind === '3d', viewportReady, endDrag, !doc.timeline);
+  // Page-space boxes behind the selection overlay: DOM measurements on web pages, resolved layout elsewhere.
+  const overlayBoxes = useMemo(() => usesDom(page) && domOverlayBounds.length ? domOverlayBounds : resolveLayout({ ...page, nodes: page.nodes.map(n => interpolateNode(n, displayed, time)) }).nodes, [page, domOverlayBounds, displayed, time]);
   useEffect(() => {
     let active = true;
     void loadDocumentFonts(displayed).catch(error => {
@@ -549,7 +560,7 @@ export function Editor({
     if (!live) return;
     let stopped = false;
     const synchronize = async () => {
-      if (syncing.current || drag.current || syncBlocked.current || syncUncertain.current || stopped) return;
+      if (syncing.current || drag.current || marquee.current || syncBlocked.current || syncUncertain.current || stopped) return;
       syncing.current = true;
       const base = clone(projectRef.current.document), sending = clone(docRef.current);
       try {
@@ -718,6 +729,32 @@ export function Editor({
       change(d => Object.assign(d, next));
     } catch (error) { setError(message(error)); }
   }
+  function copySelection(cut = false) {
+    const current = docRef.current.pages[pageIndex];
+    const roots = selectedRoots(current, selection).filter(item => !isNodeProtected(current, item));
+    if (!roots.length) return false;
+    clipboard.current = captureNodeSelection(docRef.current, current, roots.map(root => root.id));
+    if (cut) removeNode();
+    return true;
+  }
+  function pasteClipboard() {
+    const bundle = clipboard.current;
+    if (!bundle) return false;
+    const current = docRef.current.pages[pageIndex], samePage = bundle.pageId === current.id;
+    const minted = remintNodeSelection(bundle, samePage ? { x: 16, y: 16 } : { x: 0, y: 0 });
+    void trackClient({ event: 'editor_action', action: 'duplicate', page: 'editor', projectId: initial.id });
+    change(d => {
+      duplicateCreativeEmbeds(d, minted.nodes);
+      d.pages[pageIndex].nodes.push(...minted.nodes);
+      if (d.timeline && minted.tracks.length) d.timeline.tracks.push(...minted.tracks);
+    });
+    const landed = docRef.current.pages[pageIndex];
+    if (!minted.rootIds.every(id => landed.nodes.some(item => item.id === id))) return false;
+    // Repeated pastes cascade from the last copy.
+    clipboard.current = captureNodeSelection(docRef.current, landed, minted.rootIds);
+    setSelection(minted.rootIds); viewport.current?.focus({ preventScroll: true });
+    return true;
+  }
   const alignSelection = (alignment: Alignment) => arrangeSelection({ op: 'align-nodes', alignment, to: selection.length > 1 ? 'selection' : 'page' });
   const distributeSelection = (axis: Axis) => arrangeSelection({ op: 'distribute-nodes', axis });
   function nudgeSelection(dx: number, dy: number) {
@@ -828,6 +865,8 @@ export function Editor({
         setSelection(page.nodes.filter(item => !isNodeProtected(page, item)).map(item => item.id)); return;
       }
       if (command && letter === 'g') { event.preventDefault(); event.shiftKey ? ungroupSelection() : groupSelection(); return; }
+      if (command && (letter === 'c' || letter === 'x')) { if (copySelection(letter === 'x')) event.preventDefault(); return; }
+      if (command && letter === 'v') { if (pasteClipboard()) event.preventDefault(); return; }
       if (!command && event.key === '?') { event.preventDefault(); setShortcutsOpen(true); return; }
       if (!command && event.key === 'Enter' && node?.type === 'text' && selection.length === 1) { event.preventDefault(); beginText(node.id); return; }
       if (!command && letter === 'v') { event.preventDefault(); setSelected(null); return; }
@@ -903,17 +942,28 @@ export function Editor({
     const roots = selectedRoots(docRef.current.pages[pageIndex], ids).filter(item => resize !== 'move' || canMoveNode(docRef.current.pages[pageIndex], item));
     if (!roots.length || (resize !== 'move' && ids.length !== 1)) return;
     drag.current = { ids: roots.map(item => item.id), x: event.clientX, y: event.clientY, original: clone(docRef.current), resize, started: false };
+    if (resize === 'move') {
+      const current = docRef.current.pages[pageIndex];
+      const moving = new Set(roots.flatMap(root => [...subtree(current, root.id)]));
+      const dragged = overlayBoxes.filter(box => roots.some(root => root.id === box.id));
+      const others = overlayBoxes.filter(box => !moving.has(box.id) && box.visible !== false);
+      if (dragged.length) drag.current.snap = { candidates: snapCandidates(current, others), bounds: boundsOf(dragged) };
+    }
     event.currentTarget.setPointerCapture(event.pointerId);
   }
   function pointerMove(event: PointerEvent) {
     const active = drag.current;
     if (!active) return;
-    const dx = (event.clientX - active.x) / scale, dy = (event.clientY - active.y) / scale;
+    let dx = (event.clientX - active.x) / scale, dy = (event.clientY - active.y) / scale;
     if (!active.started) {
       if (Math.hypot(event.clientX - active.x, event.clientY - active.y) < 3) return;
       void trackClient({ event: 'editor_action', action: active.resize === 'move' ? 'move' : active.resize === 'rotate' ? 'rotate' : 'resize', page: 'editor', projectId: initial.id });
       remember(); active.started = true;
     }
+    if (active.snap && !event.altKey) {
+      const snapped = snapDelta(active.snap.bounds, dx, dy, active.snap.candidates, 6 / scale);
+      dx = snapped.dx; dy = snapped.dy; setGuides(snapped.guides);
+    } else if (active.snap) setGuides(current => current.length ? [] : current);
     const next = clone(active.original), targetPage = next.pages[pageIndex];
     for (const id of active.ids) {
       const target = targetPage.nodes.find(item => item.id === id)!;
@@ -922,6 +972,39 @@ export function Editor({
       else setNodePatch(next, target, transformNode(interpolateNode(target, next, time), delta.x, delta.y, active.resize, event.shiftKey));
     }
     docRef.current = next; setDoc(next);
+  }
+  function paperPoint(event: PointerEvent) {
+    const paper = event.currentTarget.getBoundingClientRect();
+    return { x: (event.clientX - paper.left) / scale, y: (event.clientY - paper.top) / scale };
+  }
+  function marqueeDown(event: PointerEvent) {
+    if (event.button !== 0 || event.defaultPrevented || directText || preview || proposal || busy) return;
+    if ((event.target as HTMLElement).closest('.node-target, .direct-text-editor, .media-preview, button, a, input, textarea, select, [contenteditable]')) return;
+    event.preventDefault();
+    viewport.current?.focus({ preventScroll: true });
+    const point = paperPoint(event);
+    marquee.current = { ...point, base: event.shiftKey ? selectionRef.current : [], additive: event.shiftKey, started: false };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+  function marqueeMove(event: PointerEvent) {
+    const active = marquee.current;
+    if (!active) return;
+    const point = paperPoint(event);
+    if (!active.started) {
+      if (Math.hypot(point.x - active.x, point.y - active.y) * scale < 3) return;
+      active.started = true; void trackClient({ event: 'editor_action', action: 'multiselect', page: 'editor', projectId: initial.id });
+    }
+    const rect = normalizeRect(active.x, active.y, point.x, point.y);
+    setMarqueeRect(rect);
+    const current = docRef.current.pages[pageIndex];
+    const hits = nodesInRect(current, overlayBoxes, rect).filter(id => { const item = current.nodes.find(n => n.id === id); return item && !isNodeProtected(current, item); });
+    setSelection(active.additive ? [...new Set([...active.base, ...hits])] : hits);
+  }
+  function marqueeUp() {
+    const active = marquee.current;
+    if (!active) return;
+    if (!active.started && !active.additive) { setSelected(null); setDirectText(null); }
+    endDrag();
   }
   async function generate() {
     if (!prompt.trim() || busy) return;
@@ -2254,6 +2337,10 @@ export function Editor({
                   width: page.width * scale,
                   height: page.height * scale,
                 }}
+                onPointerDown={marqueeDown}
+                onPointerMove={marqueeMove}
+                onPointerUp={marqueeUp}
+                onPointerCancel={endDrag}
               >
                 <div
                   className="canvas-scaled"
@@ -2308,7 +2395,7 @@ export function Editor({
                       ))}
                   {!preview &&
                     !proposal &&
-                    (usesDom(page) && domOverlayBounds.length ? domOverlayBounds : resolveLayout({ ...page, nodes: page.nodes.map(n => interpolateNode(n, displayed, time)) }).nodes)
+                    overlayBoxes
                       .filter((n) => n.visible !== false)
                       .map((target) => (
                         <div
@@ -2332,12 +2419,8 @@ export function Editor({
                           onFocus={event => { if (event.target === event.currentTarget && !directText && !pointerSelecting.current && !selection.includes(target.id)) setSelected(target.id); }}
                           onPointerDown={(e) => pointerDown(e, target)}
                           onPointerMove={pointerMove}
-                          onPointerUp={() => {
-                            drag.current = null;
-                          }}
-                          onPointerCancel={() => {
-                            drag.current = null;
-                          }}
+                          onPointerUp={endDrag}
+                          onPointerCancel={endDrag}
                           onDoubleClick={() => {
                             beginText(target.id);
                           }}
@@ -2346,12 +2429,14 @@ export function Editor({
                             {target.name}
                           </span>
                           {selection.length === 1 && selected === target.id && !isNodeProtected(page, target) && !directText && (
-                            <>{(['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'rotate'] as Handle[]).map(handle => <button key={handle} className={`resize-handle handle-${handle}`} aria-label={`Transform ${handle}`} onPointerDown={e => pointerDown(e, target, handle)} onPointerMove={pointerMove} onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}/>)}</>
+                            <>{(['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'rotate'] as Handle[]).map(handle => <button key={handle} className={`resize-handle handle-${handle}`} aria-label={`Transform ${handle}`} onPointerDown={e => pointerDown(e, target, handle)} onPointerMove={pointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}/>)}</>
                           )}
                         </div>
                       ))}
+                  {guides.map(guide => <div key={`${guide.axis}${guide.at}`} className={`snap-guide snap-guide-${guide.axis}`} aria-hidden="true" style={{ ...(guide.axis === 'x' ? { left: guide.at } : { top: guide.at }), '--inverse-scale': 1 / scale } as unknown as React.CSSProperties}/>)}
+                  {marqueeRect && <div className="marquee" aria-hidden="true" style={{ left: marqueeRect.x, top: marqueeRect.y, width: marqueeRect.width, height: marqueeRect.height, '--inverse-scale': 1 / scale } as unknown as React.CSSProperties}/>}
                   {directText && node && (() => {
-                    const bounds = (usesDom(page) ? domOverlayBounds : resolveLayout({ ...page, nodes: page.nodes.map(item => interpolateNode(item, displayed, time)) }).nodes).find(item => item.id === directText) ?? node;
+                    const bounds = overlayBoxes.find(item => item.id === directText) ?? node;
                     let opacity = node.opacity ?? 1, parent = page.nodes.find(item => item.id === node.parentId);
                     while (parent) { opacity *= parent.opacity ?? 1; parent = page.nodes.find(item => item.id === parent!.parentId); }
                     return <InlineTextEditor key={directText} node={node} bounds={bounds} theme={doc.theme} opacity={opacity} finish={finishText} save={() => void saveRef.current()}/>;
@@ -2511,7 +2596,8 @@ export function Editor({
       {characterOpen && <Modal title="Character Motion" wide onClose={()=>setCharacterOpen(false)}><CharacterEditor doc={doc} pageId={page.id} projectId={project.id} nodeId={selected??undefined} change={change} externalError={error} undo={undo} redo={redo}/></Modal>}
       {shortcutsOpen && <Modal title="Editor shortcuts" onClose={() => setShortcutsOpen(false)}><div className="modal-body shortcut-list">
         {[
-          ['Select multiple', 'Shift + click · layer checkboxes'], ['Select all layers', '⌘/Ctrl + A'], ['Duplicate', '⌘/Ctrl + D'], ['Delete selection', 'Delete / Backspace'],
+          ['Select multiple', 'Shift + click · layer checkboxes'], ['Marquee select', 'Drag on empty canvas · Shift adds'], ['Select all layers', '⌘/Ctrl + A'], ['Copy / cut / paste', '⌘/Ctrl + C / X / V'], ['Duplicate', '⌘/Ctrl + D'], ['Delete selection', 'Delete / Backspace'],
+          ['Snap to edges and centres', 'While dragging · hold Alt/Option to skip'],
           ['Group / ungroup', '⌘/Ctrl + G / Shift + G'], ['Nudge / larger nudge', 'Arrows / Shift + arrows'], ['Undo / redo', '⌘/Ctrl + Z / Shift + Z'],
           ['Save', '⌘/Ctrl + S'], ['Edit text / add text', 'Enter / T'], ['Finish / cancel text', '⌘/Ctrl + Enter / Escape'], ['Deselect', 'Escape'], ['Fit canvas', '⌘/Ctrl + 0'], ['Pan canvas', 'Space + drag / middle mouse'], ['Play / pause motion', 'Space (canvas or timeline)'],
         ].map(([action, keys]) => <div key={action}><span>{action}</span><kbd>{keys}</kbd></div>)}

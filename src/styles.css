@@ -1934,6 +1934,29 @@ details summary {
 .resize-handle:hover {
   background: var(--selection) !important;
 }
+.snap-guide,
+.marquee {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+}
+.snap-guide {
+  background: var(--selection);
+}
+.snap-guide-x {
+  top: 0;
+  bottom: 0;
+  width: calc(1px * var(--inverse-scale));
+}
+.snap-guide-y {
+  left: 0;
+  right: 0;
+  height: calc(1px * var(--inverse-scale));
+}
+.marquee {
+  border: calc(1px * var(--inverse-scale)) dashed var(--selection);
+  background: color-mix(in srgb, var(--selection) 12%, transparent);
+}
 .direct-text-editor {
   position: absolute;
   z-index: 3;

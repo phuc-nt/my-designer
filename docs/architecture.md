@@ -14,6 +14,8 @@ The same bounded navigation applies to editor/inspector panel choices, mobile pa
 
 Canvas editing shortcuts respect focused controls, text input, IME composition, dialogs, popovers, preview, and pending operations. Layer-list arrows navigate instead of nudging; canvas object focus supports nudging and layer/canvas focus supports duplicate/delete. Dialogs restore focus to their opener when closed; Escape honors an owner's busy guard. Escape in the appearance menu closes that menu without changing underlying selection or documentation search.
 
+Multi-node editing lives in pure helpers beside the editor: [alignment](../src/shared/alignment.ts) (align/distribute maths shared with the `align-nodes`/`distribute-nodes` operations), [snapping](../src/app/editor-snapping.ts) (drags snap to page edges, page centre and sibling edges within 6 screen pixels; Alt/Option skips), [marquee](../src/app/editor-marquee.ts) (dragging on empty canvas selects fully enclosed outermost layers; Shift adds) and [node selection](../src/shared/node-selection.ts) (⌘C/⌘X/⌘V capture roots with page-space coordinates plus their timeline tracks and re-mint fresh IDs on paste, +16px on the same page, same place on another page).
+
 Cloudflare runs that handler with D1, R2, static assets, and Browser Rendering. The [Node adapter](../server/node.ts) supplies SQLite, filesystem assets, static serving, and Chromium for the same routes. Headless export runs the application's bundled renderer against validated data; it is not a general remote browser or user-code execution service.
 
 ## Document and edit contracts

@@ -8,7 +8,7 @@ async function setup(page: Page, origin: string) {
   document.theme.fonts = { heading: 'Georgia', body: 'Arial' };
   document.pages = [{ id: 'page', name: 'Page', width: 600, height: 400, background: '#17202a', nodes: [
     { id: 'alpha', type: 'text', name: 'Alpha', x: 35, y: 40, width: 220, height: 90, text: 'Original text', style: { fontFamily: '$heading', fontSize: 25, fontWeight: 700, fontStyle: 'italic', fill: '#fefefe', lineHeight: 1.4, letterSpacing: 1, textAlign: 'center' } },
-    { id: 'beta', type: 'shape', name: 'Beta', x: 350, y: 60, width: 160, height: 80, style: { fill: '#d77654' } },
+    { id: 'beta', type: 'shape', name: 'Beta', x: 350, y: 70, width: 160, height: 80, style: { fill: '#d77654' } },
     { id: 'locked', type: 'shape', name: 'Locked', x: 35, y: 250, width: 130, height: 80, locked: true, style: { fill: '#446688' } },
   ] }];
   const response = await page.request.post('/api/projects', { headers: { Origin: origin }, data: { name: document.name, kind: document.kind, document } });
@@ -64,6 +64,49 @@ test('canvas Shift selection and layer checkboxes share batch actions with one u
   await expect(locked).toBeVisible(); await locked.focus();
   await panel(page, 'Design'); await page.getByRole('button', { name: 'Unlock layer', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Lock layer', exact: true })).toBeVisible();
+});
+test('marquee selects enclosed layers, drags snap to neighbour edges and the clipboard pastes copies', async ({ page, baseURL }) => {
+  await setup(page, baseURL!);
+  const alpha = page.getByRole('button', { name: 'Alpha, text', exact: true }), beta = page.getByRole('button', { name: 'Beta, shape', exact: true });
+  const paper = (await page.locator('.canvas-paper').boundingBox())!, scale = paper.width / 600;
+  // Marquee from the top-left corner across alpha and beta but above the locked shape.
+  await page.mouse.move(paper.x + 6 * scale, paper.y + 8 * scale);
+  await page.mouse.down(); await page.mouse.move(paper.x + 300 * scale, paper.y + 100 * scale); await page.mouse.move(paper.x + 570 * scale, paper.y + 160 * scale);
+  await expect(page.locator('.marquee')).toBeVisible();
+  await page.mouse.up();
+  await expect(page.locator('.marquee')).toHaveCount(0);
+  await expect(page.locator('.node-target.selected')).toHaveCount(2);
+  await expect(alpha).toHaveAttribute('aria-pressed', 'true'); await expect(beta).toHaveAttribute('aria-pressed', 'true');
+  // A plain click on empty paper clears the selection.
+  await page.mouse.click(paper.x + 300 * scale, paper.y + 350 * scale);
+  await expect(page.locator('.node-target.selected')).toHaveCount(0);
+  // Drag beta so its left edge lands 1px short of alpha's right edge (255): snapping closes the gap.
+  const betaBox = (await beta.boundingBox())!;
+  await page.mouse.move(betaBox.x + betaBox.width / 2, betaBox.y + betaBox.height / 2);
+  await page.mouse.down(); await page.mouse.move(betaBox.x + betaBox.width / 2 - 40 * scale, betaBox.y + betaBox.height / 2); await page.mouse.move(betaBox.x + betaBox.width / 2 - 96 * scale, betaBox.y + betaBox.height / 2);
+  await expect(page.locator('.snap-guide-x')).toHaveCount(1);
+  await page.mouse.up();
+  await expect(page.locator('.snap-guide')).toHaveCount(0);
+  await expect(beta).toHaveCSS('left', '255px'); await expect(beta).toHaveCSS('top', '70px');
+  await page.keyboard.press('Control+z'); await expect(beta).toHaveCSS('left', '350px');
+  // Alt bypasses snapping.
+  await page.keyboard.down('Alt');
+  await page.mouse.move(betaBox.x + betaBox.width / 2, betaBox.y + betaBox.height / 2);
+  await page.mouse.down(); await page.mouse.move(betaBox.x + betaBox.width / 2 - 40 * scale, betaBox.y + betaBox.height / 2); await page.mouse.move(betaBox.x + betaBox.width / 2 - 96 * scale, betaBox.y + betaBox.height / 2);
+  await page.mouse.up(); await page.keyboard.up('Alt');
+  await expect(beta).toHaveCSS('left', '254px');
+  await page.keyboard.press('Control+z'); await expect(beta).toHaveCSS('left', '350px');
+  // Copy, paste (offset on the same page), cut and paste again.
+  await alpha.click();
+  await page.keyboard.press('Control+c'); await page.keyboard.press('Control+v');
+  await expect(page.locator('.node-target')).toHaveCount(4);
+  const copy = page.locator('.node-target.selected'); await expect(copy).toHaveCount(1);
+  await expect(copy).toHaveCSS('left', '51px'); await expect(copy).toHaveCSS('top', '56px');
+  await page.keyboard.press('Control+v'); await expect(page.locator('.node-target')).toHaveCount(5);
+  await expect(page.locator('.node-target.selected')).toHaveCSS('left', '67px');
+  await page.keyboard.press('Control+x'); await expect(page.locator('.node-target')).toHaveCount(4);
+  await page.keyboard.press('Control+v'); await expect(page.locator('.node-target')).toHaveCount(5);
+  await expect(page.locator('.node-target.selected')).toHaveCSS('left', '83px');
 });
 test('inline draft preserves document typography, cancels cleanly and commits one undo step', async ({ page, baseURL }) => {
   const project = await setup(page, baseURL!);
