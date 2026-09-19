@@ -87,7 +87,7 @@ Provider origins are fixed or explicitly HTTPS-allowlisted by the operator. Requ
 
 Prompt-driven projects use a separate, owner-scoped design brief. [Brief routes](../server/briefs.ts) persist questions, answers, proposed scope and explicit approval with an independent revision. Server providers and external agents share this contract. Any change invalidates approval; late interview responses cannot overwrite newer answers. Provider generation reads approved scope and checks it again after the response. Manual document editing remains available.
 
-[Design checks](../src/shared/design-checks.ts) provide bounded, deterministic preflight findings. The editor checks current local geometry; REST/MCP/CLI check the saved revision. Findings identify exact layers and explain limits; they neither block publication nor certify visual or accessibility quality.
+[Design checks](../src/shared/design-checks.ts) provide bounded, deterministic preflight findings over resolved layout geometry in paint order ([geometry.ts](../src/shared/geometry.ts) holds the rectangle maths): text that overflows its box, spills past the card or frame beneath it, or collides with another text layer; contrast against the topmost opaque layer under the text; content crowding the page edge. The editor checks current local geometry; REST/MCP/CLI check the saved revision. Findings identify exact layers and explain limits; they neither block publication nor certify visual or accessibility quality.
 
 Network MCP uses stateless Streamable HTTP POST at `/mcp`, with API-token/OAuth authentication and independent Origin validation. The server supports `2025-11-25` and declared SDK legacy compatibility, not the newer 2026 transport. Tools reuse ownership/revision services.
 

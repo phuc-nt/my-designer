@@ -83,7 +83,7 @@ The [deployment guide](deployment.md#activity-retention-and-optional-posthog) ow
 
 Start prompt-driven projects with a saved brief. `update_design_brief` (CLI `brief put`) accepts a request and agent-authored contextual questions/scope; it needs no BYOK key when the agent uses its own model. `interview_design_brief` optionally uses a configured provider. Show questions in the host conversation or Studio, save answers, review the scope, and call `approve_design_brief` only after the human approves that version. Brief revisions and document revisions are independent. Any brief edit invalidates approval. Provider generation requires approval when a brief exists. Manual editing remains available.
 
-Run `inspect_design` (CLI `projects check`) after saving: findings point to specific nodes and suggest corrections for fitting, bounds, media and contrast. These deterministic hints supplement visual inspection; overlapping backgrounds, font metrics, rotation and animated extremes require preview.
+Run `inspect_design` (CLI `projects check`) after saving: findings point to specific nodes and suggest corrections for fitting, bounds, media, contrast, text that spills out of its card or frame, text layers that collide, and content crowding the page edge. Checks run on resolved layout geometry and measure contrast against the topmost opaque layer under the text. These deterministic hints supplement visual inspection; gradients and image backdrops, font metrics, rotation and animated extremes require preview.
 
 1. Read `projects get PROJECT_ID` and record `project.revision` with the document.
 2. Inspect `schema --operations`, page/node IDs, and the relevant catalog entry.
