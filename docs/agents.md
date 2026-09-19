@@ -6,7 +6,7 @@ my-designer exposes one shared document contract through REST, browser WebMCP, a
 
 `node bootstrap.mjs` builds the CLI and starts the server in local single-user mode, where every request from this machine is the owner. Run the CLI as `bin/dsa …` from the repository root; the wrapper reads the URL from `.env.local` and exports a placeholder `DESIGN_STUDIO_API_KEY` because the CLI insists on one. Explicit environment variables and `--url` / `--api-key` still override it, which is how you would point `dsa` at an upstream studio that does use tokens.
 
-The companion skill lives in-repo at [.claude/skills/my-designer/SKILL.md](../.claude/skills/my-designer/SKILL.md) and is discovered automatically by Claude Code and OpenCode when they run in this directory. Start with its [shared layout and quality reference](../.claude/skills/my-designer/references/layout-and-quality.md); the [skill index](../.claude/skills/my-designer/SKILL.md#choose-the-design-kind-guidance) links the kind-specific references.
+The companion skill lives in-repo at [.claude/skills/my-designer/SKILL.md](../.claude/skills/my-designer/SKILL.md) and is discovered automatically by Claude Code and OpenCode when they run in this directory. Start with its [shared layout and quality reference](../.claude/skills/my-designer/references/layout-and-quality.md); the [skill index](../.claude/skills/my-designer/SKILL.md#route-by-kind-first) links the kind-specific references.
 
 ## CLI command surface
 
@@ -67,7 +67,7 @@ dsa projects overview --output-dir workspace-review
 
 Project inspection defaults to an overview of six pages. Page mode accepts either a saved `pageId` (`--page-id`) or zero-based `pageIndex` (`--page`), never both; omitting both selects the first page. Overview/workspace requests use `offset` and `limit`, and callers must follow non-null `nextOffset` to inspect the remaining items. A workspace overview covers the first page of each owned project in ID order. Its revisions describe individual project snapshots, not one atomic workspace snapshot; concurrent project creation/deletion can change offset pagination. Empty results contain no images or items.
 
-Open the returned PNG with your host's image-viewing capability, or actually examine the MCP/WebMCP image blocks, before claiming visual review. A contact sheet is for composition and coverage; inspect individual pages for text fitting and fine details. Sample relevant motion times and review playback separately; one frame cannot prove animation, sound, responsiveness, or cross-browser behavior. Use observed revision checks to keep a review tied to the intended saved content. Rendering, invalid selection and stale-revision errors are explicit; resolve them before reporting inspection success. See the installable skill's [visual review workflow](../skills/design-studio-ai/references/visual-inspection.md).
+Open the returned PNG with your host's image-viewing capability, or actually examine the MCP/WebMCP image blocks, before claiming visual review. A contact sheet is for composition and coverage; inspect individual pages for text fitting and fine details. Sample relevant motion times and review playback separately; one frame cannot prove animation, sound, responsiveness, or cross-browser behavior. Use observed revision checks to keep a review tied to the intended saved content. Rendering, invalid selection and stale-revision errors are explicit; resolve them before reporting inspection success. See the skill's [visual review workflow](../.claude/skills/my-designer/references/visual-inspection.md).
 
 ## Activity, usage, and traces
 
@@ -79,7 +79,9 @@ Events link `traceId` and `parentId` across supported request/tool/provider work
 
 Token and USD cost values come from provider-reported fields. Missing values remain `null`; never treat them as zero or infer a price from an unverified model name. Summary totals may include only measured calls: retain `measuredTokenCalls`, `measuredCostCalls`, and coverage limitations when reporting usage. Inspect storage degradation and dropped-event indicators before interpreting an empty result. Queries exclude events outside the 30-day retention window; no pre-instrumentation history is reconstructed.
 
-The [deployment guide](deployment.md#activity-retention-and-optional-posthog) owns operator configuration, retention cleanup, and optional PostHog forwarding. Use activity metadata to locate a failure, then inspect the real project/artifact before claiming recovery.
+Retention cleanup and optional PostHog forwarding are configured through environment
+variables read by [the observability modules](../server/observability.ts); upstream's
+deployment guide, which owned that configuration, does not ship with this kit. Use activity metadata to locate a failure, then inspect the real project/artifact before claiming recovery.
 
 ## Revision workflow
 
@@ -131,9 +133,12 @@ Network MCP lives at `/mcp` with the server's advertised protocol versions, API-
 
 The CLI is the scoped agentization deliverable in [release phase](https://github.com/bestagentkits/design-studio-ai/blob/1a23d4a4a4ca4c14c6c15f2ae7318004a908ce2b/plans/2026-09-07-bootstrap-design-studio-ai/phase-04-integration-release.md). Curated command families cover common workflows; the explicit API escape hatch covers new REST endpoints. Structured operation arrays provide bounded batch edits without arbitrary code execution. Tokens remain stateless, requests reject redirects, and error output redacts the application token.
 
-CLI tests live in [tests/cli.test.ts](../tests/cli.test.ts); follow the build prerequisites in [repository verification guidance](../AGENTS.md#run-the-appropriate-checks). They build and execute the distributable in real subprocesses, inspect schema/template output, and exercise authenticated project editing against the SQLite-backed handler. Renderer/server tests cover actual binary export. External provider and Google success require separate credential-dependent checks. Release evidence belongs in the [finalization report](https://github.com/bestagentkits/design-studio-ai/blob/1a23d4a4a4ca4c14c6c15f2ae7318004a908ce2b/plans/2026-09-07-bootstrap-design-studio-ai/reports/finalization.md).
+CLI tests live in [tests/cli.test.ts](../tests/cli.test.ts); follow the build prerequisites in [repository verification guidance](contributing.md#run-the-appropriate-checks). They build and execute the distributable in real subprocesses, inspect schema/template output, and exercise authenticated project editing against the SQLite-backed handler. Renderer/server tests cover actual binary export. External provider and Google success require separate credential-dependent checks. Release evidence belongs in the [finalization report](https://github.com/bestagentkits/design-studio-ai/blob/1a23d4a4a4ca4c14c6c15f2ae7318004a908ce2b/plans/2026-09-07-bootstrap-design-studio-ai/reports/finalization.md).
 
-Build the complete installable skill archive with `npm run pack:skill`. The [packaging script](../scripts/package-skill.mjs) includes the entrypoint and all design-kind references in `dist/design-studio-ai-skill.zip`.
+This kit ships no skill archive: the three skills live in-repo under
+[.claude/skills/](../.claude/skills/) and any harness that reads `AGENTS.md` or that
+directory picks them up in place. Upstream packaged them into a zip for installation into
+`~/.claude/skills`.
 
 ## Creative documents
 
@@ -145,7 +150,7 @@ Native diagram appearance uses `diagram-style` with a partial `style`, optional 
 
 Discover built-in templates and themes through REST `/api/catalog`, `dsa templates list`, `dsa themes list`, or the available MCP/WebMCP catalog tools. The shared [catalog](../src/shared/catalog.ts) owns discovery; [presets](../src/shared/catalog-presets.ts) supply starting points that still need the user's content and review. A visual theme does not add a component library or a working business backend.
 
-For edits corresponding to the component and scene inspectors, discover the [operation schema](../src/shared/operations.ts) with `dsa schema --operations`. Use `update-node` for component properties or scene materials, `update-page` for camera/light settings, and `reparent-node` for layer order or nesting. Preserve the other fields from the object you read when sending a nested `component` or `scene` change: these objects are replaced, not recursively merged. Keep texture assets in the target project and use its owned asset ID. The [3D skill reference](../skills/design-studio-ai/references/3d.md) covers composition and export review.
+For edits corresponding to the component and scene inspectors, discover the [operation schema](../src/shared/operations.ts) with `dsa schema --operations`. Use `update-node` for component properties or scene materials, `update-page` for camera/light settings, and `reparent-node` for layer order or nesting. Preserve the other fields from the object you read when sending a nested `component` or `scene` change: these objects are replaced, not recursively merged. Keep texture assets in the target project and use its owned asset ID. The [3D skill](../.claude/skills/my-designer-3d/SKILL.md) covers composition, mesh editing and export review.
 
 Visual presets reference [Ant Design](https://ant.design/docs/react/customize-theme), [shadcn/ui](https://ui.shadcn.com/docs/theming), [Material 3](https://m3.material.io/styles/color/roles), [IBM Carbon](https://carbondesignsystem.com/elements/color/overview/), and [Atlassian](https://atlassian.design/foundations/color). They are adaptations to the studio’s supported renderers, not official distributions of those systems.
 

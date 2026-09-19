@@ -1,4 +1,14 @@
-# Design Studio AI
+# Design Studio AI — upstream product brief
+
+> **This is upstream's brief, kept for the design intent behind the code.** It is not
+> my-designer's scope. Where it asks for a cloud application, Cloudflare deployment,
+> registration, MCP/WebMCP surfaces, publishing or Docker self-hosting, this kit
+> deliberately does none of that: one machine, one implicit owner, the `dsa` CLI as the
+> whole agent surface. What still holds is the part that matters — one versioned document
+> for every design kind, agents and people editing the same thing through revision-checked
+> saves, real export implementations, and UX and AX weighted equally. See
+> [the root README](../README.md) for this kit's actual scope and
+> [roadmap](roadmap.md) for where it is going.
 
 Design Studio AI is an MIT-licensed design workspace where agents can perform the same design operations as people through a structured API, MCP tools, WebMCP, and a command-line client. The intended workflow is roughly 90% agent work: describe an outcome, inspect the rendered result, make targeted edits, and export or publish it.
 

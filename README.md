@@ -17,6 +17,17 @@ Derived from [Design Studio AI](https://github.com/bestagentkits/design-studio-a
 | Docker / GitHub Actions / smoke scripts | Removed |
 | Agent skill installed into `~/.claude/skills` | Skill ships in-repo at `.claude/skills/my-designer/` |
 
+### What it is, and is not
+
+It **is** a single-machine kit: one person, one server, one SQLite file, with a coding agent
+as the primary author. Point your agent at the directory and ask for a deck, a landing page,
+a 3D scene or an animation; review the render; edit by hand where it is faster than asking.
+
+It is **not** a hosted product or a team tool. There is no sign-in, no sharing and no
+multi-tenancy, and the server refuses to bind to anything but loopback in local mode. The
+multi-user code inherited from upstream (community publishing, OAuth) is still in the tree
+but switched off and untested here. Do not put this on a network.
+
 ## Requirements
 
 - Node.js 24 or newer
@@ -28,7 +39,7 @@ every export work without one; only `generate` commands need a provider.
 ## Setup
 
 ```sh
-git clone <this repo> my-designer && cd my-designer
+git clone https://github.com/phuc-nt/my-designer.git && cd my-designer
 node bootstrap.mjs
 ```
 
@@ -101,8 +112,11 @@ bin/dsa                CLI wrapper that reads the URL from .env.local
 server/                Hono API on Node (SQLite in data/)
 src/                   React editor and renderer
 packages/cli/          the dsa CLI
-docs/                  inherited documentation; see docs/README.md for what no longer applies
+docs/                  architecture, contributing, and guides inherited from upstream
+migrations/            SQLite schema, applied in order
 ```
+
+`docs/README.md` is the index and says which inherited pages still apply.
 
 Never commit `.env.local`, `.local/` or `data/`; `.gitignore` already
 excludes them.

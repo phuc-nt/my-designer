@@ -1,5 +1,8 @@
 # Durable save and export operations
 
+> Inherited from upstream. The REST contract, the Node worker and `dsa operations` all run
+> here; the WebMCP and network-MCP paragraphs describe upstream tools this kit removed.
+
 The [shared request schema](../src/shared/operation-jobs.ts) owns this contract. `POST /api/projects/{id}/operations` accepts `kind`, a caller-chosen `operationId`, and `input` containing the normal save/export fields and an observed `expectedRevision`. It returns an operation immediately. Reuse the exact ID and payload after an uncertain response. A conflicting payload returns `operation_id_conflict`; stale revisions never get silently advanced.
 
 Poll `GET /api/projects/{id}/operations/{operationId}` for `queued`, `running`, `succeeded` or `failed`, the current stage, committed revision and private result URL. Download `.../result` only after success. Save results contain the original committed project receipt; export results contain real file bytes and retain the export filename/content type. Export jobs pin the document snapshot at acceptance; referenced assets must remain available until rendering completes. A later edit cannot change the accepted document snapshot.
@@ -26,4 +29,8 @@ Example export request (replace the revision and ID with observed values):
 
 Failure responses carry a code and repair message. For a stale revision, read and reconcile before creating a new operation. A terminal failed job is retained, not restarted by a duplicate submission. For a renderer/configuration failure, repair the cause and deliberately start a new ID after checking the old status. Temporary worker interruption uses a lease and queue redelivery; a save committed before interruption returns its stored receipt without another revision increment.
 
-Cloudflare uses the queue configured in [wrangler.jsonc](../wrangler.jsonc) and [worker entry](../server/worker.ts). Provision `design-studio-operations` once with `npm run cf -- queues create design-studio-operations` before deploying; migration `0012-operation-jobs.sql` is additive. Self-hosted Node runs the same durable worker from its database, one operation at a time. A restarted worker can reclaim an expired 16-minute lease. Status polling can redispatch queued Cloudflare work after a lost dispatch. See [deployment](deployment.md) for coordinated database/assets/secret backups.
+This kit runs the durable worker in the Node server from its own database, one operation at
+a time; upstream's Cloudflare queue, `wrangler.jsonc` and `server/worker.ts` are not part
+of it. A restarted worker can reclaim an expired 16-minute lease, so an interrupted export
+resumes rather than stranding. Migration `0012-operation-jobs.sql` is additive. Back up
+`data/` and `.env.local` together.

@@ -1,6 +1,12 @@
 # Architecture and shared contract
 
-Design Studio AI uses a validated document as the boundary between people, agents, providers, and renderers. The [product brief](product-brief.md) records the requested outcome; executable schemas/routes own the current implementation.
+> Inherited from upstream and corrected where this kit differs. The document contract,
+> renderers, exports and REST routes are accurate; rows or passages about MCP, OAuth,
+> Cloudflare bindings and community publishing describe code that is either removed or
+> switched off here. The [runtime boundaries](#runtime-boundaries) table links the files
+> that actually own each behavior — read those when in doubt.
+
+my-designer uses a validated document as the boundary between people, agents, providers, and renderers. The [product brief](product-brief.md) records the requested outcome; executable schemas/routes own the current implementation.
 
 Desktop sidebar visibility is URL-backed through [screen-state.ts](../src/app/screen-state.ts). Preview starts with both sidebars closed and allows each to be expanded independently; `previewLeft`/`previewRight` preserve preview choices separately from Edit’s `left`/`right`. Reload and browser history restore those choices. Mobile Preview remains canvas-only; Edit uses the mobile panel navigation.
 
@@ -67,7 +73,7 @@ JSON errors use `{error:{code,message,details?}}` without secrets. Routes valida
 | Activity summaries, events, traces, and sanitized client events | [observability.ts](../server/observability.ts), [queries](../server/observability-queries.ts), [shared contract](../src/shared/observability.ts) |
 | Native Google Slides | [google-slides.ts](../server/google-slides.ts) |
 | OAuth discovery, consent, PKCE, tokens | [oauth.ts](../server/oauth.ts) |
-| Streamable HTTP tools/resources | [mcp.ts](../server/mcp.ts) |
+| Agent surface (upstream's `/mcp` endpoint, removed here) | [the dsa CLI](../packages/cli/src/dsa.ts), [MCP → CLI map](../.claude/skills/my-designer/references/mcp-to-cli.md) |
 
 Export POST `/api/projects/:id/export` accepts `{format,pageIndex?,expectedRevision?,start?,end?,fps?}`. POST/DELETE `/api/projects/:id/preview` and `/share` are naming-specific aliases for the immutable public snapshot workflow; they return `{url,revision}` on creation and `{ok:true}` on removal. Media POST `/api/projects/:id/media` accepts the [typed provider payload](providers.md); fal jobs are polled through the project media-job route. Clients should discover tool schemas/CLI help instead of maintaining separate document adapters.
 
@@ -117,11 +123,15 @@ Motion composition preserves layer order; editor/viewer playback and browser/clo
 
 [Activity queries](../server/observability-queries.ts) enforce owner scope by default. Global reads require an explicitly configured operator using a session or API key; an OAuth token cannot inherit global operator authority. The [shared schema](../src/shared/observability.ts) owns filters and nullable usage fields. Summaries separate root HTTP requests from nested spans to avoid presenting every internal step as another request. Missing cost remains unknown, and measured-call counts describe partial coverage. Last activity does not establish live presence or automatic retries.
 
-Sanitized client events use a strict allowlist and remain distinguishable from server-observed outcomes. Optional [PostHog forwarding](../server/observability-posthog.ts) sends those approved event fields server-side; it is not a session replay or arbitrary browser capture channel. The [deployment guide](deployment.md#activity-retention-and-optional-posthog) owns configuration and retention. These operational records do not replace project revisions, explicit brief approval, or artifact inspection.
+Sanitized client events use a strict allowlist and remain distinguishable from server-observed outcomes. Optional [PostHog forwarding](../server/observability-posthog.ts) sends those approved event fields server-side; it is not a session replay or arbitrary browser capture channel. It is off unless its
+environment variables are set, and this kit's `bootstrap.mjs` never sets them. These operational records do not replace project revisions, explicit brief approval, or artifact inspection.
 
 ## Operations and verification
 
-[Deployment](deployment.md) covers secrets, migrations, storage, browsers, backups, and rollback. [Tests](../tests) cover schema/operations, content safety, tenant isolation, revisions, OAuth, publication, CLI subprocesses, provider requests, and exports. Browser checks exercise desktop/touch workflows. External credential-dependent success is separate from local contract validation.
+[bootstrap.mjs](../bootstrap.mjs) owns local setup: `.env.local` secrets, dependency
+install, the renderer/CLI build, Chromium and the server pid. Back up `data/` and
+`.env.local` together — the database holds provider keys encrypted with that
+`ENCRYPTION_KEY`, so one without the other is unusable. [Tests](../tests) cover schema/operations, content safety, tenant isolation, revisions, OAuth, publication, CLI subprocesses, provider requests, and exports. Browser checks exercise desktop/touch workflows. External credential-dependent success is separate from local contract validation.
 
 Release evidence and pending checks live in the [finalization report](https://github.com/bestagentkits/design-studio-ai/blob/1a23d4a4a4ca4c14c6c15f2ae7318004a908ce2b/plans/2026-09-07-bootstrap-design-studio-ai/reports/finalization.md). A build, filename, or configured key does not establish deployment, format validity, or provider success.
 

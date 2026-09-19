@@ -1,5 +1,11 @@
 # Editable 3D characters
 
+> Inherited from upstream. Every REST route, `dsa scene …` command and export here is real;
+> the `studio_*` (WebMCP) and network-MCP tool names are upstream's and have no equivalent
+> in this kit. Where a sentence lists several surfaces, use the CLI or REST one. The
+> [3D skill](../.claude/skills/my-designer-3d/SKILL.md) is the agent-facing version of this
+> page and covers all 30 `dsa scene command` actions.
+
 Use **Character authoring** in a 3D project's editor. It shares the [scene command validator](../src/shared/scene-authoring-schema.ts) and atomic document operations with REST, MCP, CLI and WebMCP. Camera coordinates, landmarks and IK targets use scene/mesh-local units; rotations use degrees. Save revisions remain separate from schema versions.
 
 GLB uploads also accept an empty or generic browser MIME type when the filename ends in `.glb`; the server still checks the GLB signature before storing the asset. Preview and export canvases with bloom use straight alpha so faint glow remains translucent against the page background; ordinary rendering retains premultiplied alpha.

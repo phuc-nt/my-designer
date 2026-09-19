@@ -6,6 +6,15 @@ the array validate together, so a node and its parent can change in one
 call. Board/diagram/painting/character ops exist too — discover them in the
 schema when you need them.
 
+**One patch carries at most 100 operations.** A longer array is refused with
+`invalid_document` / `Too big: expected array to have <=100 items` and nothing
+is saved. A page holds up to 2000 nodes and a document up to 200 pages, so
+building something big means several patches in sequence: read the revision
+once, then send batches of ≤100, passing the revision each save returns to the
+next one. Do not split one logical change across patches if a half-applied
+state would look broken to the human watching the browser — group by what is
+safe to see.
+
 ## Nodes
 
 | op | fields |

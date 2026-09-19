@@ -1,5 +1,13 @@
 # Community
 
+> **Switched off in this kit.** Community is a multi-user, public sharing surface, and
+> this kit has no accounts. `bootstrap.mjs` writes `COMMUNITY_ENABLED=false`, so
+> [the gate](../server/community-access.ts) refuses every `/api/community` route and
+> `/community` page. The code is still here, unmodified, and this page still describes it —
+> if you set `COMMUNITY_ENABLED=true` you get upstream's behavior, including the parts that
+> assume real sign-in, which local mode does not provide. That combination is untested
+> here. Everything below is upstream's documentation.
+
 Community is the public design-sharing surface at `/community`. Free CC-BY-4.0 designs can be discovered by category, tags, format, period, creator and collection, downloaded as ready files, and remixed into independent private projects. Home `Cmd+K`/`Ctrl+K` searches owned projects; the same shortcut on Community searches live community metadata. URL filters support direct links and browser history.
 
 ## Publication and privacy
@@ -36,7 +44,7 @@ Use `POST /api/community/metadata/generate`, MCP `community_generate_metadata`, 
 
 [Search queries](../server/community-queries.ts) use a live-only FTS5 projection and bounded cursor pagination. Vietnamese normalization preserves display text while supporting accent-insensitive search. Changed ranking generations require a cursor reset. Most used/downloaded reflect unique eligible authenticated recipients; self-actions and repeats do not inflate them. Guest served-download aggregates are separate. Creator milestones count distinct recipients across listings, and private remix identity is not published.
 
-Profiles opt in; bookmarks and impact management remain owner-scoped. Operators review version-pinned reports, record hide/restore/dismiss reasons, and curate reviewed listing versions. [Deployment](deployment.md#community-rollout) owns feature and admin configuration. ID grants and verified GitHub email pregrants are separate from observability administration; ordinary password registration does not prove an email grant. Moderation excludes OAuth credentials.
+Profiles opt in; bookmarks and impact management remain owner-scoped. Operators review version-pinned reports, record hide/restore/dismiss reasons, and curate reviewed listing versions. `COMMUNITY_ENABLED` and `COMMUNITY_ADMIN_IDS` own feature and admin configuration. ID grants and verified GitHub email pregrants are separate from observability administration; ordinary password registration does not prove an email grant. Moderation excludes OAuth credentials.
 
 The public-profile form offers **Generate with AI** for display name, handle and bio. It defaults to the first configured text connection, matching the brief editor, and lets the author select another connection. Optional writing instructions and the entered profile fields are sent to that provider; account identity and private projects are not added as context. Generation uses the saved model and may incur provider usage. Without a configured text provider, manual editing remains available with a Settings link.
 
@@ -48,4 +56,4 @@ The public [Community guide](../src/app/community-documentation.tsx) is generate
 
 Profile drafting is `POST /api/community/me/profile/generate`, `community_generate_profile`, `studio_community_generate_profile`, or `dsa community generate-profile --file request.json`. The shared request schema accepts an optional provider, draft profile fields and writing instructions. A response contains `suggestion` and the selected `provider`. This incurs generation only; use the separate revision-checked `set-profile` operation after the person reviews the result.
 
-Release evidence and remaining verification work belong in the [implementation plan](../plans/2026-09-12-community-design-sharing/plan.md), not this behavior guide.
+Release evidence and remaining verification work belong in upstream's implementation plan, not this behavior guide.

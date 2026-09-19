@@ -1,6 +1,6 @@
 # Timeline videos and motion
 
-Read [shared layout and quality](layout-and-quality.md) first. Use this for `kind: "video"`; inspect the `motion-title` template and the live timeline schema.
+Read [shared layout and quality](../../my-designer/references/layout-and-quality.md) first. Use this for `kind: "video"`; inspect the `motion-title` template and the live timeline schema.
 
 ## Sequence and supported motion
 

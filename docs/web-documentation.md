@@ -1,5 +1,11 @@
 # Public documentation and beginner guide
 
+> Inherited from upstream. The `/docs` and `/guide` pages are built and served by this kit
+> too — `npm run build` runs [build-public-docs.mjs](../scripts/build-public-docs.mjs) —
+> but they document a hosted, signed-in product. In local mode there is no API key to
+> paste and no account to link, so the playground's key management and the MCP/WebMCP
+> pages describe upstream. Treat this page as the guide to maintaining that generator.
+
 The public documentation portal lives at `/docs`; the visual beginner guide lives at `/guide`. The REST page includes an interactive playground: a user can enter an API key held in page memory, or use their signed-in session, and explicitly execute real API requests. Provider operations may incur usage and writes affect the selected project. Passive page viewing and the build process do not make those requests. The playground accepts query parameters, uploads real files using multipart form data, and downloads binary responses. Its copyable curl example reflects those request formats. API-key management links to the existing signed-in `/?settings=agents` workflow.
 
 ## Owning content and routes

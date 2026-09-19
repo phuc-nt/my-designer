@@ -69,13 +69,50 @@ commit to read for the details.
 3. **Editable PPTX export** — **Done** (`95b7a22`): `pptx-export.ts` emits text boxes, shapes, images, charts (and, since item 6, tables); unsupported layers are rasterised per node and listed in the notes; `--rasterize` keeps the picture-per-slide path. (Presenton vs Slidev)
 4. **Better preflight** — **Done** (`1aecde1`): `text-collision`, `text-spills-container`, contrast vs the topmost opaque backdrop, `crowded-edge`, all with node IDs.
 5. **Human → agent feedback on the canvas** — **Done** (`cc2191a`): comments on layers and pages inside the document, `projects comments`, `document changes --follow` (polling, one JSON line per revision), `projects check --file` preflight, `--summary` responses. (Claude Design)
-6. **`table` node + `xlsx`/`csv` export** — **Done** (commit `feat: table node with xlsx/csv export, design-system extract and kit routing`): `table.ts` model (cells with text/fill/colour/alignment/bold/spans, header rows, column widths), SVG grid render, Inspector grid editor, toolbar button and catalog block, native PowerPoint tables, `xlsx` (one sheet per page with tables) and `csv` (first table on a page) written server-side without a browser.
+6. **`table` node + `xlsx`/`csv` export** — **Done** (`9d34555`): `table.ts` model (cells with text/fill/colour/alignment/bold/spans, header rows, column widths), SVG grid render, Inspector grid editor, toolbar button and catalog block, native PowerPoint tables, `xlsx` (one sheet per page with tables) and `csv` (first table on a page) written server-side without a browser.
 7. **Upstream issues worth taking** — **Done**: #67 `upsert-node` (`d904b06`), #68 `projects check --file` and #71 summary responses (`cc2191a`), #75 revision-keyed export cache (`1304d12`). #17 offline-runnable source export was already covered by `render` + React export.
 8. **Document-as-git-artifact** — **Done** (`1304d12`): `projects diff`, `document get --output-dir` page folders, `document put --dir` / `import --dir`. Revisions are still not stored, so diffs compare files or a file against the live project. (OpenPencil)
 9. **Design system from a codebase** — **Done** (same commit as item 6): `design-systems extract --from <dir> [--import]` with the pure `design-system-extract.ts` (CSS custom properties, regex-parsed Tailwind config, existing `DESIGN.md`). (Claude Design, Stitch)
 10. **Skill routing between the three kits** — **Done** (same commit as item 6): the "When a sibling kit fits better" paragraph in `my-designer/SKILL.md`.
 
 Deferred: YAML authoring (#16 — JSON via files already works for agents), Figma import (large, hosted dependency), agent teams/orchestration (belongs in the harness, not the kit), a second MCP surface (rejected by design).
+
+## 5. Verified, and what is still open
+
+A 136-assertion acceptance run over the public CLI (every project kind, every
+template, every export format, revision conflicts, comments, page folders,
+table edge cases with CJK and Vietnamese text, invalid input, arrange ops,
+preflight checks, design-system extraction across five codebase shapes, 3D and
+motion exports, a 200-node page, and the export cache) passes in full against
+this build, along 535 unit tests. Four product bugs surfaced that way and are
+all fixed:
+
+1. Unreadable table header text on a dark header fill.
+2. The hosted per-user export quota throttling the single local agent.
+3. `editable-scene` export answering caller mistakes (a primitive, a text node,
+   an unknown id) with a generic 502 instead of a 400/404 that says what to fix.
+4. **Every `editable-scene` export failing with 502 `render_failed`.** The
+   renderer evaluates the shared code in an `about:blank` page, which is an
+   insecure context, so `crypto.randomUUID` is undefined and `uid()` threw for
+   each mesh the GLB decomposed into. `uid()` now falls back to
+   `crypto.getRandomValues`. The existing browser test could not catch this
+   because it navigates to an `https://` origin, where `randomUUID` exists.
+
+Known limits, in rough order of how likely they are to bite:
+
+- **No stored revision history.** `projects diff` compares two files or a file
+  against the live project. Point-in-time recovery means keeping your own
+  copies.
+- **100 operations per patch.** Deliberate, but it means building something
+  large is several sequential saves; the skill's operations reference explains
+  the batching.
+- **Page cameras are not keyframable**, so a moving camera needs the scene
+  rebuilt per keyframe rather than animated.
+- **Upstream's multi-user code is still in the tree** (community publishing,
+  OAuth, MCP tool modules) behind flags this kit leaves off. It is untested in
+  local mode and is dead weight in the dependency graph
+  (`@cloudflare/puppeteer`, `@modelcontextprotocol/sdk`). Removing it is the
+  obvious next cleanup.
 
 ## Sources
 

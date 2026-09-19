@@ -1,4 +1,4 @@
-# `dsa scene command` — all 29 actions
+# `dsa scene command` — all 30 actions
 
 Field types from `bin/dsa scene schema` of this build (`?` optional,
 `=` default). Every command takes the node's `nodeId` (or `nodeIds` /

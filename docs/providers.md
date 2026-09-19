@@ -10,7 +10,7 @@ Choose **Add custom provider** to create multiple named connections. Each has a 
 
 Authentication choices are Bearer token, API key in a named header, HTTP Basic (credential is `username:password`), or no authentication. Credentials are encrypted at rest, including Basic credentials. Query-string credentials are not supported. Header names cannot override routing, cookies or transport framing. Official integrations retain fixed authentication; use a custom connection to select another method.
 
-The operator must allow the custom origin in `PROVIDER_ALLOWED_ORIGINS`, for example `https://api.example.com`. The server validates HTTPS and the allowlist both when saving and before use; unlisted endpoints return `invalid_provider_url`. Keep the existing `ENCRYPTION_KEY` when applying the additive custom-provider migration. See [deployment and backups](deployment.md#backups-and-rollback).
+The operator must allow the custom origin in `PROVIDER_ALLOWED_ORIGINS`, for example `https://api.example.com`. The server validates HTTPS and the allowlist both when saving and before use; unlisted endpoints return `invalid_provider_url`. Keep the existing `ENCRYPTION_KEY` when applying the additive custom-provider migration: the saved keys are encrypted with it and a new one makes them unreadable.
 
 `PUT /api/providers/custom-team` accepts the shared [provider settings schema](../src/shared/providers.ts):
 
