@@ -40,11 +40,15 @@ Output is JSON on stdout; errors are JSON on stderr; exit codes 0 ok,
 | `projects clone <id> [--name]` | copies assets too |
 | `projects rename <id> <name> --revision n` | |
 | `projects delete <id>` | deletes stored assets as well; no confirmation |
-| `projects check <id>` | read-only preflight; findings carry page/node IDs |
+| `projects check <id> [--file ops.json]` | read-only preflight; findings carry page/node IDs. `--file` previews the checks after applying ops locally, nothing is saved (`preview:true`) |
+| `projects comments <id> [--unresolved]` | comments stored in the document with `pageId`/`nodeId`/`nodeName`; `counts.unresolved` |
+| `projects comments <id> --add "text" (--node id \| --page id) [--author agent\|human] --revision n` | leave a note for the human; revision-checked save, summary receipt |
+| `projects comments <id> --resolve <commentId> --revision n` / `--reopen <commentId>` | close or reopen a thread |
 | `projects document get <id> [--output f]` | the raw document |
-| `projects document patch <id> --file ops.json --revision n` | the normal write |
-| `projects document put <id> --file doc.json --revision n [--brief-revision n]` | whole-document replace |
-| `projects document changes <id> [--since n]` | what the human saved since `n` |
+| `projects document patch <id> --file ops.json --revision n [--summary]` | the normal write; `--summary` returns the project summary plus `changed:{pages,nodes}` and diff lines instead of the document |
+| `projects document put <id> --file doc.json --revision n [--brief-revision n] [--summary]` | whole-document replace |
+| `projects document changes <id> [--since n] [--summary --base doc.json]` | what the human saved since `n`; `--summary` replaces the document with a diff against `--base` |
+| `projects document changes <id> --follow [--interval ms] [--duration ms] [--summary]` | one JSON line per new revision until `--duration` elapses (0 = until Ctrl-C); starts from the live revision unless `--since` is given |
 | `projects document merge <id> --file merge.json` | `{base,document,baseRevision}` three-way merge |
 | `projects paint <id> --file cmd.json` | raster stroke/fill on a painting node |
 | `projects thumbnail <id> --output cover.png [--revision n]` | 202 = still rendering, retry |

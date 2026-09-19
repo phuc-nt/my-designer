@@ -14,6 +14,7 @@ import { documentSchema, nodeSchema, pageSchema, themeSchema, uid, type DesignDo
 import { createBlock, themes } from './catalog';
 import { canMoveNode, resolveLayout, subtree } from './layout';
 import { alignBoxes, boundsOf, distributeBoxes, type AlignBox, type Translation } from './alignment';
+import { addComment, commentAuthors, setCommentResolved } from './comments';
 
 const measuredBoundsSchema = z.object({ id: z.string(), x: z.number().finite().min(-100000).max(100000), y: z.number().finite().min(-100000).max(100000), width: z.number().finite().min(0).max(20000), height: z.number().finite().min(0).max(20000) });
 
@@ -46,7 +47,9 @@ export const operationSchema = z.discriminatedUnion('op', [
   z.object({ op: z.literal('update-page'), pageId: z.string(), changes: pageSchema.partial().omit({ id: true, nodes: true }) }),
   z.object({ op: z.literal('upsert-node'), pageId: z.string(), node: nodeSchema }),
   z.object({ op: z.literal('align-nodes'), pageId: z.string(), nodeIds: z.array(z.string()).min(1).max(2000), alignment: z.enum(['left', 'center', 'right', 'top', 'middle', 'bottom']), to: z.enum(['selection', 'parent', 'page']).default('selection') }),
-  z.object({ op: z.literal('distribute-nodes'), pageId: z.string(), nodeIds: z.array(z.string()).min(3).max(2000), axis: z.enum(['horizontal', 'vertical']), gap: z.number().finite().min(0).max(20000).optional() })
+  z.object({ op: z.literal('distribute-nodes'), pageId: z.string(), nodeIds: z.array(z.string()).min(3).max(2000), axis: z.enum(['horizontal', 'vertical']), gap: z.number().finite().min(0).max(20000).optional() }),
+  z.object({ op: z.literal('add-comment'), nodeId: z.string().optional(), pageId: z.string().optional(), comment: z.object({ id: z.string().min(1).max(120).regex(/^[a-zA-Z0-9_-]+$/).optional(), text: z.string().trim().min(1).max(2000), author: z.enum(commentAuthors).default('agent') }) }),
+  z.object({ op: z.literal('resolve-comment'), commentId: z.string(), resolved: z.boolean().default(true) })
 ]);
 export const operationsSchema = z.array(operationSchema).min(1).max(100);
 export type DesignOperation = z.infer<typeof operationSchema>;
@@ -110,6 +113,8 @@ export function mutateDocument(document: DesignDocument, input: unknown): Design
       for(const page of doc.pages)for(const node of page.nodes)if(node.src===old.url)node.src=replacement.url;
     }
     else if (action.op === 'rename') doc.name = action.name;
+    else if (action.op === 'add-comment') { if (!!action.nodeId === !!action.pageId) throw new Error('Comment on exactly one of nodeId or pageId'); addComment(doc, action, action.comment); }
+    else if (action.op === 'resolve-comment') setCommentResolved(doc, action.commentId, action.resolved);
     else if (action.op === 'set-theme') doc.theme = action.theme;
     else if (action.op === 'apply-theme') { const theme = themes.find(t => t.id === action.themeId); if (!theme) throw new Error('Unknown theme'); doc.theme = structuredClone(theme); }
     else if (action.op === 'set-timeline') doc.timeline = action.timeline;

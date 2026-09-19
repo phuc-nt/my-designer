@@ -2400,7 +2400,7 @@ export function Editor({
                       .map((target) => (
                         <div
                           key={target.id}
-                          className={`node-target ${selection.includes(target.id) ? "selected" : ""} ${target.locked ? "locked" : ""}`}
+                          className={`node-target ${selection.includes(target.id) ? "selected" : ""} ${target.locked ? "locked" : ""} ${target.comments?.some(comment => !comment.resolved) ? "commented" : ""}`}
                           style={
                             {
                               left: target.x,

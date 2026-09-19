@@ -80,6 +80,22 @@ the old document to hide a conflict. For long sessions,
 `projects document merge <id> --file {base,document,baseRevision}` does a
 three-way merge that returns conflict paths instead of clobbering.
 
+## Comments: the review loop with the human
+
+Comments live in the document, on a layer or a page, and share its
+revision. The human writes them in the Inspector; you read them with
+`projects comments <id> --unresolved`, each row carries `pageId`,
+`nodeId`, `nodeName` and `text`. Loop: read open comments → apply the
+change with `document patch` → `projects comments <id> --resolve
+<commentId> --revision n` → repeat until none are open. Leave your own
+notes for the human with `--add "…" --node <id>` (or `--page <id>`);
+they show as a dot on the canvas. Do not resolve a comment you did not
+act on. Before a risky patch, `projects check <id> --file ops.json`
+previews the checks without saving. Add `--summary` to `document patch`
+or `put` to get back only the touched page/node IDs instead of the
+whole document, and `projects document changes <id> --follow --summary`
+prints one JSON line per human save while you work on something else.
+
 ## Inspect quality
 
 Read [visual-inspection.md](references/visual-inspection.md). Page mode for

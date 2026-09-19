@@ -223,3 +223,52 @@ test('CLI operation IDs recover a save and download the real durable result',asy
  const replay=await json(['operations','start',project.id,'--file','-'],{input:JSON.stringify(payload)});assert.equal(replay.operation.status,'succeeded');
  const out=join(directory,'durable-result.json');await json(['operations','result',project.id,'cli-save','--out',out]);const receipt=JSON.parse(await readFile(out,'utf8'));assert.equal(receipt.project.document.name,'Durable result');assert.equal(receipt.project.revision,project.revision+1);
 });
+
+test('CLI previews checks for unsaved operations, manages comments and follows changes as JSON lines', async () => {
+  const created = await json(['projects', 'create', '--name', 'Collab loop', '--kind', 'slides', '--template', 'product-deck']);
+  const projectId = created.project.id as string, revision = created.project.revision as number;
+  const page = created.project.document.pages[0], textNode = page.nodes.find((node: any) => node.type === 'text');
+  const preview = await json(['projects', 'check', projectId, '--file', '-'], { input: JSON.stringify([{ op: 'update-node', nodeId: textNode.id, changes: { text: 'A headline that cannot possibly fit inside this tiny layer', width: 40, height: 2 } }]) });
+  assert.equal(preview.preview, true); assert.equal(preview.revision, revision); assert.equal(preview.operations, 1);
+  assert.ok(preview.issues.some((issue: any) => issue.code === 'text-overflow'), 'the previewed defect is reported');
+  assert.equal((await json(['projects', 'get', projectId])).project.revision, revision, 'check --file never saves');
+
+  const added = await json(['projects', 'comments', projectId, '--add', 'Use the brand blue here', '--node', textNode.id, '--revision', String(revision)]);
+  assert.equal(added.revision, revision + 1); assert.equal('document' in added.project, false, 'comment writes use summary receipts');
+  assert.deepEqual(added.changed.nodes, [textNode.id]);
+  assert.equal(added.comments.length, 1); assert.equal(added.comments[0].author, 'agent'); assert.equal(added.comments[0].nodeId, textNode.id);
+  const commentId = added.comments[0].id as string;
+  const pageComment = await json(['projects', 'comments', projectId, '--add', 'Slide feels empty', '--page', page.id, '--author', 'human', '--revision', String(added.revision)]);
+  assert.equal(pageComment.comments.length, 2);
+  const listed = await json(['projects', 'comments', projectId]);
+  assert.equal(listed.counts.total, 2); assert.equal(listed.counts.unresolved, 2);
+  const resolved = await json(['projects', 'comments', projectId, '--resolve', commentId, '--unresolved', '--revision', String(pageComment.revision)]);
+  assert.deepEqual(resolved.comments.map((comment: any) => comment.text), ['Slide feels empty']);
+  const openOnly = await json(['projects', 'comments', projectId, '--unresolved']);
+  assert.deepEqual(openOnly.counts, { total: 1, unresolved: 1 });
+  const stale = await run(['projects', 'comments', projectId, '--reopen', commentId, '--revision', String(revision)]);
+  assert.equal(stale.code, 1); assert.equal(JSON.parse(stale.stderr).error.code, 'revision_conflict');
+  const conflicting = await run(['projects', 'comments', projectId, '--add', 'x', '--revision', String(resolved.revision)]);
+  assert.equal(conflicting.code, 1); assert.equal(JSON.parse(conflicting.stderr).error.code, 'invalid_target');
+  const missing = await run(['projects', 'comments', projectId, '--resolve', commentId]);
+  assert.equal(missing.code, 1); assert.equal(JSON.parse(missing.stderr).error.code, 'revision_required');
+
+  const summarized = await json(['projects', 'document', 'patch', projectId, '--summary', '--revision', String(resolved.revision), '--file', '-'], { input: JSON.stringify([{ op: 'rename', name: 'Collab loop renamed' }]) });
+  assert.equal('document' in summarized.project, false); assert.deepEqual(summarized.summary, ['renamed the document']);
+
+  const follow = run(['projects', 'document', 'changes', projectId, '--follow', '--summary', '--interval', '150', '--duration', '2500']);
+  await new Promise(resolveWait => setTimeout(resolveWait, 500));
+  const during = await json(['projects', 'comments', projectId, '--reopen', commentId, '--revision', String(summarized.revision)]);
+  const result = await follow;
+  assert.equal(result.code, 0, result.stderr);
+  const lines = result.stdout.trim().split('\n').map(line => JSON.parse(line));
+  assert.equal(lines[0].following, projectId); assert.equal(lines[0].since, summarized.revision);
+  const event = lines.find(line => line.revision === during.revision);
+  assert.ok(event, `follow must print the new revision: ${result.stdout}`);
+  assert.equal('document' in event.project, false);
+  assert.deepEqual(event.changed.nodes, [textNode.id]);
+  assert.ok(event.summary.some((line: string) => line.includes('comments')), event.summary.join('\n'));
+  const single = await json(['projects', 'document', 'changes', projectId, '--since', String(summarized.revision), '--summary']);
+  assert.equal(single.revision, during.revision); assert.deepEqual(single.summary, ['no base document to compare against; pass --base or use --follow']);
+  await json(['projects', 'delete', projectId]);
+});

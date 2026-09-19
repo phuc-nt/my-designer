@@ -18,7 +18,8 @@ import { inspectMotion, motionInspectionSchema } from '../src/shared/motion-insp
 import { updateEvent } from './observability-store';
 import { Hono } from "hono";
 import { z } from "zod";
-import { documentSchema, type DesignDocument } from "../src/shared/schema";
+import { documentSchema, type DesignDocument, type Project } from "../src/shared/schema";
+import { changedIds, describeDiff, diffDocuments } from "../src/shared/document-diff";
 import { createDocument } from "../src/shared/catalog";
 import { renderHtml } from "../src/shared/render";
 import type { Env } from "./types";
@@ -65,6 +66,17 @@ export const serializeProject = (row: ProjectRow, base: string) => ({
     ? { publishedUrl: `${base}/published/${row.published_slug}` }
     : {}),
 });
+/**
+ * Response body for a document write. With `?summary=1` the full document is
+ * replaced by the project summary plus which pages and nodes the save touched,
+ * so agents applying small patches do not download the whole document back.
+ */
+export function writeReceipt(c: Context<Env>, before: DesignDocument | undefined, project: Project) {
+  if (!['1', 'true'].includes(c.req.query('summary') ?? '')) return { project };
+  const { document, ...summary } = project;
+  const diff = before ? diffDocuments(before, document) : undefined;
+  return { project: summary, revision: project.revision, changed: diff ? changedIds(diff) : { pages: document.pages.map(page => page.id), nodes: document.pages.flatMap(page => page.nodes.map(node => node.id)) }, summary: diff ? describeDiff(diff) : ['saved without a comparable base'] };
+}
 export async function validateAssets(c: Context<Env>, doc: DesignDocument, projectId?: string) {
   const refs = ownedDocumentAssetIds(doc);
   const references = [...refs];
@@ -373,16 +385,23 @@ projectRoutes.patch("/:id", async (c) => {
 projectRoutes.put("/:id/document", async (c) => {
   // The owned save service validates the canonical document after its version guard.
   const body = documentWriteSchema.extend({ document: z.unknown() }).parse(await c.req.json());
-  return c.json({
-    project: await saveDocument(
+  // Summary receipts diff against the document as it was before this write.
+  const summary = ["1", "true"].includes(c.req.query("summary") ?? "");
+  const before = summary ? documentSchema.parse(JSON.parse((await projectRow(c, c.req.param("id"))).document)) : undefined;
+  return c.json(
+    writeReceipt(
       c,
-      c.req.param("id"),
-      body.document,
-      body.expectedRevision,
-      body.expectedBriefRevision,
-      body.operationId,
+      before,
+      await saveDocument(
+        c,
+        c.req.param("id"),
+        body.document,
+        body.expectedRevision,
+        body.expectedBriefRevision,
+        body.operationId,
+      ),
     ),
-  });
+  );
 });
 projectRoutes.delete("/:id", async (c) => {
   const row = await projectRow(c, c.req.param("id"));

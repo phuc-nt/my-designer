@@ -23,6 +23,8 @@ import { parseLiveArtifact, type LiveArtifact } from '../shared/live-artifact';
 const SceneInspector = lazy(() => import('./scene-inspector').then(module => ({ default: module.SceneInspector })));
 import { navigateButtonGroup } from "./keyboard-navigation";
 import { ArrangeButtons } from './arrange-buttons';
+import { CommentsPanel } from './comments-panel';
+import { addComment, setCommentResolved } from '../shared/comments';
 import type { Alignment, Axis } from '../shared/alignment';
 
 type Props = {
@@ -80,6 +82,11 @@ export function Inspector({
       Object.assign(d, mutateDocument(d, [{ op: 'update-page', pageId: page.id, changes: patch }]));
     });
   }
+  // Browser comments are authored by the human; agents add theirs through the CLI.
+  const comment = (target: { nodeId?: string; pageId?: string }) => ({
+    onAdd: (text: string) => change(d => { addComment(d, target, { text, author: 'human' }); }),
+    onResolve: (commentId: string, resolved: boolean) => change(d => { setCommentResolved(d, commentId, resolved); }),
+  });
   return (
     <aside className="inspector">{storedNode?.component && <ComponentInspector doc={doc} key={storedNode.id} node={storedNode} update={update}/>}
       {doc.kind === '3d' && <Suspense fallback={null}><SceneInspector onDocument={next=>change(d=>Object.assign(d,next))} onTexture={onTexture} doc={doc} page={page} node={storedNode?.type === 'model3d' ? storedNode : undefined} update={update} pageUpdate={pageUpdate}/></Suspense>}
@@ -274,6 +281,7 @@ export function Inspector({
             </div>
           </section>
           {doc.kind === 'slides' && <section><Field label="Speaker notes"><textarea value={page.notes ?? ''} onChange={e => pageUpdate({ notes: e.target.value })}/></Field></section>}
+          <CommentsPanel key={page.id} comments={page.comments} placeholder="Note for the agent about this page" {...comment({ pageId: page.id })} />
           {doc.timeline && (
             <section>
               <h3>Motion settings</h3>
@@ -350,6 +358,7 @@ export function Inspector({
               />
             </Field>
           </section>
+          <CommentsPanel key={node.id} comments={storedNode?.comments} placeholder="Ask the agent to change this layer" {...comment({ nodeId: node.id })} />
           <section>
             <h3>Position & size</h3>
             <div className="property-grid">

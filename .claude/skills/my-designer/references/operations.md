@@ -41,6 +41,8 @@ boardId paintingId crop parentId locked visible text src style data`.
 | `update-page` | `pageId`, `changes:{name?,width?,height?,background?,layout?,notes?,scene?}` |
 | `remove-page` | `pageId` |
 | `rename` | `name` |
+| `add-comment` | exactly one of `nodeId`/`pageId`, `comment:{text (≤2000), author?: agent\|human (default agent), id?}` |
+| `resolve-comment` | `commentId`, `resolved?` (default `true`; `false` reopens) |
 | `set-theme` | `theme:{id,name,colors,fonts:{heading,body},spacing[],radius}` |
 | `apply-theme` | `themeId` |
 | `set-timeline` | `timeline:{duration,fps,tracks[]}` |

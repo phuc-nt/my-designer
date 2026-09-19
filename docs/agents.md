@@ -20,7 +20,8 @@ This reference follows the current [CLI source](../packages/cli/src/dsa.ts) and 
 | `projects list/get/create/rename/delete/clone` | Persisted project management; clone copies owned asset bytes |
 | `projects paint ID --file command.json` | Server-rendered stroke/fill using observed revision, painting generation and exact retry ID |
 | `projects document get/put/patch` | Canonical document reads and atomic expected-revision writes |
-| `projects document merge/changes` | Three-way merge using the exact earlier base, and revision polling |
+| `projects document merge/changes` | Three-way merge using the exact earlier base, and revision polling; `changes --follow` streams one JSON line per human save, `--summary` returns a page/node diff |
+| `projects comments` | Review comments stored on layers and pages: list open threads, add notes for the human, resolve or reopen |
 | `brief get/put/interview/approve` | Persisted interactive questions, answers, scope and explicit version-bound approval |
 | `observability summary/events/trace` | Owner-scoped activity, provider usage, and correlated spans; global reads require configured operator authorization |
 | `projects check` | Read-only preflight hints with exact layer IDs; inspect the actual preview too |
@@ -94,6 +95,8 @@ Run `inspect_design` (CLI `projects check`) after saving: findings point to spec
 `generate` follows the same rule: its response is a proposal that can be read by document PUT, and the original revision is required to save it. CLI renames also use revision-checked document writes. Clone is a distinct new project and copies referenced owned assets so source deletion does not break the clone.
 
 For simultaneous human/agent edits, retain the document and revision you actually read. `projects document merge PROJECT_ID --file merge.json` accepts `{base,document,baseRevision}`; network MCP exposes `merge_design` and `get_design_changes`. Independent properties merge, while overlapping edits return conflict paths. Never alter the base or retry with an invented revision to bypass a conflict. The editor's Live mode displays saved changes without a reload and autosaves local edits. Turning Live off leaves explicit Save available.
+
+Review comments live in the document on layers and pages, so they share its revision and merge like any other field. The human adds them from the Inspector; unresolved layer comments show as a dot on the canvas. `projects comments PROJECT_ID --unresolved` lists open threads with their page and node IDs; `--add`, `--resolve` and `--reopen` write through the same revision-checked save. `projects check PROJECT_ID --file ops.json` previews design checks for a patch without saving it. Every document write accepts `?summary=1` (CLI `--summary`) to return the project summary plus the touched page and node IDs instead of the whole document.
 
 The shared operation schema includes grouping/reparenting, structured page/node layout, track replacement/removal and keyframe upsert/removal. Component props, mesh/UV data, material settings, bones and weights use the same document validator as the browser. Discover exact fields from `/api/schema` or `dsa schema`; do not invent a separate scene format.
 

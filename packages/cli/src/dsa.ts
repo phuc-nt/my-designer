@@ -18,6 +18,9 @@ import { duplicateDocument, mutateDocument, operationsSchema } from '../../../sr
 import { renderHtml, renderSvg } from '../../../src/shared/render';
 import { interviewSchema, answerSchema, scopeSchema } from '../../../src/shared/brief';
 import { mergeRequestSchema } from '../../../src/shared/collaboration-contract';
+import { inspectDesign } from '../../../src/shared/design-checks';
+import { listComments } from '../../../src/shared/comments';
+import { changedIds, describeDiff, diffDocuments } from '../../../src/shared/document-diff';
 import { registerObservabilityCommands } from './observability-commands';
 import { registerDesignSystemCommands } from './design-system-commands';
 import { Client, CliError, inputJson, inputText, nonnegativeNumber, output, outputFile, positiveInteger, secretInput } from './client';
@@ -46,9 +49,10 @@ function revision(value: string): number { return positiveInteger(value); }
 function ensureRevision(current: Project, expected: number): void {
   if (current.revision !== expected) throw new CliError('revision_conflict', `Expected revision ${expected}; current revision is ${current.revision}. Read and reconcile before retrying.`, 1, 409);
 }
-async function save(id: string, document: DesignDocument, expectedRevision: number): Promise<unknown> {
-  return client().json(`${projectPath(id)}/document`, 'PUT', { document: documentSchema.parse(document), expectedRevision });
+async function save(id: string, document: DesignDocument, expectedRevision: number, summary = false): Promise<unknown> {
+  return client().json(`${projectPath(id)}/document${summary ? '?summary=1' : ''}`, 'PUT', { document: documentSchema.parse(document), expectedRevision });
 }
+const sleep = (milliseconds: number) => new Promise<void>(resolve => setTimeout(resolve, milliseconds));
 function selectedKind(value: string): ProjectKind {
   if (!(kinds as readonly string[]).includes(value)) throw new CliError('invalid_kind', `Kind must be one of: ${kinds.join(', ')}.`);
   return value as ProjectKind;
@@ -107,7 +111,29 @@ projects.command('list').option('--query <text>', 'Search name/description').opt
   return client().json(`/api/projects?${query}`);
 }));
 projects.command('get <id>').action(wrap(id => client().json(projectPath(id))));
-projects.command('check <id>').description('Read-only preflight with node IDs, severity and actionable design checks').action(wrap(id => client().json(`${projectPath(id)}/checks`)));
+projects.command('check <id>').description('Read-only preflight with node IDs, severity and actionable design checks').option('--file <path>', 'Preview: apply an operations array locally before checking; nothing is saved').action(wrap(async (id, options) => {
+  if (!options.file) return client().json(`${projectPath(id)}/checks`);
+  const operations = operationsSchema.parse(await inputJson(options.file));
+  const current = await project(id);
+  return { projectId: current.id, revision: current.revision, preview: true, operations: operations.length, ...inspectDesign(mutateDocument(current.document, operations)) };
+}));
+projects.command('comments <id>').description('List review comments stored in the document; --add, --resolve and --reopen write through a revision-checked save')
+  .option('--unresolved', 'Only open comments').option('--add <text>', 'Append a comment to --node or --page').option('--node <nodeId>', 'Target node for --add').option('--page <pageId>', 'Target page for --add')
+  .option('--author <author>', 'human or agent', 'agent').option('--resolve <commentId>', 'Mark a comment resolved').option('--reopen <commentId>', 'Reopen a resolved comment').option('--revision <number>', 'Revision observed when reading; required for writes')
+  .action(wrap(async (id, options) => {
+    const writes = [options.add !== undefined, options.resolve !== undefined, options.reopen !== undefined].filter(Boolean).length;
+    if (writes > 1) throw new CliError('conflicting_options', 'Use one of --add, --resolve or --reopen per call.');
+    if (!writes) return client().json(`${projectPath(id)}/comments${options.unresolved ? '?unresolved=1' : ''}`);
+    if (options.revision === undefined) throw new CliError('revision_required', 'Comment writes need --revision from the last read.');
+    if (options.add !== undefined && !options.node === !options.page) throw new CliError('invalid_target', '--add needs exactly one of --node or --page.');
+    const expected = revision(options.revision); const current = await project(id); ensureRevision(current, expected);
+    const operations = operationsSchema.parse(options.add !== undefined
+      ? [{ op: 'add-comment', nodeId: options.node, pageId: options.page, comment: { text: options.add, author: options.author } }]
+      : [{ op: 'resolve-comment', commentId: options.resolve ?? options.reopen, resolved: options.resolve !== undefined }]);
+    const document = mutateDocument(current.document, operations);
+    const receipt = await save(id, document, expected, true) as object;
+    return { ...receipt, comments: listComments(document, { unresolved: Boolean(options.unresolved) }) };
+  }));
 projects.command('create').requiredOption('--name <name>', 'Project name').option('--description <text>', 'Project description', '').option('--kind <kind>', 'Document kind').option('--template <id>', 'Template ID').option('--theme <id>', 'Theme ID').option('--file <path>', 'Document JSON file or - for stdin').action(wrap(async options => {
   if (options.file && options.template) throw new CliError('conflicting_options', 'Choose either --file or --template.');
   const template = options.template ? selection(templates, options.template) : undefined;
@@ -128,13 +154,40 @@ projects.command('clone <id>').option('--name <name>', 'Name for the new project
 }));
 const documents = projects.command('document').description('Read and write the canonical design document');
 documents.command('merge <id>').description('Merge edits against the actual base you read; overlapping changes return conflict').requiredOption('--file <path>', 'JSON {base,document,baseRevision}, or - for stdin').action(wrap(async (id, options) => client().json(`${projectPath(id)}/merge`, 'POST', mergeRequestSchema.parse(await inputJson(options.file)))));
-documents.command('changes <id>').option('--since <revision>', 'Last observed revision', '0').action(wrap((id, options) => client().json(`${projectPath(id)}/changes?since=${nonnegativeNumber(options.since)}`)));
+type ChangeFeed = { revision: number; unchanged?: boolean; project?: Project };
+/** One change event; with `summary` the project document is replaced by a diff against `base`. */
+function changeEvent(feed: ChangeFeed, base: DesignDocument | undefined, summary: boolean): { event: unknown; document: DesignDocument | undefined } {
+  if (feed.unchanged || !feed.project) return { event: feed, document: base };
+  if (!summary) return { event: feed, document: feed.project.document };
+  const { document, ...project } = feed.project;
+  const diff = base ? diffDocuments(base, document) : undefined;
+  return { event: { revision: feed.revision, project, changed: diff ? changedIds(diff) : undefined, summary: diff ? describeDiff(diff) : ['no base document to compare against; pass --base or use --follow'] }, document };
+}
+documents.command('changes <id>').description('What the human saved after --since; --follow keeps polling and prints one JSON line per new revision')
+  .option('--since <revision>', 'Last observed revision; --follow defaults to the live revision', '0').option('--follow', 'Keep polling until --duration elapses or the process is interrupted')
+  .option('--interval <milliseconds>', 'Polling interval with --follow', '2000').option('--duration <milliseconds>', 'Stop following after this long; 0 follows until interrupted', '0')
+  .option('--summary', 'Replace the document with a page/node diff against the previously seen revision').option('--base <file>', 'Document JSON to diff against for --summary')
+  .action(async (id, options) => {
+    const summary = Boolean(options.summary), since = nonnegativeNumber(options.since);
+    let base = options.base ? await documentInput(options.base) : undefined;
+    if (!options.follow) { output(changeEvent(await client().json<ChangeFeed>(`${projectPath(id)}/changes?since=${since}`), base, summary).event); return; }
+    const interval = positiveInteger(options.interval), duration = nonnegativeNumber(options.duration), started = Date.now();
+    const live = await project(id);
+    let last = since || live.revision;
+    if (summary && !base) base = live.document;
+    process.stdout.write(JSON.stringify({ following: id, revision: live.revision, since: last, interval, duration: duration || null }) + '\n');
+    while (!duration || Date.now() - started < duration) {
+      const feed = await client().json<ChangeFeed>(`${projectPath(id)}/changes?since=${last}`);
+      if (!feed.unchanged) { const next = changeEvent(feed, base, summary); process.stdout.write(JSON.stringify(next.event) + '\n'); base = next.document; last = feed.revision; }
+      await sleep(interval);
+    }
+  });
 documents.command('get <id>').option('--output <file>', 'Save document JSON to a file').action(async (id, options) => { await outputFile(options.output, JSON.stringify((await project(id)).document, null, 2)); });
-documents.command('put <id>').option('--brief-revision <number>', 'Observed brief revision when applying a proposal').requiredOption('--file <path>', 'Document JSON or - for stdin').requiredOption('--revision <number>', 'Expected saved revision').action(wrap(async (id, options) => client().json(`${projectPath(id)}/document`,'PUT',{document:await documentInput(options.file),expectedRevision:revision(options.revision),...(options.briefRevision!==undefined?{expectedBriefRevision:nonnegativeNumber(options.briefRevision)}:{})})));
-documents.command('patch <id>').description('Apply shared targeted operations; reuses atomic revision-checked save').requiredOption('--file <path>', 'Operations array JSON or - for stdin').requiredOption('--revision <number>', 'Expected saved revision').action(wrap(async (id, options) => {
+documents.command('put <id>').option('--brief-revision <number>', 'Observed brief revision when applying a proposal').requiredOption('--file <path>', 'Document JSON or - for stdin').requiredOption('--revision <number>', 'Expected saved revision').option('--summary', 'Return the project summary and changed page/node IDs instead of the whole document').action(wrap(async (id, options) => client().json(`${projectPath(id)}/document${options.summary ? '?summary=1' : ''}`,'PUT',{document:await documentInput(options.file),expectedRevision:revision(options.revision),...(options.briefRevision!==undefined?{expectedBriefRevision:nonnegativeNumber(options.briefRevision)}:{})})));
+documents.command('patch <id>').description('Apply shared targeted operations; reuses atomic revision-checked save').requiredOption('--file <path>', 'Operations array JSON or - for stdin').requiredOption('--revision <number>', 'Expected saved revision').option('--summary', 'Return the project summary and changed page/node IDs instead of the whole document').action(wrap(async (id, options) => {
   const operations = operationsSchema.parse(await inputJson(options.file)); const expected = revision(options.revision);
   const current = await project(id); ensureRevision(current, expected);
-  return save(id, mutateDocument(current.document, operations), expected);
+  return save(id, mutateDocument(current.document, operations), expected, Boolean(options.summary));
 }));
 projects.command('import').description('Create a new project from canonical JSON').requiredOption('--file <path>', 'Document JSON or - for stdin').option('--name <name>', 'Override project name').action(wrap(async options => {
   const document = await documentInput(options.file);
