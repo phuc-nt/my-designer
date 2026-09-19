@@ -22,6 +22,7 @@ function fixture() {
     { id: 'flow', type: 'text', name: 'Flow', x: 0, y: 0, width: 200, height: 30, text: 'Laid out by the frame', parentId: 'frame' },
     { id: 'hidden', type: 'text', name: 'Hidden', x: 0, y: 0, width: 50, height: 20, text: 'invisible', visible: false },
     { id: 'glyph', type: 'icon', name: 'Glyph', x: 540, y: 20, width: 40, height: 40, data: { icon: 'star' } },
+    { id: 'grid', type: 'table', name: 'Budget', x: 40, y: 365, width: 240, height: 30, data: { table: { rows: [[{ text: 'Plan', colSpan: 2 }, 'Cost'], ['Design', 'Q1', '1200']], headerFill: '#112233' } } },
   ] };
   doc.pages = [page, { id: 'p2', name: 'Second', width: 600, height: 400, background: '$background', nodes: [{ id: 'later', type: 'text', name: 'Later', x: 10, y: 10, width: 100, height: 20, text: 'Second slide' }] }];
   return documentSchema.parse(doc);
@@ -43,7 +44,7 @@ test('pptxColor converts CSS colours to PowerPoint hex with alpha', () => {
 
 test('pptxNodeKind routes primitives to native objects and the rest to pictures', () => {
   const doc = fixture(), kinds = Object.fromEntries(doc.pages[0].nodes.map(n => [n.id, pptxNodeKind(n)]));
-  assert.deepEqual(kinds, { title: 'text', card: 'shape', dot: 'shape', photo: 'image', graph: 'chart', frame: 'shape', flow: 'text', hidden: 'skip', glyph: 'raster' });
+  assert.deepEqual(kinds, { title: 'text', card: 'shape', dot: 'shape', photo: 'image', graph: 'chart', frame: 'shape', flow: 'text', hidden: 'skip', glyph: 'raster', grid: 'table' });
 });
 
 test('buildPptx writes editable text, shapes, images, charts and notes, rasterising only unsupported layers', async () => {
@@ -70,6 +71,10 @@ test('buildPptx writes editable text, shapes, images, charts and notes, rasteris
   const chart = await zip.file('ppt/charts/chart1.xml')!.async('string');
   assert.ok(chart.includes('<c:v>Q2</c:v>') && chart.includes('<c:v>35</c:v>'));
   assert.ok(xml.includes('<p:bg>') && xml.includes('102030'), 'slide background comes from the page');
+  // Tables: a native table with the header merged across two columns and filled with the header colour.
+  assert.ok(xml.includes('<a:tbl>') && xml.includes('<a:t>Design</a:t>') && xml.includes('<a:t>1200</a:t>'), 'table cells are native');
+  assert.ok(/<a:tc[^>]*gridSpan="2"/.test(xml), 'colSpan becomes gridSpan');
+  assert.ok(/<a:tc[^>]*>[^]*?112233[^]*?<\/a:tc>/.test(xml), 'header fill is applied to the merged cell');
   const notes = await zip.file('ppt/notesSlides/notesSlide1.xml')!.async('string');
   assert.ok(notes.includes('Speaker notes survive.') && notes.includes('Rasterised layers') && notes.includes('Glyph'));
   assert.ok((await slideXml(zip, 2)).includes('<a:t>Second slide</a:t>'));

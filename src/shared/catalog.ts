@@ -1,6 +1,7 @@
 import { applyTemplatePreset, extraTemplates, systemThemes } from './catalog-presets';
 import { uid, type DesignDocument, type DesignNode, type DesignPage, type ProjectKind, type Theme } from './schema';
 import { structuredPage } from './structured-templates';
+import { defaultTable } from './table';
 
 export const themes: Theme[] = [
   { id: 'atelier', name: 'Atelier', colors: { background: '#F6F3EC', surface: '#EAE5D9', text: '#282B25', muted: '#73776B', accent: '#BE4B36', primary: '#BE4B36', secondary: '#C3CDA6', border: '#D7D6CA' }, fonts: { heading: 'Georgia', body: 'Arial' }, spacing: [4, 8, 16, 24, 32, 48, 64, 96], radius: 12 },
@@ -32,6 +33,7 @@ export const blocks: Block[] = [
   { id: 'button', name: 'Button', description: 'An accessible primary call to action.', nodes: [shape('Button', 64, 64, 220, 60, '$accent'), { ...text('Explore the possibilities', 80, 80, 190, 30, 16), style: { fontSize: 16, fill: '$background', fontWeight: 600 } }] },
   { id: 'card', name: 'Feature card', description: 'A reusable card for an idea or feature.', nodes: [shape('Card', 64, 64, 320, 260), text('01 / THE DETAILS', 88, 90, 270, 40, 14), text('Made with intention.', 88, 160, 270, 90, 32, true), text('Small details. Lasting impact.', 88, 270, 270, 30, 16)] },
   { id: 'chart', name: 'Bar chart', description: 'Editable data visualization.', nodes: [{ id: 'block-chart', type: 'chart', name: 'Bar chart', x: 64, y: 64, width: 600, height: 300, data: { labels: ['Discover', 'Design', 'Deliver'], values: [35, 65, 90] }, style: { fill: '$accent' } }] },
+  { id: 'table', name: 'Table', description: 'A header row plus data rows; exports as an editable PowerPoint table, xlsx or csv.', nodes: [{ id: 'block-table', type: 'table', name: 'Table', x: 64, y: 64, width: 600, height: 200, data: { table: defaultTable() }, style: { fill: '$accent' } }] },
   { id: 'image', name: 'Image', description: 'Add an image and set its source from your assets.', nodes: [{ id: 'block-image', type: 'image', name: 'Image', x: 64, y: 64, width: 480, height: 320, style: { fill: '$surface' } }] },
   { id: 'quote', name: 'Pull quote', description: 'Give a meaningful idea a little more space.', nodes: [shape('Quote accent', 64, 64, 4, 160, '$accent', 0), text('“Simplicity is the result of careful thought.”', 96, 64, 600, 160, 40, true)] },
   { id: 'live-kpi', name: 'Live metric', description: 'A metric card that re-renders when its params change.', nodes: [{ id: 'block-live-kpi', type: 'shape', name: 'Live metric', x: 64, y: 64, width: 320, height: 120, style: { fill: '$surface', borderRadius: 12 }, data: { live: { renderer: 'kpi', params: { title: 'Metric', label: 'Value', value: 0 } } } }] }

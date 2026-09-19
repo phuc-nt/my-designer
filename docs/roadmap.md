@@ -33,18 +33,18 @@ group/ungroup, duplicate, nudge, layer tree, Inspector fields (geometry,
 opacity, fill/stroke, typography, radius, chart values, speaker notes, 3D
 geometry/material, timeline duration/fps, live-artifact params), timeline
 keyframes, painting workspace, character rig editor, creative boards.
-Missing (and present in every mature canvas tool): **align/distribute**,
-**snap guides**, **marquee multi-select**, **clipboard copy/paste across
-pages**. These are §4 items 1–2.
+Since then §4 items 1–2 added **align/distribute**, **snap guides**,
+**marquee multi-select** and **clipboard copy/paste across pages**, item 5
+added canvas comments, and item 6 a table grid editor.
 
 ## 2. Contributions from the generators
 
 | From | What | Status |
 | --- | --- | --- |
 | `mxg`/`mpg` `text.js` | Glyph-advance text measurement (Latin 0.52 em, East Asian Wide 1 em, combining marks 0) + kinsoku | **Done** — `render.ts` `wrappedLines`/`measureText` (commit `a5b8458`). Fixes wrong `text-overflow` findings and mis-wrapped SVG for Japanese and NFD Vietnamese. |
-| `mpg` `export-pptx.js` | PPTX with real text boxes, shapes and images | Proposed — §4 item 3. Today `scripts/export-renderer.ts` rasterises every page into one picture per slide, so the human cannot edit the deck in PowerPoint/Keynote. |
-| `mpg` `checks.js` | `text-collision` (two text nodes overlapping), `text-spills-card` / `text-tight-card` (text vs its visual container, not only its parent), contrast against the **topmost shape actually behind** the text | Proposed — §4 item 4. `design-checks.ts` today checks contrast only against the declared parent fill or page background. |
-| `mxg` region/table model | A `table` node type (rows × columns, per-cell text/fill/merge) and `xlsx` export | Proposed — §4 item 6. |
+| `mpg` `export-pptx.js` | PPTX with real text boxes, shapes and images | **Done** — `src/shared/pptx-export.ts` (commit `95b7a22`); rasterised path kept behind `--rasterize`. |
+| `mpg` `checks.js` | `text-collision` (two text nodes overlapping), `text-spills-card` / `text-tight-card` (text vs its visual container, not only its parent), contrast against the **topmost shape actually behind** the text | **Done** — `design-checks.ts` (commit `1aecde1`): `text-collision`, `text-spills-container`, contrast vs the topmost opaque backdrop, `crowded-edge`. |
+| `mxg` region/table model | A `table` node type (rows × columns, per-cell text/fill/merge) and `xlsx` export | **Done** — `src/shared/table.ts` + `spreadsheet-export.ts` (§4 item 6). The xlsx is written as OOXML through JSZip rather than through `exceljs`, so the server stays dependency-light. |
 | `mxg` stress-test method | Independent fixture, answer key outside the run directory, contamination grep, agent scores itself against the key | Reusable as-is for evaluating the skills; no code change. |
 
 ## 3. What comparable products do that we do not
@@ -59,18 +59,21 @@ pages**. These are §4 items 1–2.
 | **Figma / Penpot / Paper.design MCP, Google Stitch** | Agent reads/writes a hosted canvas | Stitch's `DESIGN.md` convention (ported), Penpot's open format | Hosted, MCP |
 | **Claude office skills** (pptx/docx/xlsx) | Agent produces Office files through a skill, no server | Our skills should say *when* to use my-designer vs `mpg`/`mxg` directly (§4 item 10) | — |
 
-## 4. Proposed next steps (ordered)
+## 4. Next steps — all ten shipped (2026-09-19)
 
-1. **Align / distribute operations** — `align-nodes {nodeIds, axis, to: start|center|end}` and `distribute-nodes {nodeIds, axis, gap?}` in `browser-design-tools.ts`, exposed in the Inspector as buttons and to the agent as targeted ops. Small; removes the most common reason a page "looks off" in a render. (mcp_excalidraw, OpenPencil)
-2. **Snap guides + marquee select + clipboard** in `editor.tsx` — pure human-side; no schema change. Snap to page edges, page centre, sibling edges; marquee on empty canvas; ⌘C/⌘V across pages with fresh IDs.
-3. **Editable PPTX export** — port `mpg/src/export-pptx.js`: text nodes → `addText` with font/size/weight/colour/alignment, shapes → `addShape`, images → `addImage`, charts → `addChart`, anything unsupported (3D, boards, artwork, characters) → rasterised as today. Keep the current rasterised path behind `--format pptx --rasterize`. Requires the glyph-advance measurement (done) to size text boxes. (Presenton vs Slidev)
-4. **Better preflight** — port `mpg` checks: `text-collision`, `text-spills-container` (text vs the nearest shape/frame whose bounds contain its origin, not only its parent), contrast vs the topmost opaque node behind the text, `crowded-edge` (content within 2% of page edge). Each finding keeps node IDs like today.
-5. **Human → agent feedback on the canvas** — a `comment` field per node (Inspector text area, marker on canvas) plus `projects comments <id> [--since n]` and `projects document changes --follow` (SSE) so the agent sees "make this bigger" pinned to a node instead of a chat message. Directly the Claude Design loop; the fork already has `document changes` and revision tracking to build on.
-6. **`table` node + `xlsx`/`csv` export** — rows × columns with per-cell text, fill, alignment and merges; renders as a grid in SVG/PNG/PDF, exports as native tables in PPTX (item 3) and as a sheet via `mxg`'s region model. Fills the last gap in "create design files" (slides, web, report, wireframe, 3D, video — but no spreadsheets or tables).
-7. **Upstream issues worth taking** — #68 preflight a patch without saving (`projects check --file ops.json`), #67 `upsert-node`, #71 summary responses for mutations (return counts and a page thumbnail hash instead of the full document), #75 cache exports by revision, #17 offline-runnable source export. All CLI-side, all agent ergonomics.
-8. **Document-as-git-artifact** — `projects document get --output design.json` is already there; add `projects diff <id> --revision a --revision b` producing a node-level diff and let `projects import` accept a directory of `pages/*.json`. Makes review of agent work possible in a PR. (OpenPencil)
-9. **Design system from a codebase** — `design-systems extract --from <dir>` reading Tailwind config / CSS custom properties / existing `DESIGN.md` into the portable folder format (ported), then `import`. (Claude Design, Stitch)
-10. **Skill routing between the three kits** — one paragraph in `my-designer/SKILL.md`: a deck that will be edited in PowerPoint → `mpg`; a spreadsheet/form → `mxg`; anything reviewed visually in the browser, animated, 3D, or exported as web/PDF/video → my-designer. Zero code.
+Each item below was delivered as one conventional commit; the hash is the
+commit to read for the details.
+
+1. **Align / distribute operations** — **Done** (`d904b06`): `align-nodes`, `distribute-nodes` and `upsert-node` in `operations.ts` with pure maths in `alignment.ts`; Inspector and selection-bar buttons for the human. (mcp_excalidraw, OpenPencil)
+2. **Snap guides + marquee select + clipboard** — **Done** (`a9302dc`): `editor-snapping.ts`, `editor-marquee.ts`, `node-selection.ts`; snap to page edges/centre and sibling edges, marquee on empty canvas, ⌘C/⌘X/⌘V across pages with fresh IDs.
+3. **Editable PPTX export** — **Done** (`95b7a22`): `pptx-export.ts` emits text boxes, shapes, images, charts (and, since item 6, tables); unsupported layers are rasterised per node and listed in the notes; `--rasterize` keeps the picture-per-slide path. (Presenton vs Slidev)
+4. **Better preflight** — **Done** (`1aecde1`): `text-collision`, `text-spills-container`, contrast vs the topmost opaque backdrop, `crowded-edge`, all with node IDs.
+5. **Human → agent feedback on the canvas** — **Done** (`cc2191a`): comments on layers and pages inside the document, `projects comments`, `document changes --follow` (polling, one JSON line per revision), `projects check --file` preflight, `--summary` responses. (Claude Design)
+6. **`table` node + `xlsx`/`csv` export** — **Done** (commit `feat: table node with xlsx/csv export, design-system extract and kit routing`): `table.ts` model (cells with text/fill/colour/alignment/bold/spans, header rows, column widths), SVG grid render, Inspector grid editor, toolbar button and catalog block, native PowerPoint tables, `xlsx` (one sheet per page with tables) and `csv` (first table on a page) written server-side without a browser.
+7. **Upstream issues worth taking** — **Done**: #67 `upsert-node` (`d904b06`), #68 `projects check --file` and #71 summary responses (`cc2191a`), #75 revision-keyed export cache (`1304d12`). #17 offline-runnable source export was already covered by `render` + React export.
+8. **Document-as-git-artifact** — **Done** (`1304d12`): `projects diff`, `document get --output-dir` page folders, `document put --dir` / `import --dir`. Revisions are still not stored, so diffs compare files or a file against the live project. (OpenPencil)
+9. **Design system from a codebase** — **Done** (same commit as item 6): `design-systems extract --from <dir> [--import]` with the pure `design-system-extract.ts` (CSS custom properties, regex-parsed Tailwind config, existing `DESIGN.md`). (Claude Design, Stitch)
+10. **Skill routing between the three kits** — **Done** (same commit as item 6): the "When a sibling kit fits better" paragraph in `my-designer/SKILL.md`.
 
 Deferred: YAML authoring (#16 — JSON via files already works for agents), Figma import (large, hosted dependency), agent teams/orchestration (belongs in the harness, not the kit), a second MCP surface (rejected by design).
 

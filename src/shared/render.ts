@@ -6,12 +6,30 @@ import { ease } from './easing';
 import { documentFontFamilies, googleFontsStylesheetUrl } from './font-loading';
 import { isSafeUrl, type DesignDocument, type DesignNode, type Theme } from './schema';
 import { parseLiveArtifact, renderLiveArtifact } from './live-artifact';
+import { tableGrid, tableOf } from './table';
 
 export const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
 export function resolveColor(value: unknown, theme: Theme, fallback = '#000000'): string {
   const raw = typeof value === 'string' ? value : '';
   const color = raw.startsWith('$') ? theme.colors[raw.slice(1)] ?? fallback : raw;
   return /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]{1,30}|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%]+\))$/.test(color) ? color : fallback;
+}
+export function hexLuminance(hex: string): number | null {
+  if (/^#[0-9a-f]{3}$/i.test(hex)) hex = '#' + [...hex.slice(1)].map(c => c + c).join('');
+  if (!/^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(hex)) return null;
+  const channels = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(c => c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+}
+/** Text color that stays readable on `fill`: the theme text/background token whose luminance contrasts most, or black/white when the fill is not a hex color. */
+export function readableTextOn(fill: string, theme: Theme): string {
+  const fillL = hexLuminance(fill);
+  if (fillL === null) return fill.startsWith('#') ? '#ffffff' : resolveColor('$background', theme, '#ffffff');
+  const text = resolveColor('$text', theme, '#000000'), background = resolveColor('$background', theme, '#ffffff');
+  const candidates = [text, background, '#000000', '#ffffff'].map(color => ({ color, l: hexLuminance(color) ?? (color === '#000000' ? 0 : 1) }));
+  const contrast = (l: number) => (Math.max(l, fillL) + 0.05) / (Math.min(l, fillL) + 0.05);
+  const themed = candidates.slice(0, 2).map(c => ({ ...c, ratio: contrast(c.l) })).sort((a, b) => b.ratio - a.ratio)[0];
+  if (themed.ratio >= 4.5) return themed.color;
+  return contrast(0) >= contrast(1) ? '#000000' : '#ffffff';
 }
 const num = (v: unknown, fallback: number, min = -100000, max = 100000) => typeof v === 'number' && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : fallback;
 export function resolveFont(value: unknown, theme: Theme): string {
@@ -202,6 +220,25 @@ function nodeSvg(n: DesignNode, doc: DesignDocument, time = 0): string {
     const labels = Array.isArray(n.data?.labels) ? n.data.labels : [];
     const maximum = Math.max(1, ...values), gap = n.width / Math.max(values.length, 1);
     markup = values.map((value, i) => { const h = value / maximum * (n.height - 45); return `<rect x="${gap * i + 10}" y="${n.height - 45 - h}" width="${Math.max(0, gap - 24)}" height="${h}" rx="4" fill="${fill}"/><text x="${gap * i + 10}" y="${n.height - 14}" font-family="Arial" font-size="14" fill="${escapeHtml(resolveColor('$text', theme))}">${escapeHtml(String(labels[i] ?? value).slice(0, 30))}</text>`; }).join('');
+  } else if (n.type === 'table') {
+    const table = tableOf(n);
+    if (!table) markup = `<rect width="${n.width}" height="${n.height}" fill="none" stroke="${escapeHtml(resolveColor('$muted', theme))}" stroke-dasharray="6 4"/>`;
+    else {
+      const grid = tableGrid(table, n.width, n.height), font = escapeHtml(resolveFont(s.fontFamily, theme));
+      const border = escapeHtml(resolveColor(table.border ?? s.stroke ?? '$border', theme, '#d0d0d0')), textColor = escapeHtml(resolveColor('$text', theme));
+      const headerFillRaw = resolveColor(table.headerFill ?? s.fill ?? '$accent', theme);
+      const headerFill = escapeHtml(headerFillRaw), headerColor = escapeHtml(table.headerColor ? resolveColor(table.headerColor, theme) : readableTextOn(headerFillRaw, theme));
+      const bodyFill = table.fill ? escapeHtml(resolveColor(table.fill, theme)) : 'none';
+      markup = grid.cells.map(cell => {
+        const c = cell.cell, cellFill = c.fill ? escapeHtml(resolveColor(c.fill, theme)) : cell.header ? headerFill : bodyFill;
+        const color = c.color ? escapeHtml(resolveColor(c.color, theme)) : cell.header ? headerColor : textColor;
+        const anchor = c.align === 'center' ? 'middle' : c.align === 'right' ? 'end' : 'start';
+        const tx = cell.x + (anchor === 'middle' ? cell.width / 2 : anchor === 'end' ? cell.width - grid.padding : grid.padding);
+        const lines = wrappedLines(cell.text, Math.max(1, cell.width - grid.padding * 2), grid.fontSize).slice(0, Math.max(1, Math.floor((cell.height - grid.padding) / (grid.fontSize * 1.25))));
+        const spans = lines.map((line, i) => `<tspan x="${tx}" y="${cell.y + grid.padding + grid.fontSize * (0.85 + i * 1.25)}">${escapeHtml(line)}</tspan>`).join('');
+        return `<rect x="${cell.x}" y="${cell.y}" width="${cell.width}" height="${cell.height}" fill="${cellFill}" stroke="${border}" stroke-width="1"/><text fill="${color}" font-family="${font}" font-size="${grid.fontSize}" font-weight="${cell.header || c.bold ? 700 : 400}" text-anchor="${anchor}">${spans}</text>`;
+      }).join('');
+    }
   } else if (n.type === 'character' && n.character) {
     const character=doc.characters?.find(c=>c.id===n.character!.characterId);
     if(character) markup=`<svg width="${n.width}" height="${n.height}" viewBox="0 0 ${character.width} ${character.height}" overflow="visible">${characterSvg(character,n.character,doc.assets,time,n.id)}</svg>`;

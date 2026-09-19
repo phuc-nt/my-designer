@@ -28,8 +28,13 @@ positions included), move the outermost selected nodes with their subtrees and
 keyframes, and reject flow children — put those in `position: "absolute"` or
 change the container layout instead. Rotation is ignored (unrotated boxes).
 
-Node types: `frame group component text image shape icon chart model3d
-video audio board artwork character`. Optional node fields: `rotation
+Node types: `frame group component text image shape icon chart table model3d
+video audio board artwork character`. A `table` node needs
+`data.table = {rows: [[cell, …], …], columnWidths?, headerRows? (default 1),
+fontSize?, cellPadding?, headerFill?, headerColor?, fill?, border?}` where a
+cell is a string or `{text, fill?, color?, align?, bold?, colSpan?,
+rowSpan?}`; rows share the node height, columns follow `columnWidths`.
+Start from `blocks get table`. Optional node fields: `rotation
 opacity layout sizing position pivot component interactions scene character
 boardId paintingId crop parentId locked visible text src style data`.
 

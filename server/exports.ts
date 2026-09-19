@@ -12,6 +12,7 @@ import { z } from 'zod';
 import puppeteer from '@cloudflare/puppeteer';
 import { documentSchema, type DesignDocument } from '../src/shared/schema';
 import { renderSvg } from '../src/shared/render';
+import { buildXlsx, pageCsv } from '../src/shared/spreadsheet-export';
 import { createReactArchive, type ReactRuntimeManifest } from '../src/shared/react-export';
 import { documentFontFamilies, googleFontsStylesheetUrl } from '../src/shared/font-loading';
 import type { Env, Bindings } from './types';
@@ -23,7 +24,7 @@ import { interactiveSnapshotHtml } from './published-html';
 export interface ExportBrowser { newPage(): Promise<any>; close(): Promise<void> }
 export const exportRoutes = new Hono<Env>();
 
-const mimeTypes = {'editable-scene':'application/json','scene-angles':'application/zip', motion:'application/zip', 'png-sequence':'application/zip', spritesheet:'application/zip', json: 'application/json', svg: 'image/svg+xml', html: 'text/html', png: 'image/png', pdf: 'application/pdf', pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', webm: 'video/webm', mp4: 'video/mp4', react: 'application/zip', glb: 'model/gltf-binary', gltf: 'model/gltf+json' };
+const mimeTypes = {'editable-scene':'application/json','scene-angles':'application/zip', motion:'application/zip', 'png-sequence':'application/zip', spritesheet:'application/zip', json: 'application/json', svg: 'image/svg+xml', html: 'text/html', png: 'image/png', pdf: 'application/pdf', pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', webm: 'video/webm', mp4: 'video/mp4', react: 'application/zip', glb: 'model/gltf-binary', gltf: 'model/gltf+json', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', csv: 'text/csv; charset=utf-8' };
 
 /** Fetch only generated Google Fonts CSS and its fixed-origin font files, before browser isolation. */
 export async function embeddedDocumentFonts(doc: DesignDocument) {
@@ -70,7 +71,7 @@ exportRoutes.post('/:id/export', async c => renderProjectExport(c, c.req.param('
 
 export type SnapshotAssetResolver = (url: string) => Promise<{bytes: Uint8Array; mimeType: string}>;
 /** Cheap formats render straight from the document; everything else is worth caching per revision. */
-const uncachedFormats = new Set(['json', 'html', 'svg']);
+const uncachedFormats = new Set(['json', 'html', 'svg', 'csv', 'xlsx']);
 const exportExtension = (format: keyof typeof mimeTypes) => format === 'editable-scene' ? 'json' : ['react', 'motion', 'png-sequence', 'spritesheet', 'scene-angles'].includes(format) ? 'zip' : format;
 export function exportHeaders(name: string, format: keyof typeof mimeTypes, cache?: 'hit' | 'miss') {
   return { 'Content-Type': mimeTypes[format], 'Content-Disposition': `attachment; filename="${name.replace(/[^a-zA-Z0-9_-]/g, '_')}.${exportExtension(format)}"`, 'Cache-Control': 'private,no-store', 'X-Content-Type-Options': 'nosniff', ...(cache ? { 'X-Export-Cache': cache } : {}) };
@@ -141,6 +142,14 @@ export async function renderSnapshotExport(bindings: Bindings, name: string, doc
   if (['glb', 'gltf'].includes(options.format) && !doc.pages[options.pageIndex].nodes.some(node => node.type === 'model3d')) fail(400, 'unsupported_export', 'Scene export requires a 3D object on the selected page.');
   const headers = exportHeaders(name, options.format);
   if (options.format === 'json') { const output = JSON.stringify(doc, null, 2); hooks.onBytes?.(new TextEncoder().encode(output).length); return new Response(output, { headers }); }
+  if (options.format === 'csv' || options.format === 'xlsx') {
+    // Spreadsheets come straight from the table nodes: no browser, no fonts, no cache.
+    const csv = options.format === 'csv' ? pageCsv(doc, options.pageIndex) : null;
+    const output = options.format === 'csv' ? (csv === null ? null : new TextEncoder().encode(csv)) : await buildXlsx(doc);
+    if (!output) fail(400, 'unsupported_export', options.format === 'csv' ? 'CSV export needs a table node on the selected page.' : 'Spreadsheet export needs at least one table node in the document.');
+    hooks.onBytes?.(output.byteLength);
+    return new Response(new Uint8Array(output).buffer as ArrayBuffer, { headers });
+  }
   if (!['html', 'svg', 'react'].includes(options.format)) {
     const selectedPages = hooks.inspection ? hooks.inspection.pageIndices.map(index => doc.pages[index]) : options.format === 'pdf' || options.format === 'pptx' ? doc.pages : [doc.pages[options.pageIndex]];
     const renderNodes = selectedPages.flatMap(page => page.nodes.filter(node => node.visible !== false));

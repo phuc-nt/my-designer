@@ -3,8 +3,9 @@
 // stay native; only layers PowerPoint cannot express are rasterised.
 import type PptxGenJS from 'pptxgenjs';
 import { resolveLayout } from './layout';
-import { interpolateNode, resolveColor, resolveFont, wrappedLines } from './render';
+import { interpolateNode, readableTextOn, resolveColor, resolveFont, wrappedLines } from './render';
 import { parseLiveArtifact } from './live-artifact';
+import { tableGrid, tableOf } from './table';
 import type { DesignDocument, DesignNode, DesignPage } from './schema';
 
 const PX_PER_INCH = 96;
@@ -32,12 +33,13 @@ export function pptxColor(value: string): { hex: string; alpha: number } | null 
 export const pageNeedsPicture = (page: DesignPage) => page.nodes.some(n => n.type === 'component' && n.visible !== false);
 export const pageUsesScene = (doc: DesignDocument, page: DesignPage) => doc.kind === '3d' || !!page.scene || page.nodes.some(n => !!n.scene);
 
-export type PptxNodeKind = 'text' | 'shape' | 'image' | 'chart' | 'raster' | 'skip';
+export type PptxNodeKind = 'text' | 'shape' | 'image' | 'chart' | 'table' | 'raster' | 'skip';
 const RASTER_IMAGE = /^data:image\/(png|jpeg|gif)/;
 export function pptxNodeKind(node: DesignNode): PptxNodeKind {
   if (node.visible === false || node.type === 'group') return 'skip';
   if (parseLiveArtifact(node.data)) return 'raster';
   if (node.type === 'text') return 'text';
+  if (node.type === 'table') return tableOf(node) ? 'table' : 'raster';
   if (node.type === 'image') return node.src && RASTER_IMAGE.test(node.src) ? 'image' : 'raster';
   if (node.type === 'chart') return Array.isArray(node.data?.values) && node.data.values.some(v => typeof v === 'number') ? 'chart' : 'raster';
   if (node.type === 'shape' || node.type === 'frame') return 'shape';
@@ -122,6 +124,31 @@ export async function buildPptx(deck: PptxGenJS, doc: DesignDocument, options: P
         const fill = pptxColor(resolveColor(style.fill ?? '$accent', theme))?.hex ?? textColor;
         slide.addChart(type, [{ name: node.name || 'Series', labels: values.map((value, i) => String(labels[i] ?? value).slice(0, 30)), values }], {
           x: box.x, y: box.y, w: box.w, h: box.h, barDir: 'col', chartColors: [fill], showLegend: false, catAxisLabelColor: textColor, valAxisLabelColor: textColor, valGridLine: { style: 'none' },
+        });
+      } else if (kind === 'table') {
+        const table = tableOf(node)!, grid = tableGrid(table, node.width, node.height);
+        const border = pptxColor(resolveColor(table.border ?? style.stroke ?? '$border', theme, '#d0d0d0'))?.hex ?? 'D0D0D0';
+        const headerFillRaw = resolveColor(table.headerFill ?? style.fill ?? '$accent', theme), headerFill = pptxColor(headerFillRaw)?.hex;
+        const headerColor = pptxColor(table.headerColor ? resolveColor(table.headerColor, theme) : readableTextOn(headerFillRaw, theme))?.hex ?? 'FFFFFF';
+        const bodyFill = table.fill ? pptxColor(resolveColor(table.fill, theme))?.hex : undefined;
+        const covered = new Set<string>();
+        const rows: PptxGenJS.TableRow[] = Array.from({ length: grid.rows }, () => []);
+        for (const cell of grid.cells) {
+          const c = cell.cell, fillHex = c.fill ? pptxColor(resolveColor(c.fill, theme))?.hex : cell.header ? headerFill : bodyFill;
+          const colorHex = c.color ? pptxColor(resolveColor(c.color, theme))?.hex : cell.header ? headerColor : textColor;
+          rows[cell.row].push({ text: cell.text, options: {
+            colspan: cell.colSpan > 1 ? cell.colSpan : undefined, rowspan: cell.rowSpan > 1 ? cell.rowSpan : undefined,
+            bold: cell.header || !!c.bold, align: c.align ?? 'left', valign: 'top', color: colorHex,
+            fill: fillHex ? { color: fillHex } : undefined,
+          } });
+          for (let dr = 0; dr < cell.rowSpan; dr++) for (let dc = 0; dc < cell.colSpan; dc++) covered.add(`${cell.row + dr}:${cell.column + dc}`);
+        }
+        // Cells the source omitted (short rows) still need a placeholder so column counts line up.
+        for (let r = 0; r < grid.rows; r++) for (let c = 0; c < grid.columns; c++) if (!covered.has(`${r}:${c}`)) { rows[r].push({ text: '' }); covered.add(`${r}:${c}`); }
+        slide.addTable(rows, {
+          x: box.x, y: box.y, w: box.w, h: box.h, colW: grid.columnEdges.slice(1).map((edge, i) => (edge - grid.columnEdges[i]) * sx),
+          rowH: box.h / grid.rows, fontFace: resolveFont(style.fontFamily, theme), fontSize: grid.fontSize * 0.75, margin: grid.padding * 0.75,
+          border: { type: 'solid', pt: 0.75, color: border }, autoPage: false,
         });
       } else {
         slide.addImage({ ...box, data: await options.rasterizeNode(pageIndex, node), transparency: transparencyOf(node.opacity, 1) });

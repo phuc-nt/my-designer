@@ -68,6 +68,7 @@ import {
   Film,
   ImagePlus,
   Layers3,
+  Table,
   Group,
   Ungroup,
   Keyboard,
@@ -104,6 +105,7 @@ import {
   type Project,
 } from "../shared/schema";
 import { blocks, createBlock } from "../shared/catalog";
+import { defaultTable } from "../shared/table";
 import { promptTemplates } from "../shared/prompt-templates";
 import { interpolateNode, renderSvg } from "../shared/render";
 import {
@@ -2190,6 +2192,20 @@ export function Editor({
                 }
               >
                 <Layers3 size={17} />
+              </button>
+              <button
+                className="icon-button"
+                title="Add table"
+                aria-label="Add table"
+                onClick={() =>
+                  addNode("table", {
+                    data: { table: defaultTable() },
+                    width: 520,
+                    height: 180,
+                  })
+                }
+              >
+                <Table size={17} />
               </button>
               {doc.kind === "3d" && (
                 <button

@@ -162,6 +162,13 @@ test('real SQLite project edits use stdin operations and reject stale revisions 
   const renamed = (await json(['projects', 'rename', created.id, 'Renamed safely', '--revision', '2'])).project; assert.equal(renamed.revision, 3);
   const exported = join(directory, 'deck.svg'); await json(['projects', 'export', created.id, '--format', 'svg', '--output', exported]);
   const svg = await readFile(exported, 'utf8'); assert.match(svg, /^<svg /); assert.match(svg, /Saved through CLI/);
+  const noTable = await run(['projects', 'export', created.id, '--format', 'csv', '--output', join(directory, 'none.csv')]);
+  assert.equal(noTable.code, 1); assert.equal(JSON.parse(noTable.stderr).error.code, 'unsupported_export');
+  await json(['projects', 'document', 'patch', created.id, '--revision', '3', '--file', '-'], { input: JSON.stringify([{ op: 'add-node', pageId: created.document.pages[0].id, node: { id: 'cli-table', type: 'table', name: 'Costs', x: 0, y: 0, width: 300, height: 100, data: { table: { rows: [['Item', 'Cost'], ['Design', '1200']] } } } }]) });
+  const csvFile = join(directory, 'deck.csv'); await json(['projects', 'export', created.id, '--format', 'csv', '--output', csvFile]);
+  assert.equal(await readFile(csvFile, 'utf8'), 'Item,Cost\r\nDesign,1200\r\n');
+  const xlsxFile = join(directory, 'deck.xlsx'); await json(['projects', 'export', created.id, '--format', 'xlsx', '--output', xlsxFile, '--revision', '4']);
+  assert.equal((await readFile(xlsxFile)).subarray(0, 2).toString(), 'PK');
   const preview = await json(['preview', created.id]); assert.equal((await fetch(preview.url)).status, 200);
   await json(['unpreview', created.id]); assert.equal((await fetch(preview.url)).status, 404);
   const share = await json(['share', created.id]); assert.equal((await fetch(share.url)).status, 200);

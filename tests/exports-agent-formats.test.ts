@@ -110,6 +110,17 @@ test('authenticated React and scene exports preserve assets, animation, ownershi
     };
     const editable = await slideXml({}); assert.ok(editable.includes('<a:t>') && editable.includes('<p:pic>'), 'editable deck keeps text boxes and the owned image');
     const rasterized = await slideXml({ rasterize: true }); assert.ok(!rasterized.includes('<a:t>') && rasterized.includes('<p:pic>'), 'rasterized deck is one picture per slide');
+    // Spreadsheets come straight from table nodes without a browser; pages without tables refuse csv, documents without tables refuse xlsx.
+    assert.equal((await exportFile(deck.id, 'xlsx')).status, 400); assert.equal((await exportFile(deck.id, 'csv')).status, 400);
+    deck.document.pages[0].nodes.push({ id: 'deck-table', type: 'table', name: 'Budget', x: 0, y: 0, width: 300, height: 100, data: { table: { rows: [['Item', 'Cost'], ['Design', '1200']] } } });
+    deck.revision = 2; await save(deck);
+    const csv = await exportFile(deck.id, 'csv', 3); assert.equal(csv.status, 200, await csv.clone().text());
+    assert.equal(csv.headers.get('content-type'), 'text/csv; charset=utf-8'); assert.match(csv.headers.get('content-disposition')!, /\.csv"$/); assert.equal(csv.headers.get('x-export-cache'), null);
+    assert.equal(await csv.text(), 'Item,Cost\r\nDesign,1200\r\n');
+    const xlsx = await exportFile(deck.id, 'xlsx', 3); assert.equal(xlsx.status, 200, await xlsx.clone().text());
+    assert.equal(xlsx.headers.get('content-type'), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); assert.match(xlsx.headers.get('content-disposition')!, /\.xlsx"$/);
+    const sheet = await (await JSZip.loadAsync(await xlsx.arrayBuffer())).file('xl/worksheets/sheet1.xml')!.async('string');
+    assert.ok(sheet.includes('<t xml:space="preserve">Design</t>') && sheet.includes('<v>1200</v>'));
     const scene = await create(createDocument('3d', 'Textured animation'));
     const asset = await upload(scene.id); scene.document.assets.push(asset);
     const node = scene.document.pages[0].nodes.find(n => n.type === 'model3d')!;

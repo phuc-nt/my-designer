@@ -25,6 +25,17 @@ guessing, and `bin/dsa <group> <cmd> --help` when in doubt).
 Read [layout-and-quality.md](references/layout-and-quality.md) once for any
 2D kind. Every kind shares the workflow below.
 
+**When a sibling kit fits better.** Use my-designer when the human will
+review the result visually in the browser, when it moves (timeline, video),
+is 3D, or ships as web/PDF/PNG/SVG. When the deliverable is a PowerPoint
+file the human will keep editing in PowerPoint or Keynote and nobody needs
+the canvas, use `~/workspace/my-pptx-generator` (deck JSON → PPTX, no
+server). When it is a spreadsheet or a grid form (cells, merges, print
+layout), use `~/workspace/my-excel-generator` (region JSON → xlsx). Here,
+`table` nodes cover tables *inside* a design and export as native PowerPoint
+tables, `xlsx` (one sheet per page) or `csv` (first table on a page); they
+are not a spreadsheet engine.
+
 ## Workflow
 
 ```sh

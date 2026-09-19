@@ -18,7 +18,7 @@ function luminance(hex: string): number | null {
   return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
 }
 const CONTAINER_TYPES = new Set(['frame', 'shape', 'component']);
-const CONTENT_TYPES = new Set(['text', 'image', 'chart', 'icon', 'video']);
+const CONTENT_TYPES = new Set(['text', 'image', 'chart', 'table', 'icon', 'video']);
 const EDGE_KINDS = new Set(['web', 'slides', 'report']);
 const isBackdrop = (node: DesignNode) => (node.type === 'frame' || node.type === 'shape') && node.style?.shape !== 'line' && (node.opacity === undefined || node.opacity >= 1);
 const isContainer = (node: DesignNode) => CONTAINER_TYPES.has(node.type) && node.style?.shape !== 'line' && node.width >= 24 && node.height >= 24;

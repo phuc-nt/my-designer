@@ -28,6 +28,7 @@ Output is JSON on stdout; errors are JSON on stderr; exit codes 0 ok,
 | `fonts --query <text>` | bundled/Google font metadata |
 | `design-systems schema\|list\|get <id> [--system-version n]\|versions <id>` | reusable token/component libraries |
 | `design-systems import --folder <dir>` / `design-systems export <id> --folder <dir> [--system-version n]` | portable `manifest.json` + `DESIGN.md` + `tokens.css` folder ⇄ saved library; the compiled JSON stays the authority |
+| `design-systems extract --from <dir> [--output <folder>] [--id slug] [--name n] [--import]` | derive that folder from a codebase: CSS/SCSS custom properties (shadcn `h s% l%` triplets and `var()` chains resolved), `tailwind.config.*` (`colors`, `fontFamily`, `borderRadius`, `spacing`, regex-parsed, never executed) and an existing `DESIGN.md`; writes to `<dir>/design-system` by default and reports `tokens`, `missing`, `findings`. `--import` saves it when the compile guard passes; otherwise fix `tokens.css` and run `import --folder` |
 
 ## Projects
 
@@ -82,7 +83,7 @@ projects export <id> --format F [--output f] [--page <index>] [--revision n]
 render --file doc.json --format json|html|svg [--output f] [--page i] [--time s]
 ```
 
-Formats: `json html svg png pdf pptx webm mp4 react glb gltf motion
+Formats: `json html svg png pdf pptx xlsx csv webm mp4 react glb gltf motion
 png-sequence spritesheet scene-angles editable-scene`. Binary formats need
 `--output`. `--start/--end/--fps` drive frame/video exports;
 `--review-samples` and `--start/--end` drive `scene-angles`; `--node` is
@@ -102,7 +103,14 @@ resolved positions, and `page.notes` become speaker notes. Icons, 3D, boards,
 artwork, characters, video/audio placeholders and live artifacts are
 rasterised per layer and listed in that slide's notes. Pages with React
 components or a 3D scene are rendered as one picture. `--rasterize` renders
-every slide as one picture (exact but not editable).
+every slide as one picture (exact but not editable). `table` nodes become
+native PowerPoint tables (merged cells, header fill, borders).
+
+`xlsx` and `csv` come straight from `table` nodes without a browser: `xlsx`
+writes one sheet per page that has tables (each table titled by its node
+name, spans merged, numeric text stored as numbers), `csv` writes the first
+table on `--page`. Both answer `unsupported_export` (400) when there is no
+table to export. Neither is cached.
 
 ## Assets
 

@@ -10,7 +10,7 @@ Use fixed page dimensions suited to the delivery screen. Establish repeated titl
 
 ## Suitable elements and taste
 
-Use editable text for headlines and takeaways, shapes for relationships, images for real evidence, and charts only with verified values and labels. The basic chart node is a bar chart using `data.labels` and `data.values`; do not imply arbitrary chart types. Keep source labels legible when needed. Put speaker context into page `notes` and verify whether the chosen delivery format carries it.
+Use editable text for headlines and takeaways, shapes for relationships, images for real evidence, and charts only with verified values and labels. The basic chart node is a bar chart using `data.labels` and `data.values`; do not imply arbitrary chart types. Use a `table` node (`blocks get table`; `data.table.rows`, spans, header rows) for real tabular content: it renders as a grid and exports as a native PowerPoint table, not a picture. Keep source labels legible when needed. Put speaker context into page `notes` and verify whether the chosen delivery format carries it.
 
 Prefer strong scale contrast and generous spacing over a wall of tiny bullets. Repeat typography and alignment across the deck, with controlled variation for chapter breaks. Let diagrams explain the claim instead of adding decorative machinery. Use the user's brand and exact wording; treat your aesthetic preferences as recommendations.
 

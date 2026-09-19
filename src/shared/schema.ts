@@ -7,6 +7,7 @@ import { characterErrors, instanceErrors } from './character-validation';
 import { layoutSchema, sizingSchema, componentSchema, interactionSchema, timelineSchema, sceneObjectSchema, sceneSchema } from './design-capabilities';
 import { liveArtifactSchema } from './live-artifact';
 import { commentsSchema } from './comments';
+import { tableDataSchema } from './table';
 
 export const kinds = ['web', 'slides', 'report', 'wireframe', '3d', 'video'] as const;
 export type ProjectKind = typeof kinds[number];
@@ -27,7 +28,7 @@ export const themeSchema = z.object({
   spacing: z.array(finite.min(0).max(1000)).max(32), radius: finite.min(0).max(1000)
 });
 export const nodeSchema = z.object({
-  id, type: z.enum(['frame', 'group', 'component', 'text', 'image', 'shape', 'icon', 'chart', 'model3d', 'video', 'audio', 'board', 'artwork', 'character']),
+  id, type: z.enum(['frame', 'group', 'component', 'text', 'image', 'shape', 'icon', 'chart', 'table', 'model3d', 'video', 'audio', 'board', 'artwork', 'character']),
   name: z.string().max(200), x: coordinate, y: coordinate, width: dimension, height: dimension,
   rotation: finite.min(-36000).max(36000).optional(), opacity: finite.min(0).max(1).optional(),
   layout: layoutSchema.optional(), sizing: sizingSchema.optional(), position: z.enum(['flow', 'absolute']).optional(),
@@ -82,6 +83,7 @@ export const documentSchema = z.discriminatedUnion('schemaVersion', [legacyDocum
         if(node.data?.audioEvent!==undefined&&(typeof node.data.audioEvent!=='string'||node.data.audioEvent.length>120))ctx.addIssue({code:'custom',message:'Audio event must be a label of at most 120 characters'});
       }
       if(node.type==='character' && !node.character) ctx.addIssue({code:'custom',message:'Character node needs instance settings'});
+      if (node.type === 'table') { const table = tableDataSchema.safeParse(node.data?.table); if (!table.success) ctx.addIssue({ code: 'custom', message: `Table node ${node.id} needs data.table with rows of cells: ${table.error.issues[0]?.message ?? 'invalid'}` }); }
       if(node.character) {
         const c=characters.get(node.character.characterId);
         if(node.type!=='character'||!c) ctx.addIssue({code:'custom',message:'Invalid character instance'});

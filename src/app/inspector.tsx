@@ -26,6 +26,44 @@ import { ArrangeButtons } from './arrange-buttons';
 import { CommentsPanel } from './comments-panel';
 import { addComment, setCommentResolved } from '../shared/comments';
 import type { Alignment, Axis } from '../shared/alignment';
+import { defaultTable, normalizeCell, tableColumnCount, tableOf, type TableCell, type TableData } from '../shared/table';
+
+/** Rows × columns of inputs for a table node; every edit writes `data.table` back through `update`. */
+function TableEditor({ node, update }: { node: DesignNode; update: (partial: Partial<DesignNode>) => void }) {
+  const table = tableOf(node) ?? defaultTable();
+  const columns = tableColumnCount(table);
+  const save = (next: TableData) => update({ data: { ...node.data, table: next } });
+  const setCell = (r: number, c: number, text: string) => {
+    const rows: TableCell[][] = table.rows.map(row => [...row]);
+    while (rows[r].length <= c) rows[r].push('');
+    const cell = rows[r][c];
+    rows[r][c] = typeof cell === 'string' ? text : { ...cell, text };
+    save({ ...table, rows });
+  };
+  const addRow = () => table.rows.length < 200 && save({ ...table, rows: [...table.rows, Array.from({ length: columns }, () => '')] });
+  const removeRow = () => table.rows.length > 1 && save({ ...table, rows: table.rows.slice(0, -1) });
+  const addColumn = () => columns < 50 && save({ ...table, rows: table.rows.map(row => [...row, '']), columnWidths: table.columnWidths?.length ? [...table.columnWidths, table.columnWidths[table.columnWidths.length - 1]] : undefined });
+  const removeColumn = () => columns > 1 && save({ ...table, rows: table.rows.map(row => row.slice(0, Math.max(1, row.length - 1))), columnWidths: table.columnWidths?.slice(0, -1) });
+  return (
+    <section>
+      <h3>Table</h3>
+      <div className="button-row">
+        <button className="button small" onClick={addRow} type="button">+ Row</button>
+        <button className="button small" onClick={removeRow} type="button" disabled={table.rows.length <= 1}>− Row</button>
+        <button className="button small" onClick={addColumn} type="button">+ Column</button>
+        <button className="button small" onClick={removeColumn} type="button" disabled={columns <= 1}>− Column</button>
+      </div>
+      <Field label="Header rows" hint="Rows drawn bold on the header fill">
+        <input type="number" min={0} max={Math.min(10, table.rows.length)} value={table.headerRows ?? 1} onChange={e => save({ ...table, headerRows: Math.max(0, Math.min(10, Number(e.target.value) || 0)) })} />
+      </Field>
+      <div className="table-editor" style={{ display: 'grid', gridTemplateColumns: `repeat(${columns}, minmax(48px, 1fr))`, gap: 4 }}>
+        {table.rows.map((row, r) => Array.from({ length: columns }, (_, c) => (
+          <input key={`${r}:${c}`} aria-label={`Row ${r + 1} column ${c + 1}`} value={normalizeCell(row[c]).text} onChange={e => setCell(r, c, e.target.value)} style={{ fontWeight: r < (table.headerRows ?? 1) ? 600 : 400, minWidth: 0 }} />
+        )))}
+      </div>
+    </section>
+  );
+}
 
 type Props = {
   onTexture?: (file: File, nodeId: string) => Promise<void>;
@@ -546,6 +584,9 @@ export function Inspector({
                 />
               </Field>
             </section>
+          )}
+          {node.type === "table" && (
+            <TableEditor node={node} update={update} />
           )}
           {liveData && (
             <section>
