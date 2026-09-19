@@ -72,23 +72,93 @@ export function interpolateNode(node: DesignNode, doc: DesignDocument, time = 0)
   }
   return result;
 }
+// Text measurement. Widths are summed per character as multiples of the font
+// size: Latin averages 0.52 em, East Asian Wide/Fullwidth characters a full
+// em, combining marks nothing (they stack on the glyph before them). Counting
+// characters instead believed twice as many Japanese characters fit per line
+// and measured decomposed (NFD) Vietnamese ~24% wider than the same text in
+// NFC — both surfaced as wrong `text-overflow` findings and mis-wrapped SVG.
+export const LATIN_ADVANCE = 0.52;
+export const WIDE_ADVANCE = 1;
+// East Asian Wide (W) and Fullwidth (F): Hangul jamo leads, CJK punctuation and
+// symbols, kana, CJK ideographs (incl. extension A and the SIP), Yi, Hangul
+// syllables, compatibility ideographs, vertical/small/fullwidth forms.
+const WIDE = /[ᄀ-ᅟ⺀-〾ぁ-㏿㐀-䶿一-鿿ꀀ-꓏가-힣豈-﫿︐-︙︰-﹯＀-｠￠-￦]|[\u{20000}-\u{3FFFD}]/u;
+// `\p{M}` plus the Hangul vowel/trailing jamo, which compose onto the leading
+// consonant but are not marks.
+const COMBINING = /\p{M}|[ᅠ-ᇿힰ-퟿]/u;
+// Kinsoku shori: characters that may not open a line (closing brackets, the
+// Japanese comma and full stop, small kana, the long-vowel mark) and those
+// that may not end one (opening brackets).
+const NO_LINE_START = /[、。，．・：；？！ー〜々ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ）］｝〉》」』】〕”’)\]}»]/;
+const NO_LINE_END = /[（［｛〈《「『【〔“‘(\[{«]/;
+
+/** Advance of one character in em. */
+export function charAdvance(ch: string): number {
+  if (COMBINING.test(ch)) return 0;
+  return WIDE.test(ch) ? WIDE_ADVANCE : LATIN_ADVANCE;
+}
+/** Estimated width of a single line of text in px at `size` px. */
+export function measureText(value: string, size: number): number {
+  let em = 0;
+  for (const ch of value) em += charAdvance(ch);
+  return em * size;
+}
+// Break candidates: Latin runs stay whole so they wrap on spaces; each wide
+// character is its own token because Japanese has no spaces to wrap on.
+function textTokens(paragraph: string): string[] {
+  const tokens: string[] = [];
+  let latin = '';
+  for (const ch of paragraph) {
+    if (COMBINING.test(ch) && (latin || tokens.length)) {
+      if (latin) latin += ch; else tokens[tokens.length - 1] += ch;
+    } else if (WIDE.test(ch)) {
+      if (latin) { tokens.push(latin); latin = ''; }
+      tokens.push(ch);
+    } else if (/\s/.test(ch)) {
+      if (latin) { tokens.push(latin); latin = ''; }
+      if (tokens[tokens.length - 1] !== ' ') tokens.push(' ');
+    } else latin += ch;
+  }
+  if (latin) tokens.push(latin);
+  return tokens;
+}
 export function wrappedLines(value: string, width: number, size: number): string[] {
-  const capacity = Math.max(1, Math.floor(width / (size * 0.52)));
+  const limit = Math.max(width, 1);
   const lines: string[] = [];
-  for (const paragraph of value.split('\n')) {
+  for (const paragraph of value.replace(/\r\n/g, '\n').split('\n')) {
     if (!paragraph) { lines.push(''); continue; }
-    let line = '';
-    for (const word of paragraph.split(/\s+/)) {
-      if (line && line.length + word.length + 1 > capacity) { lines.push(line); line = ''; }
-      if (word.length > capacity) {
-        if (line) { lines.push(line); line = ''; }
-        for (let pos = 0; pos < word.length; pos += capacity) {
-          const chunk = word.slice(pos, pos + capacity);
-          if (pos + capacity < word.length) lines.push(chunk); else line = chunk;
+    let line = '', lineWidth = 0;
+    for (const token of textTokens(paragraph)) {
+      if (token === ' ') {
+        if (line) { line += ' '; lineWidth += LATIN_ADVANCE * size; }
+        continue;
+      }
+      const tokenWidth = measureText(token, size);
+      if (tokenWidth > limit) {
+        // A single token wider than the box: hard-split it, never between a
+        // character and its combining marks (advance 0).
+        if (line) { lines.push(line.trimEnd()); line = ''; lineWidth = 0; }
+        let chunk = '', chunkWidth = 0;
+        for (const ch of token) {
+          const advance = charAdvance(ch) * size;
+          if (advance > 0 && chunkWidth + advance > limit && chunk) { lines.push(chunk); chunk = ''; chunkWidth = 0; }
+          chunk += ch;
+          chunkWidth += advance;
         }
-      } else line += (line ? ' ' : '') + word;
+        line = chunk; lineWidth = chunkWidth;
+        continue;
+      }
+      if (line && lineWidth + tokenWidth > limit) {
+        if (NO_LINE_START.test(token)) { line += token; lineWidth += tokenWidth; continue; }
+        let carry = '';
+        while (line && NO_LINE_END.test(line[line.length - 1]!)) { carry = line[line.length - 1] + carry; line = line.slice(0, -1); }
+        lines.push(line.trimEnd() || line);
+        line = carry; lineWidth = measureText(carry, size);
+      }
+      line += token; lineWidth += tokenWidth;
     }
-    lines.push(line);
+    lines.push(line.trimEnd());
   }
   return lines;
 }
