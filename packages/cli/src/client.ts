@@ -44,7 +44,7 @@ export class Client {
   private timeout: number;
   constructor(options: ClientOptions) {
     let base: URL;
-    try { base = new URL(options.url ?? process.env.DESIGN_STUDIO_URL ?? 'https://studio.agentkit.best'); }
+    try { base = new URL(options.url ?? process.env.DESIGN_STUDIO_URL ?? 'http://localhost:8787'); }
     catch { throw new CliError('invalid_url', 'Design Studio URL must be a valid HTTP(S) origin.'); }
     if (base.username || base.password || base.search || base.hash || base.pathname !== '/' ||
         (base.protocol !== 'https:' && !(base.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(base.hostname)))) {
