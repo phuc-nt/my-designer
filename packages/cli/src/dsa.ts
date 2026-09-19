@@ -12,6 +12,8 @@ import { basename, extname } from 'node:path';
 import { z } from 'zod';
 import { documentSchema, kinds, type DesignDocument, type Project, type ProjectKind } from '../../../src/shared/schema';
 import { blocks, createBlock, createDocument, templates, themes } from '../../../src/shared/catalog';
+import { promptTemplates } from '../../../src/shared/prompt-templates';
+import { createMotionDocument, motionTemplates } from '../../../src/shared/motion-templates';
 import { duplicateDocument, mutateDocument, operationsSchema } from '../../../src/shared/operations';
 import { renderHtml, renderSvg } from '../../../src/shared/render';
 import { interviewSchema, answerSchema, scopeSchema } from '../../../src/shared/brief';
@@ -61,7 +63,13 @@ program.command('health').description('Check server health without authenticatio
 program.command('config').description('Read public server configuration; does not save credentials').action(wrap(() => client().json('/api/config', 'GET', undefined, false)));
 program.command('schema').description('Print shared JSON Schema; semantic ID/parent/timeline checks also run on writes')
   .option('--operations', 'Print targeted operation schema').action(wrap(options => ({ schema: z.toJSONSchema(options.operations ? operationsSchema : documentSchema), semanticValidation: 'Writes additionally validate unique IDs, same-page acyclic parents, and timeline references.' })));
-program.command('catalog').description('List bundled themes, templates, and reusable blocks').action(wrap(() => ({ themes, templates, blocks })));
+program.command('catalog').description('List bundled themes, templates, reusable blocks and generation prompts').action(wrap(() => ({ themes, templates, blocks, prompts: promptTemplates })));
+const promptGroup = program.command('prompts').description('Inspect reusable generation prompts');
+promptGroup.command('list').option('--kind <kind>', 'image or motion').action(wrap(options => ({ prompts: options.kind ? promptTemplates.filter(p => p.kind === options.kind) : promptTemplates })));
+promptGroup.command('get <id>').action(wrap(id => ({ prompt: selection(promptTemplates, id) })));
+const motionGroup = program.command('motion-template').description('Compile validated motion primitives into timeline keyframes');
+motionGroup.command('list').action(wrap(() => ({ templates: motionTemplates.map(t => ({ id: t.id, name: t.name })) })));
+motionGroup.command('instantiate <id>').option('--name <name>', 'Document name', 'Motion template').option('--output <file>', 'Write JSON to file; - for stdout').action(async (id, options) => { const document = createMotionDocument(id, options.name); await outputFile(options.output, JSON.stringify(document, null, 2)); });
 const themeGroup = program.command('themes').description('Inspect design tokens and palettes');
 themeGroup.command('list').action(wrap(() => ({ themes })));
 themeGroup.command('get <id>').action(wrap(id => ({ theme: selection(themes, id) })));

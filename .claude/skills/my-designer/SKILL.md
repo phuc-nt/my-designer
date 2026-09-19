@@ -111,7 +111,15 @@ whose `src` is that `url` (images, video, audio, GLB). `assets list` /
 one asset for another of the same media kind. Provider keys are configured
 by the human (`providers set <id> --key-env VAR`); `generate`, `brief
 interview` and `media generate` fail with `provider_unconfigured` until
-then — say so, do not treat it as broken.
+then — say so, do not treat it as broken. `bin/dsa prompts list --kind
+image` holds ready prompts with a provider, model and aspect ratio; keep
+the entry's attribution if you quote it.
+
+A **live artifact** is a node whose `data.live` is `{renderer, params}`
+(`renderer` ∈ `kpi` `stat-list` `progress`, `params` scalar). It re-renders
+from its params, the human tweaks them in the Inspector, you change them
+with `update-node`; a malformed `data.live` is rejected on write. The
+`live-kpi` block (`blocks get live-kpi`) is the starting point.
 
 ## Big JSON without flooding your context
 

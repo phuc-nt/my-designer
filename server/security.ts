@@ -103,7 +103,8 @@ export async function authenticate(c: Context<Env>) {
     c.set("user", user);
     c.set("authMethod", user ? "session" : null);
   }
-  if (!c.get("user") && c.env.LOCAL_USER) {
+  // `c.env` is undefined when a test calls `app.request()` without bindings.
+  if (!c.get("user") && c.env?.LOCAL_USER) {
     c.set("user", await localUser(c));
     c.set("authMethod", "local");
   }

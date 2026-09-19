@@ -43,6 +43,13 @@ keyframe uses its own outgoing easing; sparse channels hold the node's
 static value. `clipName` binds a track to a 3D preset clip
 (`clip` scene command) so it loops for the clip's `start–end`.
 
+For a stock opening you do not have to hand-write keyframes: `bin/dsa
+motion-template list` names four validated primitives (`reveal`, `stagger`,
+`kinetic-type`, `chart-race`); `bin/dsa motion-template instantiate reveal
+--output m.json` compiles one into a `video` document whose timeline only
+uses the keys above, and `projects import --file m.json` saves it. Treat
+the result as a starting point to edit, not a finished piece.
+
 Operations (all in one `document patch`, revision-checked):
 
 | op | fields |

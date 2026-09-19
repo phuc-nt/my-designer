@@ -23,6 +23,8 @@ Studio AI mentions a tool name.
 | `inspect_motion` | `motion <id> [--node id] [--time s]` |
 | `start_operation` / `get_operation` / `get_operation_result`, `studio_start_save` / `studio_reconcile_save` | `operations start` / `status` / `result` |
 | `list_design_systems`, `get_design_system`, `create_design_system`, `update_design_system`, `list_design_system_versions`, `apply_design_system`, `insert_design_system_item` | `design-systems list\|get\|create\|update\|versions\|apply\|insert` |
+| `import_design_system_folder` | `design-systems import --folder <dir>` (and `export` for the reverse) |
+| `list_prompt_templates`, `get_prompt_template` | `prompts list [--kind k]`, `prompts get <id>` |
 | `list_google_fonts` | `fonts --query` |
 | `list_provider_connections`, `list_provider_models` | `providers list`, `providers models <p>` |
 | `get_observability_summary`, `list_activity_events`, `get_activity_trace` | `observability summary\|events\|trace` |

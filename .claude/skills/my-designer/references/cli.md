@@ -19,13 +19,15 @@ Output is JSON on stdout; errors are JSON on stderr; exit codes 0 ok,
 | `schema` | document JSON Schema (large — redirect to a file) |
 | `schema --operations` | targeted-operation shapes ([operations.md](operations.md)) |
 | `scene schema` | **separate** schema of the 29 `scene command` actions (see `../../my-designer-3d/`) |
-| `catalog` | themes + templates + blocks in one call |
+| `catalog` | themes + templates + blocks + prompts in one call |
+| `prompts list [--kind image\|motion]` / `prompts get <id>` | ready generation prompts with provider, model and aspect ratio; pass `.prompt.prompt` to `media generate --prompt` |
 | `themes list` / `themes get <id>` | |
 | `templates list [--kind k]` / `templates get <id>` | |
 | `templates instantiate <id> [--name n] [--theme id] [--output f\|-]` | fresh IDs, document JSON, not saved |
 | `blocks list` / `blocks get <id> [--offset px]` | reusable node groups; `get` returns `{nodes}` to feed `add-node` or use `insert-block` |
 | `fonts --query <text>` | bundled/Google font metadata |
 | `design-systems schema\|list\|get <id> [--system-version n]\|versions <id>` | reusable token/component libraries |
+| `design-systems import --folder <dir>` / `design-systems export <id> --folder <dir> [--system-version n]` | portable `manifest.json` + `DESIGN.md` + `tokens.css` folder ⇄ saved library; the compiled JSON stays the authority |
 
 ## Projects
 
@@ -97,6 +99,7 @@ server `export --format html` embeds the real interactive viewer.
 | `scene command <id> --page <pageId> --revision n --file cmd.json [--apply]` | preview unless `--apply` |
 | `scene schema` | the 29 command shapes |
 | `motion <id> [--character id] [--node id] [--time s] [--review-samples n]` | 2D character rigs / pose sampling |
+| `motion-template list` / `motion-template instantiate <id> [--name n] [--output f\|-]` | `reveal` `stagger` `kinetic-type` `chart-race` → a video document with compiled keyframes, not saved (see `../../my-designer-motion/`) |
 
 ## Brief, generation, operations
 

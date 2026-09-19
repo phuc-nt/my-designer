@@ -16,7 +16,7 @@ This reference follows the current [CLI source](../packages/cli/src/dsa.ts) and 
 | --- | --- |
 | `health`, `config` | Public health and configuration; no credential persistence |
 | `schema [--operations]` | JSON Schema from the shared validators; semantic checks still run on writes |
-| `catalog`, `themes list/get`, `templates list/get/instantiate`, `blocks list/get` | Bundled design resources; instantiated IDs are unique |
+| `catalog`, `themes list/get`, `templates list/get/instantiate`, `blocks list/get`, `prompts list/get` | Bundled design resources and reusable generation prompts; instantiated IDs are unique |
 | `projects list/get/create/rename/delete/clone` | Persisted project management; clone copies owned asset bytes |
 | `projects paint ID --file command.json` | Server-rendered stroke/fill using observed revision, painting generation and exact retry ID |
 | `projects document get/put/patch` | Canonical document reads and atomic expected-revision writes |
@@ -29,9 +29,10 @@ This reference follows the current [CLI source](../packages/cli/src/dsa.ts) and 
 | `assets list/upload/download` | Authenticated asset storage; node placement is a separate document edit |
 | `generate` | Real provider document proposal; no implicit save |
 | `fonts --query`, `providers models PROVIDER --query` | Search catalog metadata with explicit live/cache/fallback provenance |
-| `design-systems schema/list/get/versions/create/update/apply/insert/remove` | Shared reusable libraries, immutable versions and conflict-checked project writes |
+| `design-systems schema/list/get/versions/create/update/apply/insert/remove/import/export` | Shared reusable libraries, immutable versions and conflict-checked project writes; `import`/`export` round-trip portable `DESIGN.md` + `tokens.css` + `manifest.json` folders |
 | `providers list/set/remove` | Masked configuration; provider secret from environment/stdin |
 | `tokens list/create/revoke` | Token metadata and lifecycle; new token returned once |
+| `motion-template list/instantiate` | Compile a validated motion primitive (`reveal`/`stagger`/`kinetic-type`/`chart-race`) into timeline keyframes and a video document |
 | `publish`, `unpublish`, `preview`, `unpreview`, `share`, `unshare` | Public immutable snapshot creation and removal; preview/share are naming-specific aliases for the same public snapshot contract, and each removal alias removes all public snapshots |
 | `media generate/status` | OpenAI image/edit/speech; fal image, video/edit, music/effects, and source-audio jobs |
 | `google-slides` | Server export using a short-lived Google OAuth token |
@@ -105,6 +106,8 @@ WebMCP adds `studio_capabilities` and `studio_apply_operations` for the open doc
 Discover definitions with `dsa design-systems schema`. Create/update accepts `--file`; update requires `--system-version` with the version actually read. Pinned get/apply/insert also accept `--system-version`. Apply/insert require `--revision` for the target project; insert additionally needs `--page` and `--item`. A stale library or project returns a conflict. Do not replace the observed version with a later one without reconciling the user's changes.
 
 Network MCP exposes the same library operations through [design-system-tools.ts](../server/design-system-tools.ts). Projects embed applied tokens/components and pin the saved version. Library definitions support reusable page compositions with remapped IDs. Private project assets must be embedded or replaced with portable references before library capture. Deleting a library leaves embedded project designs intact.
+
+A design system can also be authored as a portable folder — `manifest.json` (id/name/description/system/source), `DESIGN.md` (agent-facing prose) and `tokens.css` (compiled custom properties) — and imported with `dsa design-systems import --folder <dir>`. `dsa design-systems export <id> --folder <dir>` reverses it. The compiled versioned JSON remains the runtime authority; the folder is an ingest surface, not a second truth.
 
 ## Capability boundaries
 
