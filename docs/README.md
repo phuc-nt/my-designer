@@ -18,6 +18,7 @@ Start here when maintaining Design Studio AI. The [root README](../README.md) in
 | Connect an external agent through the CLI (MCP/WebMCP sections describe upstream; see the in-repo skills) | [Agent access](agents.md) |
 | Understand provider setup and source-media constraints | [Providers](providers.md) |
 | Maintain the public documentation portal, beginner guide, and discovery output | [Web documentation](web-documentation.md) |
+| See what was ported from upstream and the generators, and what comes next | [Roadmap](roadmap.md) |
 
 [Agent access](agents.md) documents using the product. The in-repo skills — [my-designer](../.claude/skills/my-designer/SKILL.md), [my-designer-3d](../.claude/skills/my-designer-3d/SKILL.md), [my-designer-motion](../.claude/skills/my-designer-motion/SKILL.md) — guide agents creating designs in it. Repository coding-agent behavior belongs in [AGENTS.md](../AGENTS.md).
 
