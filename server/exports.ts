@@ -69,24 +69,59 @@ export async function embeddedDocumentFonts(doc: DesignDocument) {
 exportRoutes.post('/:id/export', async c => renderProjectExport(c, c.req.param('id'), await c.req.json()));
 
 export type SnapshotAssetResolver = (url: string) => Promise<{bytes: Uint8Array; mimeType: string}>;
+/** Cheap formats render straight from the document; everything else is worth caching per revision. */
+const uncachedFormats = new Set(['json', 'html', 'svg']);
+const exportExtension = (format: keyof typeof mimeTypes) => format === 'editable-scene' ? 'json' : ['react', 'motion', 'png-sequence', 'spritesheet', 'scene-angles'].includes(format) ? 'zip' : format;
+export function exportHeaders(name: string, format: keyof typeof mimeTypes, cache?: 'hit' | 'miss') {
+  return { 'Content-Type': mimeTypes[format], 'Content-Disposition': `attachment; filename="${name.replace(/[^a-zA-Z0-9_-]/g, '_')}.${exportExtension(format)}"`, 'Cache-Control': 'private,no-store', 'X-Content-Type-Options': 'nosniff', ...(cache ? { 'X-Export-Cache': cache } : {}) };
+}
+async function exportCacheKey(projectId: string, revision: number, options: Record<string, unknown>) {
+  const { expectedRevision: _ignored, ...rest } = options;
+  const canonical = JSON.stringify(Object.fromEntries(Object.entries(rest).filter(([, value]) => value !== undefined).sort(([a], [b]) => a.localeCompare(b))));
+  const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical)))).map(v => v.toString(16).padStart(2, '0')).join('');
+  return `exports/${projectId}/${revision}/${digest.slice(0, 32)}`;
+}
+/** Drop cached exports for a project: every revision, or only those other than `keepRevision`. */
+export async function purgeExportCache(bindings: Bindings, projectId: string, keepRevision?: number) {
+  const query = keepRevision === undefined
+    ? bindings.DB.prepare('SELECT storage_key FROM export_cache WHERE project_id=?').bind(projectId)
+    : bindings.DB.prepare('SELECT storage_key FROM export_cache WHERE project_id=? AND revision<>?').bind(projectId, keepRevision);
+  for (const entry of (await query.all<{ storage_key: string }>()).results) {
+    await bindings.ASSETS_BUCKET.delete(entry.storage_key);
+    await bindings.DB.prepare('DELETE FROM export_cache WHERE storage_key=?').bind(entry.storage_key).run();
+  }
+}
 export async function renderProjectExport(c: Context<Env>, projectId: string, input: unknown, thumbnail = false, snapshot?: Awaited<ReturnType<typeof projectRow>>, inspection?: InspectionRenderOptions) {
   return withSpan(c, {kind:'export',action:thumbnail?'thumbnail.render':'export.render'}, async span => {
     const owned = await projectRow(c, projectId), row = snapshot ?? owned, options = optionsSchema.parse(input);
     if (options.expectedRevision && options.expectedRevision !== row.revision) fail(409, 'revision_conflict', 'Save or reload the current revision before export.');
     span.event.projectId = row.id; span.event.action = thumbnail ? 'thumbnail.render' : `export.${options.format}`;
     await updateEvent(c.env, span.event);
+    // A saved revision plus identical options renders byte-identical output, so reuse what a previous call produced.
+    const cacheKey = !thumbnail && !inspection && !snapshot && !uncachedFormats.has(options.format) ? await exportCacheKey(row.id, row.revision, options) : undefined;
+    if (cacheKey) {
+      const cached = await c.env.DB.prepare('SELECT bytes FROM export_cache WHERE storage_key=? AND project_id=?').bind(cacheKey, row.id).first<{ bytes: number }>();
+      const object = cached ? await c.env.ASSETS_BUCKET.get(cacheKey) : null;
+      if (cached && object) { span.set({ outputBytes: cached.bytes }); return new Response(await object.arrayBuffer(), { headers: exportHeaders(row.name, options.format, 'hit') }); }
+    }
     let doc = documentSchema.parse(JSON.parse(row.document));
     if (options.format !== 'json') {
       if (options.format !== 'editable-scene') doc = publicCreativeProjection(upgradeDocument(doc));
       await validateAssets(c, doc, row.id);
     }
-    return renderSnapshotExport(c.env, row.name, doc, options, async url => {
+    const response = await renderSnapshotExport(c.env, row.name, doc, options, async url => {
       const asset = await c.env.DB.prepare('SELECT storage_key,mime_type FROM assets WHERE id=? AND user_id=?').bind(url.split('/').pop(), owner(c)).first<{storage_key:string;mime_type:string}>();
       if (!asset) fail(400, 'missing_asset', 'A referenced asset is unavailable.');
       const object = await c.env.ASSETS_BUCKET.get(asset.storage_key);
       if (!object) fail(400, 'missing_asset', 'An asset could not be loaded.');
       return {bytes:new Uint8Array(await object.arrayBuffer()),mimeType:asset.mime_type};
     }, {thumbnail, inspection, onBytes: outputBytes => span.set({outputBytes}), beforeRender: () => rateLimit(c, `${thumbnail?'thumbnail':'export'}:${owner(c)}`, thumbnail?60:20)});
+    if (!cacheKey || response.status !== 200) return response;
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    await c.env.ASSETS_BUCKET.put(cacheKey, bytes, { httpMetadata: { contentType: mimeTypes[options.format] } });
+    await c.env.DB.prepare('INSERT OR REPLACE INTO export_cache (storage_key,project_id,revision,content_type,bytes,created_at) VALUES (?,?,?,?,?,?)').bind(cacheKey, row.id, row.revision, mimeTypes[options.format], bytes.byteLength, new Date().toISOString()).run();
+    await purgeExportCache(c.env, row.id, row.revision);
+    return new Response(bytes, { headers: exportHeaders(row.name, options.format, 'miss') });
   });
 }
 
@@ -104,8 +139,7 @@ export async function renderSnapshotExport(bindings: Bindings, name: string, doc
   if (options.format === 'react' && !['web', 'wireframe'].includes(doc.kind)) fail(400, 'unsupported_export', 'React source export is available for Web/App and wireframe projects.');
   if (['glb', 'gltf'].includes(options.format) && doc.pages[options.pageIndex].nodes.some(node=>node.character)) fail(400,'unsupported_export','Character motion uses the native motion package; GLB/glTF cannot preserve 2D rigs.');
   if (['glb', 'gltf'].includes(options.format) && !doc.pages[options.pageIndex].nodes.some(node => node.type === 'model3d')) fail(400, 'unsupported_export', 'Scene export requires a 3D object on the selected page.');
-  const extension = options.format==='editable-scene'?'json':['react','motion','png-sequence','spritesheet','scene-angles'].includes(options.format) ? 'zip' : options.format;
-  const headers = { 'Content-Type': mimeTypes[options.format], 'Content-Disposition': `attachment; filename="${name.replace(/[^a-zA-Z0-9_-]/g, '_')}.${extension}"`, 'Cache-Control': 'private,no-store', 'X-Content-Type-Options': 'nosniff' };
+  const headers = exportHeaders(name, options.format);
   if (options.format === 'json') { const output = JSON.stringify(doc, null, 2); hooks.onBytes?.(new TextEncoder().encode(output).length); return new Response(output, { headers }); }
   if (!['html', 'svg', 'react'].includes(options.format)) {
     const selectedPages = hooks.inspection ? hooks.inspection.pageIndices.map(index => doc.pages[index]) : options.format === 'pdf' || options.format === 'pptx' ? doc.pages : [doc.pages[options.pageIndex]];

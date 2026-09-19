@@ -409,9 +409,9 @@ projectRoutes.delete("/:id", async (c) => {
   // Close thumbnail publication before reading storage keys, so deletion cannot miss a late cover.
   await c.env.DB.prepare("UPDATE projects SET thumbnail_deleting=1 WHERE id=? AND user_id=?").bind(row.id, owner(c)).run();
   const assets = await c.env.DB.prepare(
-    "SELECT storage_key FROM assets WHERE project_id=? AND user_id=? UNION ALL SELECT storage_key FROM project_thumbnails WHERE project_id=? AND storage_key IS NOT NULL UNION ALL SELECT input_key FROM operation_jobs WHERE project_id=? UNION ALL SELECT result_key FROM operation_jobs WHERE project_id=? AND result_key IS NOT NULL",
+    "SELECT storage_key FROM assets WHERE project_id=? AND user_id=? UNION ALL SELECT storage_key FROM project_thumbnails WHERE project_id=? AND storage_key IS NOT NULL UNION ALL SELECT input_key FROM operation_jobs WHERE project_id=? UNION ALL SELECT result_key FROM operation_jobs WHERE project_id=? AND result_key IS NOT NULL UNION ALL SELECT storage_key FROM export_cache WHERE project_id=?",
   )
-    .bind(row.id, owner(c), row.id, row.id, row.id)
+    .bind(row.id, owner(c), row.id, row.id, row.id, row.id)
     .all<{ storage_key: string }>();
   await c.env.DB.prepare("DELETE FROM projects WHERE id=? AND user_id=?")
     .bind(row.id, owner(c))

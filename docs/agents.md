@@ -26,7 +26,8 @@ This reference follows the current [CLI source](../packages/cli/src/dsa.ts) and 
 | `observability summary/events/trace` | Owner-scoped activity, provider usage, and correlated spans; global reads require configured operator authorization |
 | `projects check` | Read-only preflight hints with exact layer IDs; inspect the actual preview too |
 | `projects inspect ID`, `projects overview` | Private saved-page, project contact-sheet, and workspace-cover PNGs with revision and pagination metadata |
-| `projects import/export`, `render` | Canonical JSON import; authenticated cloud export; offline JSON/HTML/SVG rendering |
+| `projects import/export`, `render` | Canonical JSON or page-folder import; authenticated cloud export, cached per saved revision (`X-Export-Cache`); offline JSON/HTML/SVG rendering |
+| `projects diff`, `projects document get --output-dir` | Structural diff of two documents (files or file vs live); one JSON file per page for targeted edits, reassembled by `put --dir` / `import --dir` |
 | `assets list/upload/download` | Authenticated asset storage; node placement is a separate document edit |
 | `generate` | Real provider document proposal; no implicit save |
 | `fonts --query`, `providers models PROVIDER --query` | Search catalog metadata with explicit live/cache/fallback provenance |
@@ -97,6 +98,8 @@ Run `inspect_design` (CLI `projects check`) after saving: findings point to spec
 For simultaneous human/agent edits, retain the document and revision you actually read. `projects document merge PROJECT_ID --file merge.json` accepts `{base,document,baseRevision}`; network MCP exposes `merge_design` and `get_design_changes`. Independent properties merge, while overlapping edits return conflict paths. Never alter the base or retry with an invented revision to bypass a conflict. The editor's Live mode displays saved changes without a reload and autosaves local edits. Turning Live off leaves explicit Save available.
 
 Review comments live in the document on layers and pages, so they share its revision and merge like any other field. The human adds them from the Inspector; unresolved layer comments show as a dot on the canvas. `projects comments PROJECT_ID --unresolved` lists open threads with their page and node IDs; `--add`, `--resolve` and `--reopen` write through the same revision-checked save. `projects check PROJECT_ID --file ops.json` previews design checks for a patch without saving it. Every document write accepts `?summary=1` (CLI `--summary`) to return the project summary plus the touched page and node IDs instead of the whole document.
+
+Large documents are easier to edit one page at a time: `projects document get PROJECT_ID --output-dir folder` writes `document.json` (everything but pages) and `pages/NN-<id>.json` in page order, and `document put --dir folder` or `import --dir folder` reassembles them, sorted by file name. `projects diff --from before.json --to after.json` (or one file against the live document with a project ID) reports added, removed and changed pages and nodes with the fields that differ, the same diff the summary receipts use. Revisions are not stored, so keep your own snapshot to diff against.
 
 The shared operation schema includes grouping/reparenting, structured page/node layout, track replacement/removal and keyframe upsert/removal. Component props, mesh/UV data, material settings, bones and weights use the same document validator as the browser. Discover exact fields from `/api/schema` or `dsa schema`; do not invent a separate scene format.
 

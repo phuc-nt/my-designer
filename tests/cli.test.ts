@@ -272,3 +272,47 @@ test('CLI previews checks for unsaved operations, manages comments and follows c
   assert.equal(single.revision, during.revision); assert.deepEqual(single.summary, ['no base document to compare against; pass --base or use --follow']);
   await json(['projects', 'delete', projectId]);
 });
+
+test('CLI round-trips a project through a page folder and diffs documents against files or the live project', async () => {
+  const created = await json(['projects', 'create', '--name', 'Folder deck', '--kind', 'slides', '--template', 'product-deck']);
+  const projectId = created.project.id as string, revision = created.project.revision as number, original = created.project.document;
+  assert.ok(original.pages.length >= 2, 'the template must have several pages for ordering to matter');
+  const folder = join(directory, 'folder-deck');
+  const written = await json(['projects', 'document', 'get', projectId, '--output-dir', folder]);
+  assert.equal(written.pages.length, original.pages.length); assert.match(written.pages[0], /^pages\/01-/);
+  assert.deepEqual(JSON.parse(await readFile(join(folder, 'document.json'), 'utf8')).pages, []);
+  assert.deepEqual((await readdir(join(folder, 'pages'))).sort(), written.pages.map((file: string) => basename(file)));
+  const both = await run(['projects', 'document', 'get', projectId, '--output', join(folder, 'x.json'), '--output-dir', folder]);
+  assert.equal(both.code, 1); assert.equal(JSON.parse(both.stderr).error.code, 'conflicting_options');
+
+  // Edit one page file, reimport the folder as a new project and put it back into the original: pages keep their order.
+  const secondFile = join(folder, written.pages[1]); const second = JSON.parse(await readFile(secondFile, 'utf8'));
+  second.name = 'Edited on disk'; await writeFile(secondFile, JSON.stringify(second));
+  const imported = await json(['projects', 'import', '--dir', folder, '--name', 'Folder deck copy']);
+  assert.equal(imported.project.name, 'Folder deck copy');
+  assert.deepEqual(imported.project.document.pages.map((page: any) => page.id), original.pages.map((page: any) => page.id));
+  assert.equal(imported.project.document.pages[1].name, 'Edited on disk');
+  const put = await json(['projects', 'document', 'put', projectId, '--dir', folder, '--revision', String(revision), '--summary']);
+  assert.equal(put.revision, revision + 1); assert.deepEqual(put.changed.pages, [original.pages[1].id]);
+  const neither = await run(['projects', 'document', 'put', projectId, '--revision', String(put.revision)]);
+  assert.equal(neither.code, 1); assert.equal(JSON.parse(neither.stderr).error.code, 'input_required');
+  const missing = await run(['projects', 'import', '--dir', join(directory, 'nowhere')]);
+  assert.equal(missing.code, 1); assert.equal(JSON.parse(missing.stderr).error.code, 'invalid_folder');
+
+  // diff: file vs file, file vs live, and the errors for an unusable combination.
+  const before = join(directory, 'before.json'); await writeFile(before, JSON.stringify(original));
+  const after = join(directory, 'after.json'); await writeFile(after, JSON.stringify({ ...original, pages: original.pages.map((page: any, index: number) => index === 1 ? { ...page, name: 'Edited on disk' } : page) }));
+  const files = await json(['projects', 'diff', '--from', before, '--to', after]);
+  assert.equal(files.identical, false); assert.equal(files.diff.count, 1); assert.deepEqual(files.changed.pages, [original.pages[1].id]);
+  assert.deepEqual(files.summary, [`changed page "Edited on disk" (${original.pages[1].id}): name`]);
+  const live = await json(['projects', 'diff', projectId, '--from', before]);
+  assert.equal(live.to, `live revision ${put.revision}`); assert.deepEqual(live.changed.pages, [original.pages[1].id]);
+  const same = await json(['projects', 'diff', projectId, '--to', after]);
+  assert.equal(same.identical, true); assert.deepEqual(same.summary, []);
+  const noSides = await run(['projects', 'diff', projectId]);
+  assert.equal(noSides.code, 1); assert.equal(JSON.parse(noSides.stderr).error.code, 'input_required');
+  const noProject = await run(['projects', 'diff', '--from', before]);
+  assert.equal(noProject.code, 1); assert.equal(JSON.parse(noProject.stderr).error.code, 'project_required');
+  await json(['projects', 'delete', imported.project.id]);
+  await json(['projects', 'delete', projectId]);
+});

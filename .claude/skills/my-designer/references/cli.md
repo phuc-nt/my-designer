@@ -36,7 +36,8 @@ Output is JSON on stdout; errors are JSON on stderr; exit codes 0 ok,
 | `projects list` | `--query`, `--kind`, `--sort updated\|created\|name` |
 | `projects get <id>` | → `{project:{id,name,kind,revision,document,thumbnailUrl,…}}` |
 | `projects create` | `--name` (required), `--description`, `--kind web\|slides\|report\|wireframe\|3d\|video`, `--template <id>`, `--theme <id>`, `--file doc.json` |
-| `projects import --file doc.json [--name]` | new project from canonical JSON |
+| `projects import --file doc.json \| --dir folder [--name]` | new project from canonical JSON or a page folder |
+| `projects diff [id] --from a.json --to b.json` | structural diff of two documents → `{identical, diff, changed:{pages,nodes}, summary[]}`; omit one side to compare against the live project document (id required then). Revisions are not stored, so keep your own `--from` snapshot |
 | `projects clone <id> [--name]` | copies assets too |
 | `projects rename <id> <name> --revision n` | |
 | `projects delete <id>` | deletes stored assets as well; no confirmation |
@@ -45,8 +46,9 @@ Output is JSON on stdout; errors are JSON on stderr; exit codes 0 ok,
 | `projects comments <id> --add "text" (--node id \| --page id) [--author agent\|human] --revision n` | leave a note for the human; revision-checked save, summary receipt |
 | `projects comments <id> --resolve <commentId> --revision n` / `--reopen <commentId>` | close or reopen a thread |
 | `projects document get <id> [--output f]` | the raw document |
+| `projects document get <id> --output-dir folder` | page folder: `document.json` (with `pages: []`) plus `pages/NN-<id>.json`; edit one page file at a time, then `document put --dir` or `import --dir` (files sorted by name = page order; stale page files are removed on re-export) |
 | `projects document patch <id> --file ops.json --revision n [--summary]` | the normal write; `--summary` returns the project summary plus `changed:{pages,nodes}` and diff lines instead of the document |
-| `projects document put <id> --file doc.json --revision n [--brief-revision n] [--summary]` | whole-document replace |
+| `projects document put <id> --file doc.json \| --dir folder --revision n [--brief-revision n] [--summary]` | whole-document replace |
 | `projects document changes <id> [--since n] [--summary --base doc.json]` | what the human saved since `n`; `--summary` replaces the document with a diff against `--base` |
 | `projects document changes <id> --follow [--interval ms] [--duration ms] [--summary]` | one JSON line per new revision until `--duration` elapses (0 = until Ctrl-C); starts from the live revision unless `--since` is given |
 | `projects document merge <id> --file merge.json` | `{base,document,baseRevision}` three-way merge |
@@ -86,6 +88,11 @@ png-sequence spritesheet scene-angles editable-scene`. Binary formats need
 `--review-samples` and `--start/--end` drive `scene-angles`; `--node` is
 for `editable-scene`. `render` is offline and static (3D becomes a symbol);
 server `export --format html` embeds the real interactive viewer.
+
+Rendered exports (everything except `json`, `html`, `svg`) are cached per
+saved revision and option set: repeating the same export of an unchanged
+project returns the stored bytes (`X-Export-Cache: hit`, otherwise `miss`).
+A new save invalidates the cache, so you never need to bust it yourself.
 
 `pptx` is editable by default: text nodes become text boxes (font, size,
 weight, colour, alignment, line/letter spacing), shapes and frames become

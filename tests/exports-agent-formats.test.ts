@@ -70,10 +70,35 @@ test('authenticated React and scene exports preserve assets, animation, ownershi
     await save(web);
     const archiveResponse = await exportFile(web.id, 'react'); assert.equal(archiveResponse.status, 200, await archiveResponse.clone().text());
     assert.equal(archiveResponse.headers.get('content-type'), 'application/zip'); assert.match(archiveResponse.headers.get('content-disposition')!, /\.zip"$/);
-    const zip = await JSZip.loadAsync(await archiveResponse.arrayBuffer());
+    assert.equal(archiveResponse.headers.get('x-export-cache'), 'miss');
+    const archiveBytes = Buffer.from(await archiveResponse.arrayBuffer());
+    const zip = await JSZip.loadAsync(archiveBytes);
     assert.ok(zip.file('src/app/design-component.tsx')); assert.ok(zip.file('src/main.tsx'));
     assert.deepEqual(Buffer.from(await zip.file('public/assets/media-1.png')!.async('uint8array')), png);
     assert.equal(JSON.parse(await zip.file('document.json')!.async('string')).assets[0].url, '/assets/media-1.png');
+    // The same revision with the same options is served from the export cache, byte for byte, with the same headers.
+    const cachedResponse = await exportFile(web.id, 'react'); assert.equal(cachedResponse.status, 200);
+    assert.equal(cachedResponse.headers.get('x-export-cache'), 'hit'); assert.equal(cachedResponse.headers.get('content-type'), 'application/zip');
+    assert.match(cachedResponse.headers.get('content-disposition')!, /\.zip"$/);
+    assert.deepEqual(Buffer.from(await cachedResponse.arrayBuffer()), archiveBytes);
+    const cacheRows = await database.prepare('SELECT storage_key,revision FROM export_cache WHERE project_id=?').bind(web.id).all<{ storage_key: string; revision: number }>();
+    assert.equal(cacheRows.results.length, 1); assert.equal(cacheRows.results[0].revision, 2); assert.match(cacheRows.results[0].storage_key, new RegExp(`^exports/${web.id}/2/[0-9a-f]{32}$`));
+    // A new revision misses again and evicts the older revision's entry and bytes (on a throwaway copy so `web` stays at revision 2 below).
+    const churn = await create(createDocument('web', 'Cached interface')); await save(churn);
+    const first = await exportFile(churn.id, 'react'); assert.equal(first.status, 200, await first.clone().text()); assert.equal(first.headers.get('x-export-cache'), 'miss');
+    const firstKey = (await database.prepare('SELECT storage_key FROM export_cache WHERE project_id=?').bind(churn.id).first<{ storage_key: string }>())!.storage_key;
+    churn.document.name = 'Cached interface v2'; churn.revision = 2; await save(churn);
+    const refreshed = await exportFile(churn.id, 'react', 3); assert.equal(refreshed.status, 200, await refreshed.clone().text());
+    assert.equal(refreshed.headers.get('x-export-cache'), 'miss');
+    const after = await database.prepare('SELECT storage_key,revision FROM export_cache WHERE project_id=?').bind(churn.id).all<{ storage_key: string; revision: number }>();
+    assert.deepEqual(after.results.map(row => row.revision), [3]);
+    assert.equal(await bindings.ASSETS_BUCKET.get(firstKey), null);
+    // Cheap formats are never cached; deleting the project purges what is.
+    const jsonExport = await exportFile(churn.id, 'json', 3); assert.equal(jsonExport.status, 200); assert.equal(jsonExport.headers.get('x-export-cache'), null);
+    const stale = after.results[0].storage_key; assert.ok(await bindings.ASSETS_BUCKET.get(stale));
+    assert.equal((await request(`/api/projects/${churn.id}`, 'DELETE')).status, 200);
+    assert.equal(await bindings.ASSETS_BUCKET.get(stale), null);
+    assert.equal((await database.prepare('SELECT COUNT(*) AS n FROM export_cache WHERE project_id=?').bind(churn.id).first<{ n: number }>())!.n, 0);
     // PowerPoint keeps text editable and embeds owned images; `rasterize` turns each slide into one picture.
     const deck = await create(createDocument('slides', 'Editable deck'));
     const deckMedia = await upload(deck.id); deck.document.assets.push(deckMedia);

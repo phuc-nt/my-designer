@@ -7,8 +7,8 @@ import { paintingCommandSchema } from '../../../src/shared/painting-command';
 import { publicCreativeProjection } from '../../../src/shared/public-creative-projection';
 import { upgradeDocument } from '../../../src/shared/document-upgrade';
 import { Command, CommanderError } from 'commander';
-import { readFile } from 'node:fs/promises';
-import { basename, extname } from 'node:path';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { basename, extname, join } from 'node:path';
 import { z } from 'zod';
 import { documentSchema, kinds, type DesignDocument, type Project, type ProjectKind } from '../../../src/shared/schema';
 import { blocks, createBlock, createDocument, templates, themes } from '../../../src/shared/catalog';
@@ -44,6 +44,31 @@ async function project(id: string): Promise<Project> { return (await client().js
 async function documentInput(file: string): Promise<DesignDocument> {
   const input = await inputJson(file) as any;
   return documentSchema.parse(input?.project?.document ?? input?.document ?? input);
+}
+/** A page folder: `document.json` with `pages: []`, plus `pages/NN-<id>.json` in page order. */
+const pageFileName = (index: number, id: string) => `${String(index + 1).padStart(2, '0')}-${id.replace(/[^a-zA-Z0-9_-]/g, '_')}.json`;
+async function writeDocumentFolder(directory: string, document: DesignDocument) {
+  const { pages, ...rest } = document;
+  await mkdir(join(directory, 'pages'), { recursive: true });
+  await writeFile(join(directory, 'document.json'), JSON.stringify({ ...rest, pages: [] }, null, 2));
+  const files: string[] = [];
+  // Stale page files from an earlier export would otherwise be re-imported as extra pages.
+  for (const stale of await readdir(join(directory, 'pages'))) if (stale.endsWith('.json')) await rm(join(directory, 'pages', stale));
+  for (const [index, page] of pages.entries()) { const name = pageFileName(index, page.id); files.push(join('pages', name)); await writeFile(join(directory, 'pages', name), JSON.stringify(page, null, 2)); }
+  return { directory, document: join(directory, 'document.json'), pages: files };
+}
+async function readDocumentFolder(directory: string): Promise<DesignDocument> {
+  const base = JSON.parse(await readFile(join(directory, 'document.json'), 'utf8').catch(() => { throw new CliError('invalid_folder', `${directory} has no document.json; export one with document get --output-dir.`); }));
+  const names = (await readdir(join(directory, 'pages')).catch(() => [] as string[])).filter(name => name.endsWith('.json')).sort();
+  const pages = await Promise.all(names.map(async name => JSON.parse(await readFile(join(directory, 'pages', name), 'utf8'))));
+  return documentSchema.parse({ ...base, pages: [...(Array.isArray(base.pages) ? base.pages : []), ...pages] });
+}
+/** `--file` or `--dir`, never both, never neither. */
+async function documentSource(options: { file?: string; dir?: string }): Promise<DesignDocument> {
+  if (options.file && options.dir) throw new CliError('conflicting_options', 'Choose either --file or --dir.');
+  if (options.dir) return readDocumentFolder(options.dir);
+  if (options.file) return documentInput(options.file);
+  throw new CliError('input_required', 'Pass --file doc.json or --dir folder.');
 }
 function revision(value: string): number { return positiveInteger(value); }
 function ensureRevision(current: Project, expected: number): void {
@@ -182,17 +207,32 @@ documents.command('changes <id>').description('What the human saved after --sinc
       await sleep(interval);
     }
   });
-documents.command('get <id>').option('--output <file>', 'Save document JSON to a file').action(async (id, options) => { await outputFile(options.output, JSON.stringify((await project(id)).document, null, 2)); });
-documents.command('put <id>').option('--brief-revision <number>', 'Observed brief revision when applying a proposal').requiredOption('--file <path>', 'Document JSON or - for stdin').requiredOption('--revision <number>', 'Expected saved revision').option('--summary', 'Return the project summary and changed page/node IDs instead of the whole document').action(wrap(async (id, options) => client().json(`${projectPath(id)}/document${options.summary ? '?summary=1' : ''}`,'PUT',{document:await documentInput(options.file),expectedRevision:revision(options.revision),...(options.briefRevision!==undefined?{expectedBriefRevision:nonnegativeNumber(options.briefRevision)}:{})})));
+documents.command('get <id>').option('--output <file>', 'Save document JSON to a file').option('--output-dir <dir>', 'Write a page folder instead: document.json plus pages/NN-<id>.json, one file per page').action(async (id, options) => {
+  if (options.output && options.outputDir) throw new CliError('conflicting_options', 'Choose either --output or --output-dir.');
+  const document = (await project(id)).document;
+  if (options.outputDir) { output(await writeDocumentFolder(options.outputDir, document)); return; }
+  await outputFile(options.output, JSON.stringify(document, null, 2));
+});
+documents.command('put <id>').option('--brief-revision <number>', 'Observed brief revision when applying a proposal').option('--file <path>', 'Document JSON or - for stdin').option('--dir <dir>', 'Page folder written by document get --output-dir').requiredOption('--revision <number>', 'Expected saved revision').option('--summary', 'Return the project summary and changed page/node IDs instead of the whole document').action(wrap(async (id, options) => client().json(`${projectPath(id)}/document${options.summary ? '?summary=1' : ''}`,'PUT',{document:await documentSource(options),expectedRevision:revision(options.revision),...(options.briefRevision!==undefined?{expectedBriefRevision:nonnegativeNumber(options.briefRevision)}:{})})));
 documents.command('patch <id>').description('Apply shared targeted operations; reuses atomic revision-checked save').requiredOption('--file <path>', 'Operations array JSON or - for stdin').requiredOption('--revision <number>', 'Expected saved revision').option('--summary', 'Return the project summary and changed page/node IDs instead of the whole document').action(wrap(async (id, options) => {
   const operations = operationsSchema.parse(await inputJson(options.file)); const expected = revision(options.revision);
   const current = await project(id); ensureRevision(current, expected);
   return save(id, mutateDocument(current.document, operations), expected, Boolean(options.summary));
 }));
-projects.command('import').description('Create a new project from canonical JSON').requiredOption('--file <path>', 'Document JSON or - for stdin').option('--name <name>', 'Override project name').action(wrap(async options => {
-  const document = await documentInput(options.file);
+projects.command('import').description('Create a new project from canonical JSON or a page folder').option('--file <path>', 'Document JSON or - for stdin').option('--dir <dir>', 'Page folder written by document get --output-dir').option('--name <name>', 'Override project name').action(wrap(async options => {
+  const document = await documentSource(options);
   return client().json('/api/projects', 'POST', { name: options.name ?? document.name, kind: document.kind, document });
 }));
+projects.command('diff [id]').description('Structural diff between two documents: files, or a file against the live project')
+  .option('--from <path>', 'Base document JSON; defaults to the live project document').option('--to <path>', 'Target document JSON; defaults to the live project document')
+  .action(wrap(async (id, options) => {
+    if (!options.from && !options.to) throw new CliError('input_required', 'Pass --from and/or --to; the omitted side is the live project document.');
+    if ((!options.from || !options.to) && !id) throw new CliError('project_required', 'Give a project ID when one side should be the live document.');
+    const live = id && (!options.from || !options.to) ? await project(id) : undefined;
+    const from = options.from ? await documentInput(options.from) : live!.document, to = options.to ? await documentInput(options.to) : live!.document;
+    const diff = diffDocuments(from, to);
+    return { from: options.from ?? `live revision ${live!.revision}`, to: options.to ?? `live revision ${live!.revision}`, identical: diff.count === 0, diff, changed: changedIds(diff), summary: describeDiff(diff) };
+  }));
 
 projects.command('thumbnail <id>').description('Download a persistent saved-revision cover').requiredOption('--output <file>', 'PNG destination').option('--revision <number>', 'Saved cover revision').action(async (id, options) => {
   if (options.output === '-') throw new CliError('file_required', 'Thumbnail download requires --output FILE.');
