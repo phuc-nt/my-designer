@@ -131,4 +131,17 @@ export type Timeline = NonNullable<DesignDocument['timeline']>;
 export interface Project { thumbnailUrl?: string; thumbnailRevision?: number | null; id: string; name: string; description: string; kind: ProjectKind; document: DesignDocument; revision: number; createdAt: string; updatedAt: string; publishedUrl?: string }
 export type ProjectSummary = Omit<Project, 'document'>;
 export interface User { id: string; email: string; name: string }
-export const uid = () => crypto.randomUUID();
+/**
+ * `crypto.randomUUID` only exists in a secure context, and the export renderer runs the
+ * shared code inside an `about:blank` page, so it is undefined there. Fall back to
+ * `getRandomValues`, which is always present, rather than letting an insecure context turn
+ * an ordinary export into a generic 502.
+ */
+export const uid = (): string => {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};

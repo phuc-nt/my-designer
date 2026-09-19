@@ -132,6 +132,14 @@ export async function renderSnapshotExport(bindings: Bindings, name: string, doc
   let doc=documentSchema.parse(structuredClone(document));
   if (!doc.pages[options.pageIndex]) fail(400, 'invalid_page', 'This page does not exist.');
   if(options.format==='editable-scene'&&!options.nodeId)fail(400,'invalid_export','Editable scene export requires a nodeId');
+  if (options.format === 'editable-scene') {
+    // The renderer needs an imported GLB to re-read; a primitive or a missing node would
+    // throw inside the browser, where every failure collapses into a generic 502.
+    const target = doc.pages[options.pageIndex].nodes.find(node => node.id === options.nodeId);
+    if (!target) fail(404, 'not_found', `No node ${options.nodeId} on page ${options.pageIndex}.`);
+    if (target.type !== 'model3d') fail(400, 'unsupported_export', `Editable scene export converts an imported 3D model; node ${options.nodeId} is a ${target.type}.`);
+    if (!target.src) fail(400, 'unsupported_export', 'Editable scene export needs an imported GLB model. This node is a built-in primitive, so its geometry already lives in the document — edit it with `dsa scene command` instead.');
+  }
   const frameEnd = options.end ?? doc.timeline?.duration ?? 2;
   if (!thumbnail && !hooks.inspection && (options.format === 'png-sequence' || options.format === 'spritesheet')) {
     const frameInput = {...doc.pages[options.pageIndex], start: options.start, end: frameEnd, fps: options.fps, format: options.format};

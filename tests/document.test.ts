@@ -56,6 +56,21 @@ test('motion interpolates numeric keyframes and clamps to each end', () => {
   assert.equal(interpolateNode(node, doc, 2).opacity, 1);
   assert.equal(interpolateNode(node, doc, 10).opacity, 0);
 });
+test('uid still mints unique v4 ids where randomUUID is missing, as in the export renderer', () => {
+  // The renderer evaluates shared code in an `about:blank` page. That is an insecure
+  // context, so `crypto.randomUUID` is undefined there and every id-minting export used
+  // to collapse into a generic 502.
+  const real = crypto.randomUUID;
+  try {
+    Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true });
+    const ids = Array.from({ length: 500 }, () => uid());
+    assert.equal(new Set(ids).size, ids.length);
+    for (const id of ids) assert.match(id, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  } finally {
+    Object.defineProperty(crypto, 'randomUUID', { value: real, configurable: true });
+  }
+  assert.match(uid(), /^[0-9a-f]{8}-/);
+});
 test('applying a theme updates token references without regenerating layout', () => {
   const doc = createDocument('web', 'Theme');
   const changed = mutateDocument(doc, [{ op: 'apply-theme', themeId: 'nocturne' }]);
