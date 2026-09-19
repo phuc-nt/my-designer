@@ -127,7 +127,14 @@ async function localUser(c: Context<Env>): Promise<User> {
   }
   return { id: localUserId, email: localUserEmail, name };
 }
+/**
+ * Local mode has exactly one owner, so the hosted per-user quotas only ever
+ * throttle the agent driving this machine. Keep the limiter (a runaway loop
+ * should still hit a wall) but raise the ceiling far above ordinary work.
+ */
+export const LOCAL_RATE_LIMIT_FACTOR = 25;
 export async function rateLimit(c: Context<Env>, action: string, limit = 10) {
+  if (c.env?.LOCAL_USER) limit *= LOCAL_RATE_LIMIT_FACTOR;
   await c.env.DB.batch([
     c.env.DB.prepare("DELETE FROM rate_limits WHERE expires_at<?").bind(
       Date.now(),

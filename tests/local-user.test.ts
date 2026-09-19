@@ -45,6 +45,20 @@ test('local single-user mode makes every request the owner without credentials',
     assert.equal(((await listed.json()) as any).tokens.length, 3);
   });
 
+  await t.test('the single local owner is not throttled by the hosted per-user quota', async () => {
+    // Hosted mode allows 20 exports per 15 minutes per user. Local mode has one
+    // owner, so that quota would only ever throttle the agent driving the
+    // machine; the limiter stays, with a far higher ceiling.
+    const { rateLimit, LOCAL_RATE_LIMIT_FACTOR } = await import('../server/security');
+    const context = (env: Bindings) => ({ env, req: { header: () => undefined } }) as any;
+    for (let i = 0; i < 20; i++) await rateLimit(context(local), 'export:local', 20);
+    await rateLimit(context(local), 'export:local', 20); // hosted mode would have failed on this call
+    assert.ok(LOCAL_RATE_LIMIT_FACTOR > 1);
+    // the same budget without LOCAL_USER still stops at the hosted ceiling
+    for (let i = 0; i < 20; i++) await rateLimit(context(base), 'export:hosted', 20);
+    await assert.rejects(() => rateLimit(context(base), 'export:hosted', 20), /Too many attempts/);
+  });
+
   await t.test('registration and login cannot reach the implicit account', async () => {
     const register = await request(local, '/api/auth/register', { method: 'POST', headers: { ...json, Origin: 'http://localhost:8787' }, body: JSON.stringify({ email: 'x@y.z', password: 'Abcdefgh1234!' }) });
     assert.equal(register.status, 403);
