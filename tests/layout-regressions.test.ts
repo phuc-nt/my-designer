@@ -108,6 +108,46 @@ test('structural edits convert animated coordinates by parent origins rather tha
   const reparented = mutateDocument({ ...animated, pages: [{ ...animated.pages[0], nodes: [...animated.pages[0].nodes, target] }] }, [{ op: 'reparent-node', nodeId: 'a', parentId: 'target', index: 0 }]);
   assert.deepEqual(reparented.timeline!.tracks[0].keyframes[0].values, { x: 70, y: 60 });
 });
+test('align-nodes moves resolved boxes, shifts legacy children and keyframes, and refuses flow children', () => {
+  const original = document([node('a', { x: 10, y: 20 }), node('group', { type: 'group', x: 100, y: 50, width: 60, height: 40 }), node('legacy-child', { parentId: 'group', x: 110, y: 55, width: 10, height: 10 }), node('c', { x: 200, y: 100, width: 20, height: 80 })]);
+  const animated = { ...original, timeline: { duration: 1, fps: 30, tracks: [{ id: 't', nodeId: 'a', keyframes: [{ time: 0, values: { x: 10 } }, { time: 1, values: { x: 40 } }] }] } };
+  const before = structuredClone(animated);
+  const left = mutateDocument(animated, [{ op: 'align-nodes', pageId: 'page', nodeIds: ['a', 'group', 'legacy-child', 'c'], alignment: 'left' }]);
+  assert.deepEqual(animated, before);
+  assert.deepEqual([box(left, 'a')[0], box(left, 'group')[0], box(left, 'c')[0]], [10, 10, 10]);
+  assert.equal(box(left, 'legacy-child')[0], 20, 'legacy page-space child follows its group');
+  assert.deepEqual(left.timeline!.tracks[0].keyframes.map(k => k.values.x), [10, 40], 'keys shift by the same delta (zero here)');
+  const bottom = mutateDocument(animated, [{ op: 'align-nodes', pageId: 'page', nodeIds: ['a', 'c'], alignment: 'bottom', to: 'page' }]);
+  assert.equal(box(bottom, 'a')[1], 170); assert.equal(box(bottom, 'c')[1], 120);
+  const centered = mutateDocument(animated, [{ op: 'align-nodes', pageId: 'page', nodeIds: ['a'], alignment: 'center', to: 'page' }]);
+  assert.equal(box(centered, 'a')[0], 130); assert.deepEqual(centered.timeline!.tracks[0].keyframes.map(k => k.values.x), [130, 160]);
+  const flow = document([node('row', { type: 'frame', width: 300, height: 100, layout: { mode: 'flex', direction: 'row' } }), node('child', { parentId: 'row' }), node('free', { x: 200, y: 150 })]);
+  assert.throws(() => mutateDocument(flow, [{ op: 'align-nodes', pageId: 'page', nodeIds: ['child', 'free'], alignment: 'left' }]), /container layout/);
+  assert.throws(() => mutateDocument(flow, [{ op: 'align-nodes', pageId: 'page', nodeIds: ['child', 'missing'], alignment: 'left' }]));
+});
+test('align-nodes to parent uses the resolved container box of local children', () => {
+  const original = document([node('card', { type: 'frame', x: 100, y: 100, width: 200, height: 100, layout: { mode: 'absolute' } }), node('label', { parentId: 'card', x: 10, y: 10, width: 50, height: 20 })]);
+  const next = mutateDocument(original, [{ op: 'align-nodes', pageId: 'page', nodeIds: ['label'], alignment: 'right', to: 'parent' }]);
+  assert.deepEqual(box(next, 'label'), [250, 110, 50, 20]); assert.equal(next.pages[0].nodes[1].x, 150, 'local coordinate stays relative to the parent');
+});
+test('distribute-nodes spaces three or more nodes evenly along one axis', () => {
+  const original = document([node('a', { x: 0, y: 0, width: 40 }), node('b', { x: 50, y: 0, width: 10 }), node('c', { x: 200, y: 0, width: 20 })]);
+  const next = mutateDocument(original, [{ op: 'distribute-nodes', pageId: 'page', nodeIds: ['a', 'b', 'c'], axis: 'horizontal' }]);
+  assert.deepEqual([box(next, 'a')[0], box(next, 'b')[0], box(next, 'c')[0]], [0, 115, 200]);
+  const packed = mutateDocument(original, [{ op: 'distribute-nodes', pageId: 'page', nodeIds: ['a', 'b', 'c'], axis: 'horizontal', gap: 8 }]);
+  assert.deepEqual([box(packed, 'a')[0], box(packed, 'b')[0], box(packed, 'c')[0]], [0, 48, 66]);
+  assert.throws(() => mutateDocument(original, [{ op: 'distribute-nodes', pageId: 'page', nodeIds: ['a', 'b'], axis: 'horizontal' }]));
+});
+test('upsert-node adds a missing node and merges an existing one like update-node', () => {
+  const original = document([node('a', { style: { fill: '#111', stroke: '#222' } })]);
+  const added = mutateDocument(original, [{ op: 'upsert-node', pageId: 'page', node: node('b', { x: 5, y: 6 }) }]);
+  assert.equal(added.pages[0].nodes.length, 2); assert.deepEqual(box(added, 'b'), [5, 6, 40, 30]);
+  const merged = mutateDocument(added, [{ op: 'upsert-node', pageId: 'page', node: node('a', { x: 99, style: { fill: '#333' } }) }]);
+  assert.equal(merged.pages[0].nodes.length, 2); assert.equal(merged.pages[0].nodes[0].x, 99);
+  assert.deepEqual(merged.pages[0].nodes[0].style, { fill: '#333', stroke: '#222' }, 'style shallow-merges');
+  const twoPages = { ...added, pages: [...added.pages, { ...added.pages[0], id: 'page-2', nodes: [] }] };
+  assert.throws(() => mutateDocument(twoPages, [{ op: 'upsert-node', pageId: 'page-2', node: node('a') }]), /already exists/);
+});
 test('legacy absolute conversion subtracts the new local origin from existing keys', () => {
   const original = document([node('parent', { type: 'frame', x: 100, y: 80 }), node('child', { parentId: 'parent', x: 120, y: 95 })]);
   const animated = { ...original, timeline: { duration: 1, fps: 30, tracks: [{ id: 'track', nodeId: 'child', keyframes: [{ time: 0, values: { x: 130, y: 100 } }] }] } };

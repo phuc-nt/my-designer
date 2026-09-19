@@ -12,7 +12,8 @@ import { characterOperationSchemas, characterOperationSchema, applyCharacterOper
 import { timelineSchema, trackSchema, keyframeSchema } from './design-capabilities';
 import { documentSchema, nodeSchema, pageSchema, themeSchema, uid, type DesignDocument, type DesignPage, type DesignNode } from './schema';
 import { createBlock, themes } from './catalog';
-import { resolveLayout, subtree } from './layout';
+import { canMoveNode, resolveLayout, subtree } from './layout';
+import { alignBoxes, boundsOf, distributeBoxes, type AlignBox, type Translation } from './alignment';
 
 const measuredBoundsSchema = z.object({ id: z.string(), x: z.number().finite().min(-100000).max(100000), y: z.number().finite().min(-100000).max(100000), width: z.number().finite().min(0).max(20000), height: z.number().finite().min(0).max(20000) });
 
@@ -42,7 +43,10 @@ export const operationSchema = z.discriminatedUnion('op', [
   z.object({ op: z.literal('reparent-node'), nodeId: z.string(), parentId: z.string().nullable(), index: z.number().int().min(0) }),
   z.object({ op: z.literal('group-nodes'), pageId: z.string(), nodeIds: z.array(z.string()).min(1).max(2000), groupId: z.string().optional(), name: z.string().max(200).optional(), bounds: z.array(measuredBoundsSchema).max(2001).optional() }),
   z.object({ op: z.literal('ungroup-node'), nodeId: z.string() }),
-  z.object({ op: z.literal('update-page'), pageId: z.string(), changes: pageSchema.partial().omit({ id: true, nodes: true }) })
+  z.object({ op: z.literal('update-page'), pageId: z.string(), changes: pageSchema.partial().omit({ id: true, nodes: true }) }),
+  z.object({ op: z.literal('upsert-node'), pageId: z.string(), node: nodeSchema }),
+  z.object({ op: z.literal('align-nodes'), pageId: z.string(), nodeIds: z.array(z.string()).min(1).max(2000), alignment: z.enum(['left', 'center', 'right', 'top', 'middle', 'bottom']), to: z.enum(['selection', 'parent', 'page']).default('selection') }),
+  z.object({ op: z.literal('distribute-nodes'), pageId: z.string(), nodeIds: z.array(z.string()).min(3).max(2000), axis: z.enum(['horizontal', 'vertical']), gap: z.number().finite().min(0).max(20000).optional() })
 ]);
 export const operationsSchema = z.array(operationSchema).min(1).max(100);
 export type DesignOperation = z.infer<typeof operationSchema>;
@@ -55,6 +59,30 @@ function offsetNodeKeyframes(doc: DesignDocument, nodeId: string, x: number, y: 
     if (typeof key.values.x === 'number') key.values.x += x;
     if (typeof key.values.y === 'number') key.values.y += y;
   }
+}
+/** Shift a node and every legacy (page-space) descendant, keeping animation keys in step. */
+function translateNodeTree(doc: DesignDocument, page: DesignPage, node: DesignNode, dx: number, dy: number) {
+  node.x += dx; node.y += dy; offsetNodeKeyframes(doc, node.id, dx, dy);
+  const walk = (parent: DesignNode) => {
+    for (const child of page.nodes.filter(n => n.parentId === parent.id)) {
+      if (!parent.layout) { child.x += dx; child.y += dy; offsetNodeKeyframes(doc, child.id, dx, dy); }
+      walk(child);
+    }
+  };
+  walk(node);
+}
+/** Selected nodes that no other selected node contains; each must accept a translation. */
+function arrangeableRoots(page: DesignPage, nodeIds: string[]): { roots: DesignNode[]; boxes: AlignBox[]; resolved: DesignPage } {
+  const ids = new Set(nodeIds), nodes = page.nodes.filter(n => ids.has(n.id));
+  if (nodes.length !== ids.size) throw new Error('Align existing nodes on the same page');
+  const roots = nodes.filter(node => { let parent = page.nodes.find(n => n.id === node.parentId); while (parent) { if (ids.has(parent.id)) return false; parent = page.nodes.find(n => n.id === parent!.parentId); } return true; });
+  const blocked = roots.filter(node => !canMoveNode(page, node));
+  if (blocked.length) throw new Error(`Flow children move through their container layout: ${blocked.map(n => n.id).join(', ')}`);
+  const resolved = resolveLayout(page), boxes = roots.map(node => { const box = resolved.nodes.find(n => n.id === node.id)!; return { id: node.id, x: box.x, y: box.y, width: box.width, height: box.height }; });
+  return { roots, boxes, resolved };
+}
+function applyTranslations(doc: DesignDocument, page: DesignPage, roots: DesignNode[], moves: Map<string, Translation>) {
+  for (const node of roots) { const move = moves.get(node.id); if (move && (move.dx || move.dy)) translateNodeTree(doc, page, node, move.dx, move.dy); }
 }
 function convertChildrenToAbsolute(doc: DesignDocument, page: DesignPage, parentId?: string) {
   const resolved = resolveLayout(page), parent = resolved.nodes.find(n => n.id === parentId);
@@ -104,6 +132,29 @@ export function mutateDocument(document: DesignDocument, input: unknown): Design
       }
     }
     else if (action.op === 'update-page') { const page = doc.pages.find(p => p.id === action.pageId); if (!page) throw new Error('Unknown page'); if (action.changes.layout?.mode === 'absolute' && page.layout?.mode !== 'absolute') convertChildrenToAbsolute(doc, page); Object.assign(page, action.changes); }
+    else if (action.op === 'align-nodes' || action.op === 'distribute-nodes') {
+      const page = doc.pages.find(p => p.id === action.pageId); if (!page) throw new Error('Unknown page');
+      const { roots, boxes, resolved } = arrangeableRoots(page, action.nodeIds);
+      if (action.op === 'distribute-nodes') {
+        if (roots.length < 3) throw new Error('Distribute at least three nodes that do not contain each other');
+        applyTranslations(doc, page, roots, distributeBoxes(boxes, action.axis, action.gap));
+      } else {
+        const parentId = roots[0]?.parentId, parentBox = action.to === 'parent' && parentId ? resolved.nodes.find(n => n.id === parentId) : undefined;
+        if (action.to === 'parent' && roots.some(n => n.parentId !== parentId)) throw new Error('Align to parent needs sibling nodes');
+        const target = action.to === 'selection' ? boundsOf(boxes) : parentBox ? { x: parentBox.x, y: parentBox.y, width: parentBox.width, height: parentBox.height } : { x: 0, y: 0, width: page.width, height: page.height };
+        applyTranslations(doc, page, roots, alignBoxes(boxes, action.alignment, target));
+      }
+    }
+    else if (action.op === 'upsert-node') {
+      const page = doc.pages.find(p => p.id === action.pageId); if (!page) throw new Error('Unknown page');
+      const elsewhere = doc.pages.find(p => p !== page && p.nodes.some(n => n.id === action.node.id)); if (elsewhere) throw new Error(`Node ${action.node.id} already exists on page ${elsewhere.id}`);
+      const existing = page.nodes.find(n => n.id === action.node.id);
+      if (!existing) page.nodes.push(action.node);
+      else {
+        if (action.node.layout?.mode === 'absolute' && existing.layout?.mode !== 'absolute') convertChildrenToAbsolute(doc, page, existing.id);
+        Object.assign(existing, action.node, { style: action.node.style ? { ...existing.style, ...action.node.style } : existing.style });
+      }
+    }
     else if (action.op === 'group-nodes') {
       const page = doc.pages.find(p => p.id === action.pageId); if (!page) throw new Error('Unknown page');
       const ids = new Set(action.nodeIds), selected = page.nodes.filter(n => ids.has(n.id));

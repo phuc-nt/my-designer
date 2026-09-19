@@ -36,7 +36,7 @@ test('browser registration stays compact while retaining canonical validation an
   assert.equal(schemas.operations.type, 'array');
   assert.equal(schemas.operations.minItems, 1);
   const literals = operationLiterals(schemas.operations);
-  for (const op of ['add-node', 'update-node', 'remove-node', 'add-page', 'set-theme', 'set-timeline', 'upsert-track', 'upsert-keyframe', 'rename', 'reparent-node', 'update-page', 'scene-command','replace-asset']) assert.ok(literals.has(op), `operations schema must publish "${op}"`);
+  for (const op of ['add-node', 'update-node', 'remove-node', 'add-page', 'set-theme', 'set-timeline', 'upsert-track', 'upsert-keyframe', 'rename', 'reparent-node', 'update-page', 'scene-command','replace-asset', 'upsert-node', 'align-nodes', 'distribute-nodes']) assert.ok(literals.has(op), `operations schema must publish "${op}"`);
   assert.ok(literals.size >= 20, `expected the full operation union, saw ${literals.size}`);
   assert.equal(schemas.documentWrite.type, 'object');
   assert.deepEqual([...schemas.documentWrite.required].sort(), ['document', 'expectedRevision']);

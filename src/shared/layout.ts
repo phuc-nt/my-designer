@@ -10,6 +10,12 @@ export function subtree(page: DesignPage, id: string): Set<string> {
   }
   return ids;
 }
+/** Flow children are placed by their container; only absolute layouts and absolute-positioned nodes accept a translation. */
+export function canMoveNode(page: DesignPage, node: DesignNode): boolean {
+  const parent = page.nodes.find(item => item.id === node.parentId);
+  const layout = parent?.layout ?? (!node.parentId ? page.layout : undefined);
+  return !layout || layout.mode === 'absolute' || node.position === 'absolute';
+}
 type Box = Pick<DesignNode, 'x' | 'y' | 'width' | 'height'>;
 const constrain = (node: DesignNode, axis: 'width' | 'height', value: number) => Math.min(node.sizing?.[axis === 'width' ? 'maxWidth' : 'maxHeight'] ?? 20000, Math.max(node.sizing?.[axis === 'width' ? 'minWidth' : 'minHeight'] ?? 0, value));
 function flexLayout(nodes: DesignNode[], layout: Layout, box: Box) {

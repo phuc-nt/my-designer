@@ -7,6 +7,8 @@
 .selection-actions { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 6px 12px; border-bottom: 1px solid var(--line); }
 .selection-actions small { margin-right: auto; }
 .selection-actions .icon-button, .layers-panel .layer-actions button { min-width: 36px; min-height: 36px; }
+.arrange-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.arrange-row .icon-button { min-width: 32px; min-height: 32px; }
 .layer-actions { display: flex; flex-wrap: wrap; gap: 4px; }
 .shortcut-list { display: grid; gap: 12px; }
 .shortcut-list div { display: flex; justify-content: space-between; gap: 20px; }

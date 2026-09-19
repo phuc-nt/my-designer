@@ -18,7 +18,15 @@ schema when you need them.
 | `group-nodes` | `pageId`, `nodeIds[]`, `groupId?`, `name?`, `bounds?` |
 | `ungroup-node` | `nodeId` |
 | `insert-block` | `pageId`, `blockId`, `offset?` (px) |
+| `upsert-node` | `pageId`, `node` (full node) — updates when the id exists on that page (same merge rule as `update-node`), otherwise adds it; errors if the id lives on another page |
+| `align-nodes` | `pageId`, `nodeIds[]` (1+), `alignment: left\|center\|right\|top\|middle\|bottom`, `to?: selection\|parent\|page` (default `selection`) |
+| `distribute-nodes` | `pageId`, `nodeIds[]` (3+), `axis: horizontal\|vertical`, `gap?` (px; omitted = equalise gaps between the outer nodes) |
 | `replace-asset` | `assetId`, `replacementId` |
+
+`align-nodes` / `distribute-nodes` work on resolved page-space boxes (auto-layout
+positions included), move the outermost selected nodes with their subtrees and
+keyframes, and reject flow children — put those in `position: "absolute"` or
+change the container layout instead. Rotation is ignored (unrotated boxes).
 
 Node types: `frame group component text image shape icon chart model3d
 video audio board artwork character`. Optional node fields: `rotation

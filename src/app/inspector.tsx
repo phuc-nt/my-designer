@@ -22,12 +22,18 @@ import { mutateDocument } from '../shared/operations';
 import { parseLiveArtifact, type LiveArtifact } from '../shared/live-artifact';
 const SceneInspector = lazy(() => import('./scene-inspector').then(module => ({ default: module.SceneInspector })));
 import { navigateButtonGroup } from "./keyboard-navigation";
+import { ArrangeButtons } from './arrange-buttons';
+import type { Alignment, Axis } from '../shared/alignment';
 
 type Props = {
   onTexture?: (file: File, nodeId: string) => Promise<void>;
   doc: DesignDocument;
   page: DesignPage;
   node?: DesignNode;
+  /** Number of selected layers; the node prop is only set when it is exactly one. */
+  selectionCount?: number;
+  align?: (alignment: Alignment) => void;
+  distribute?: (axis: Axis) => void;
   update: (patch: Partial<DesignNode>) => void;
   change: (recipe: (doc: DesignDocument) => void) => void;
   duplicate: () => void;
@@ -41,6 +47,9 @@ export function Inspector({
   doc,
   page,
   node,
+  selectionCount = node ? 1 : 0,
+  align,
+  distribute,
   update,
   change,
   duplicate,
@@ -607,6 +616,35 @@ export function Inspector({
               </div>
             </section>
           )}
+          {align && distribute && (
+            <section>
+              <h3>Arrange</h3>
+              <div className="arrange-row" role="group" aria-label="Align to page" onKeyDown={(event) => navigateButtonGroup(event)}>
+                <ArrangeButtons count={1} align={align} distribute={distribute} />
+              </div>
+              <small>Aligns this layer to the page.</small>
+            </section>
+          )}
+          <section>
+            <div className="button-row">
+              <button className="button small" onClick={duplicate}>
+                <Copy size={14} /> Duplicate
+              </button>
+              <button className="button small danger-text" onClick={remove}>
+                <Trash2 size={14} /> Delete
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : selectionCount > 1 && align && distribute ? (
+        <div className="inspector-body">
+          <section>
+            <h3>{selectionCount} layers</h3>
+            <div className="arrange-row" role="group" aria-label="Arrange selection" onKeyDown={(event) => navigateButtonGroup(event)}>
+              <ArrangeButtons count={selectionCount} align={align} distribute={distribute} />
+            </div>
+            <small>Align moves layers to the edge or centre of the selection{selectionCount > 2 ? "; distribute spaces them evenly" : ""}. Flow-layout children stay with their container.</small>
+          </section>
           <section>
             <div className="button-row">
               <button className="button small" onClick={duplicate}>

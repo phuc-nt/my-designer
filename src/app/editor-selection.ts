@@ -1,6 +1,7 @@
 import type { DesignDocument, DesignNode, DesignPage } from '../shared/schema';
 import { subtree } from '../shared/layout';
 import { interpolateNode } from '../shared/render';
+export { canMoveNode } from '../shared/layout';
 
 export function toggleSelection(ids: readonly string[], id: string): string[] {
   return ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id];
@@ -23,11 +24,6 @@ export function selectedRoots(page: DesignPage, ids: readonly string[], protectS
     const descendants = protectSubtree ? subtree(page, node.id) : new Set<string>();
     return !page.nodes.some(item => item.locked && descendants.has(item.id));
   });
-}
-export function canMoveNode(page: DesignPage, node: DesignNode): boolean {
-  const parent = page.nodes.find(item => item.id === node.parentId);
-  const layout = parent?.layout ?? (!node.parentId ? page.layout : undefined);
-  return !layout || layout.mode === 'absolute' || node.position === 'absolute';
 }
 export function localMovement(doc: DesignDocument, page: DesignPage, node: DesignNode, time: number, dx: number, dy: number) {
   let rotation = 0, parent = page.nodes.find(item => item.id === node.parentId);

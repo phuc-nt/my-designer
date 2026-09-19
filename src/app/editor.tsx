@@ -19,6 +19,8 @@ import { CharacterEditor } from './character-editor';
 import { componentIcons } from './component-icons';
 import { screenParam, useScreenState, writeScreen } from './screen-state';
 import { PanelLeftClose, PanelRightClose, PanelLeftOpen, PanelRightOpen, Presentation } from 'lucide-react';
+import { ArrangeButtons } from './arrange-buttons';
+import type { Alignment, Axis } from '../shared/alignment';
 
 import { builtInProviders, isTextProvider, isCustomProvider } from '../shared/providers';
 import { trackClient } from './analytics';
@@ -706,6 +708,18 @@ export function Editor({
       change(d => Object.assign(d, next)); setSelection(childIds);
     } catch (error) { setError(message(error)); }
   }
+  function arrangeSelection(action: { op: 'align-nodes'; alignment: Alignment; to: 'selection' | 'page' } | { op: 'distribute-nodes'; axis: Axis }) {
+    void trackClient({ event: 'editor_action', action: action.op === 'align-nodes' ? 'align' : 'distribute', page: 'editor', projectId: initial.id });
+    const current = docRef.current.pages[pageIndex];
+    const roots = selectedRoots(current, selection).filter(item => canMoveNode(current, item));
+    if (!roots.length) return;
+    try {
+      const next = mutateDocument(docRef.current, [{ ...action, pageId: current.id, nodeIds: roots.map(root => root.id) }]);
+      change(d => Object.assign(d, next));
+    } catch (error) { setError(message(error)); }
+  }
+  const alignSelection = (alignment: Alignment) => arrangeSelection({ op: 'align-nodes', alignment, to: selection.length > 1 ? 'selection' : 'page' });
+  const distributeSelection = (axis: Axis) => arrangeSelection({ op: 'distribute-nodes', axis });
   function nudgeSelection(dx: number, dy: number) {
     const roots = selectedRoots(docRef.current.pages[pageIndex], selection).filter(item => canMoveNode(docRef.current.pages[pageIndex], item));
     if (!roots.length) return;
@@ -2199,6 +2213,7 @@ export function Editor({
               <button className="icon-button" aria-label="Group selection" title="Group (⌘/Ctrl+G)" disabled={!!busy || selectedRoots(page, selection).length < 2} onClick={groupSelection}><Group size={16}/></button>
               <button className="icon-button" aria-label="Ungroup selection" title="Ungroup (⌘/Ctrl+Shift+G)" disabled={!!busy || !selectedRoots(page, selection).some(item => item.type === 'group')} onClick={ungroupSelection}><Ungroup size={16}/></button>
               {selection.length === 1 && node?.type === 'text' && <button className="icon-button" aria-label="Edit text" title="Edit text (Enter)" disabled={!!busy || isNodeProtected(page, node)} onClick={() => beginText(node.id)}><Pencil size={16}/></button>}
+              {selection.length > 1 && <ArrangeButtons count={selection.length} disabled={!!busy || selectedRoots(page, selection).length < 2} align={alignSelection} distribute={distributeSelection}/>}
             </>}
             <button className="icon-button" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" onClick={event => {
               // WebKit pointer clicks do not focus buttons. Capture the real
@@ -2481,6 +2496,9 @@ export function Editor({
           doc={doc}
           page={doc.pages[pageIndex] || doc.pages[0]!}
           node={selection.length === 1 ? node : undefined}
+          selectionCount={selection.length}
+          align={alignSelection}
+          distribute={distributeSelection}
           update={update}
           change={change}
           duplicate={duplicateNode}
