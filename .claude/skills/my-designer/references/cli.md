@@ -72,6 +72,7 @@ projects overview --output-dir dir [--offset n] [--limit 1-12] [--time s] [--til
 ```
 projects export <id> --format F [--output f] [--page <index>] [--revision n]
                      [--start s] [--end s] [--fps n] [--review-samples 2-25] [--node <id>]
+                     [--rasterize]
 render --file doc.json --format json|html|svg [--output f] [--page i] [--time s]
 ```
 
@@ -81,6 +82,16 @@ png-sequence spritesheet scene-angles editable-scene`. Binary formats need
 `--review-samples` and `--start/--end` drive `scene-angles`; `--node` is
 for `editable-scene`. `render` is offline and static (3D becomes a symbol);
 server `export --format html` embeds the real interactive viewer.
+
+`pptx` is editable by default: text nodes become text boxes (font, size,
+weight, colour, alignment, line/letter spacing), shapes and frames become
+rect/roundRect/ellipse/line shapes with fill and stroke, images stay
+pictures, charts become native charts, flex/grid children land at their
+resolved positions, and `page.notes` become speaker notes. Icons, 3D, boards,
+artwork, characters, video/audio placeholders and live artifacts are
+rasterised per layer and listed in that slide's notes. Pages with React
+components or a 3D scene are rendered as one picture. `--rasterize` renders
+every slide as one picture (exact but not editable).
 
 ## Assets
 

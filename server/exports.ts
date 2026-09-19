@@ -201,10 +201,10 @@ export async function renderSnapshotExport(bindings: Bindings, name: string, doc
       const end=frameEnd;
       const encoded=await page.evaluate(({doc,index,format,start,end,fps}:any)=>(globalThis as any).studioRenderer.motionFrames(doc,index,format,start,end,fps),{doc,index:options.pageIndex,format:options.format,start:options.start,end,fps:options.fps});output=Buffer.from(encoded,'base64');
     } else if (['pptx', 'webm', 'mp4', 'glb', 'gltf'].includes(options.format)) {
-      const encoded = await page.evaluate(async ({ document, pageIndex, format, videoOptions }: { document: DesignDocument; pageIndex: number; format: string; videoOptions:{start:number;end?:number;fps:number} }) => {
+      const encoded = await page.evaluate(async ({ document, pageIndex, format, videoOptions, rasterize }: { document: DesignDocument; pageIndex: number; format: string; videoOptions:{start:number;end?:number;fps:number}; rasterize: boolean }) => {
         const renderer = (globalThis as any).studioRenderer;
-        return format === 'pptx' ? renderer.pptx(document) : format === 'glb' || format === 'gltf' ? renderer.scene(document, pageIndex, format) : renderer.video(document, pageIndex, format,videoOptions);
-      }, { document: doc, pageIndex: options.pageIndex, format: options.format,videoOptions:{start:options.start,end:options.end,fps:options.fps} });
+        return format === 'pptx' ? renderer.pptx(document, { rasterize }) : format === 'glb' || format === 'gltf' ? renderer.scene(document, pageIndex, format) : renderer.video(document, pageIndex, format,videoOptions);
+      }, { document: doc, pageIndex: options.pageIndex, format: options.format,videoOptions:{start:options.start,end:options.end,fps:options.fps}, rasterize: options.rasterize });
       output = Buffer.from(encoded, 'base64');
     } else {
       await page.evaluate(({ document, pageIndex, all }: { document: DesignDocument; pageIndex: number; all: boolean }) => (globalThis as any).studioRenderer.present(document, pageIndex, all), { document: doc, pageIndex: options.pageIndex, all: options.format === 'pdf' });

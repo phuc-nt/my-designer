@@ -8,7 +8,8 @@ import { motionFrames } from './motion-frame-export';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import PptxGenJS from 'pptxgenjs';
-import { interpolateNode, renderHtml, renderSvg, resolveColor, resolveFont } from '../src/shared/render';
+import { interpolateNode, renderHtml, renderSvg, resolveColor } from '../src/shared/render';
+import { buildPptx, pageUsesScene } from '../src/shared/pptx-export';
 import type { DesignDocument, DesignNode } from '../src/shared/schema';
 import { mountExportPage, captureExportPage, rasterizeExportPage } from '../src/app/export-page';
 import { usesDom } from '../src/app/document-view';
@@ -80,33 +81,19 @@ async function present(input: DesignDocument, pageIndex = 0, all = false) {
   for (const index of all ? doc.pages.map((_, i) => i) : [pageIndex]) pageDisposers.push((await mountExportPage(doc, index)).dispose);
   return true;
 }
-async function pptx(input: DesignDocument) {
-  const doc = input.kind === '3d' || input.pages.some(p => p.scene || p.nodes.some(n => n.scene)) ? input : await prepare(input), deck = new PptxGenJS(), first = doc.pages[0];
-  deck.defineLayout({ name: 'STUDIO', width: first.width / 96, height: first.height / 96 }); deck.layout = 'STUDIO'; deck.title = doc.name;
-  for (const [pageIndex, page] of doc.pages.entries()) {
-    const slide = deck.addSlide(); slide.background = { color: resolveColor(page.background, doc.theme).replace('#', '') };
-    if (usesDom(page) || page.scene || page.nodes.some(n => n.scene)) {
-      const canvas = await captureExportPage(doc, pageIndex);
-      slide.addImage({ x: 0, y: 0, w: first.width / 96, h: first.height / 96, data: canvas.toDataURL('image/png') });
-      slide.addNotes(page.notes ?? `Design Studio AI: ${page.name}. Structured components rendered as an image.`); continue;
-    }
-    const sx = first.width / page.width / 96, sy = first.height / page.height / 96;
-    for (const node of page.nodes) {
-      if (node.visible === false) continue;
-      const base = { x: node.x * sx, y: node.y * sy, w: node.width * sx, h: node.height * sy, rotate: node.rotation ?? 0, transparency: (1 - (node.opacity ?? 1)) * 100 };
-      if (node.type === 'text') {
-        slide.addText(node.text ?? '', { ...base, fontSize: Number(node.style?.fontSize ?? 24) * 0.75, fontFace: resolveFont(node.style?.fontFamily, doc.theme), color: resolveColor(node.style?.fill ?? '$text', doc.theme).replace('#', ''), bold: Number(node.style?.fontWeight ?? 400) >= 600, italic: node.style?.fontStyle === 'italic', margin: 0, breakLine: false, valign: 'top' });
-      } else if (node.type === 'shape' || node.type === 'frame') {
-        const color = resolveColor(node.style?.fill ?? '$surface', doc.theme).replace('#', '');
-        slide.addShape(node.style?.shape === 'ellipse' ? deck.ShapeType.ellipse : Number(node.style?.borderRadius) >= Math.min(node.width, node.height) / 2 ? deck.ShapeType.roundRect : deck.ShapeType.rect, { ...base, fill: { color, transparency: base.transparency }, line: { color, transparency: 100 } });
-      } else {
-        const layer: DesignDocument = { ...doc, pages: [{ ...page, width: Math.max(1, node.width), height: Math.max(1, node.height), background: 'transparent', nodes: [{ ...node, x: 0, y: 0, rotation: 0 }] }] };
-        const img = await imageOf(renderSvg(layer)), canvas = document.createElement('canvas'); canvas.width = layer.pages[0].width; canvas.height = layer.pages[0].height; canvas.getContext('2d')!.drawImage(img, 0, 0);
-        slide.addImage({ ...base, data: canvas.toDataURL('image/png') });
-      }
-    }
-    slide.addNotes(`Design Studio AI: ${page.name}. Text and primitive shapes remain editable.`);
-  }
+async function pptx(input: DesignDocument, options: { rasterize?: boolean } = {}) {
+  const scene = pageUsesScene(input, input.pages[0]) || input.pages.some(page => pageUsesScene(input, page));
+  const doc = scene ? input : await prepare(input), deck = new PptxGenJS();
+  await buildPptx(deck, doc, {
+    rasterize: options.rasterize,
+    rasterizePage: async pageIndex => (await captureExportPage(doc, pageIndex)).toDataURL('image/png'),
+    rasterizeNode: async (pageIndex, node) => {
+      // The node arrives in page space and already laid out; draw it alone at its own size.
+      const page = doc.pages[pageIndex], layer: DesignDocument = { ...doc, pages: [{ ...page, layout: undefined, width: Math.max(1, Math.round(node.width)), height: Math.max(1, Math.round(node.height)), background: 'transparent', nodes: [{ ...node, x: 0, y: 0, rotation: 0, opacity: 1, parentId: undefined, position: undefined }] }] };
+      const img = await imageOf(renderSvg(layer)), canvas = document.createElement('canvas'); canvas.width = layer.pages[0].width; canvas.height = layer.pages[0].height; canvas.getContext('2d')!.drawImage(img, 0, 0);
+      return canvas.toDataURL('image/png');
+    },
+  });
   return await deck.write({ outputType: 'base64' });
 }
 async function video(input: DesignDocument, pageIndex: number, format: 'webm' | 'mp4', options?:{start?:number;end?:number;fps?:number}) {

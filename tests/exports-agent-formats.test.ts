@@ -74,6 +74,17 @@ test('authenticated React and scene exports preserve assets, animation, ownershi
     assert.ok(zip.file('src/app/design-component.tsx')); assert.ok(zip.file('src/main.tsx'));
     assert.deepEqual(Buffer.from(await zip.file('public/assets/media-1.png')!.async('uint8array')), png);
     assert.equal(JSON.parse(await zip.file('document.json')!.async('string')).assets[0].url, '/assets/media-1.png');
+    // PowerPoint keeps text editable and embeds owned images; `rasterize` turns each slide into one picture.
+    const deck = await create(createDocument('slides', 'Editable deck'));
+    const deckMedia = await upload(deck.id); deck.document.assets.push(deckMedia);
+    deck.document.pages[0].nodes.push({ id: 'deck-media', type: 'image', name: 'Deck media', x: 0, y: 0, width: 10, height: 10, src: deckMedia.url });
+    await save(deck);
+    const slideXml = async (body: Record<string, unknown>) => {
+      const response = await request(`/api/projects/${deck.id}/export`, 'POST', { format: 'pptx', ...body }); assert.equal(response.status, 200, await response.clone().text());
+      return await (await JSZip.loadAsync(await response.arrayBuffer())).file('ppt/slides/slide1.xml')!.async('string');
+    };
+    const editable = await slideXml({}); assert.ok(editable.includes('<a:t>') && editable.includes('<p:pic>'), 'editable deck keeps text boxes and the owned image');
+    const rasterized = await slideXml({ rasterize: true }); assert.ok(!rasterized.includes('<a:t>') && rasterized.includes('<p:pic>'), 'rasterized deck is one picture per slide');
     const scene = await create(createDocument('3d', 'Textured animation'));
     const asset = await upload(scene.id); scene.document.assets.push(asset);
     const node = scene.document.pages[0].nodes.find(n => n.type === 'model3d')!;
