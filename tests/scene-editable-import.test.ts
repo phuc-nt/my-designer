@@ -143,6 +143,11 @@ test('editable import preserves real GLB geometry and animation in native docume
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
+    // This origin is a *secure* context, unlike the export renderer's `about:blank` page, so
+    // browser APIs gated on one (`crypto.randomUUID`) exist here and do not there. Passing
+    // here is therefore not evidence that the export path works; the end-to-end round-trip in
+    // `exports-agent-formats.test.ts` covers that. Keep the https origin: this test is about
+    // geometry and animation fidelity, which needs module loading to behave normally.
     await page.route('https://studio.test/', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html><body></body>' }));
     await page.goto('https://studio.test/');
     await page.addScriptTag({ content: bundle.outputFiles[0].text });

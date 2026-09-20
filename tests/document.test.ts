@@ -57,9 +57,10 @@ test('motion interpolates numeric keyframes and clamps to each end', () => {
   assert.equal(interpolateNode(node, doc, 10).opacity, 0);
 });
 test('uid still mints unique v4 ids where randomUUID is missing, as in the export renderer', () => {
-  // The renderer evaluates shared code in an `about:blank` page. That is an insecure
-  // context, so `crypto.randomUUID` is undefined there and every id-minting export used
-  // to collapse into a generic 502.
+  // Stubbing the property away only pins the shape of the fallback; it cannot prove the
+  // renderer works, because a stub is not an insecure context. The real guard is the
+  // editable-scene round-trip in `exports-agent-formats.test.ts`, which drives an actual
+  // `about:blank` page where `crypto.randomUUID` is genuinely undefined.
   const real = crypto.randomUUID;
   try {
     Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true });

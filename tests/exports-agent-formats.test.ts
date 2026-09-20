@@ -13,7 +13,7 @@ import { app } from '../server/index';
 import { FileBucket, SqliteDatabase } from '../server/node-adapters';
 import { secret } from '../server/security';
 import { createDocument } from '../src/shared/catalog';
-import type { DesignDocument } from '../src/shared/schema';
+import { documentSchema, type DesignDocument } from '../src/shared/schema';
 import type { Bindings } from '../server/types';
 import { builtStaticAssets } from './built-static-assets';
 import { embeddedDocumentFonts } from '../server/exports';
@@ -139,6 +139,42 @@ test('authenticated React and scene exports preserve assets, animation, ownershi
       assert.equal(result.meshes, true); assert.equal(result.texture, true); assert.equal(result.color, 'ff0000'); assert.equal(result.clips, 1);
       assert.ok(Math.abs(result.roughness - .7) < .00001); assert.ok(Math.abs(result.rotation - Math.PI / 4) < .00001);
     }
+    // Editable scene, against a GLB this server really exported and really stores as an asset.
+    // The renderer evaluates the shared code in an `about:blank` page, which is an insecure
+    // context where `crypto.randomUUID` does not exist, so every id this path mints comes from
+    // the `uid()` fallback. Nothing here is stubbed: minting ids was what used to throw inside
+    // the browser and surface as a generic 502, and only a real render proves it does not.
+    const glbResponse = await exportFile(scene.id, 'glb'); assert.equal(glbResponse.status, 200);
+    const glbBytes = Buffer.from(await glbResponse.arrayBuffer());
+    // A separate project so `scene` stays at revision 2 for the refusal assertions below.
+    const reimport = await create(createDocument('3d', 'Re-imported scene'));
+    const glbForm = new FormData(); glbForm.set('file', new File([glbBytes], 'scene.glb', { type: 'model/gltf-binary' }));
+    const glbUpload = await request(`/api/projects/${reimport.id}/assets`, 'POST', glbForm);
+    assert.equal(glbUpload.status, 201, await glbUpload.clone().text());
+    const glbAsset = (await glbUpload.json() as { asset: DesignDocument['assets'][number] }).asset;
+    reimport.document.assets.push(glbAsset);
+    reimport.document.pages[0].nodes.push({ id: 'glb-reimport', type: 'model3d', name: 'Re-imported', x: 0, y: 0, width: 200, height: 200, src: glbAsset.url, scene: { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] } });
+    await save(reimport);
+    const editableScene = await request(`/api/projects/${reimport.id}/export`, 'POST', { format: 'editable-scene', nodeId: 'glb-reimport', expectedRevision: 2 });
+    assert.equal(editableScene.status, 200, await editableScene.clone().text());
+    assert.equal(editableScene.headers.get('content-type'), 'application/json');
+    assert.match(editableScene.headers.get('content-disposition')!, /\.json"$/);
+    const rebuilt = documentSchema.parse(JSON.parse(await editableScene.text()));
+    // The imported node becomes a group wrapping one model3d per mesh, each carrying real
+    // `scene.mesh` geometry rather than a primitive name.
+    const wrapper = rebuilt.pages[0].nodes.find(n => n.id === 'glb-reimport')!;
+    assert.equal(wrapper.type, 'group');
+    const meshes = rebuilt.pages[0].nodes.filter(n => n.type === 'model3d' && n.scene?.mesh);
+    assert.ok(meshes.length >= 1, 'the imported GLB decomposes into editable mesh nodes');
+    for (const mesh of meshes) assert.ok((mesh.scene!.mesh as { positions?: number[] }).positions?.length, 'each mesh keeps real vertex data');
+    const mintedIds = rebuilt.pages[0].nodes.map(n => n.id);
+    assert.equal(new Set(mintedIds).size, mintedIds.length, 'every minted node id is distinct');
+    assert.ok(mintedIds.some(id => /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id)), 'ids are minted in the browser, so the insecure-context fallback ran');
+    // Caller mistakes are prechecked server-side rather than collapsing into the renderer's 502.
+    assert.equal((await request(`/api/projects/${reimport.id}/export`, 'POST', { format: 'editable-scene', expectedRevision: 2 })).status, 400);
+    assert.equal((await request(`/api/projects/${reimport.id}/export`, 'POST', { format: 'editable-scene', nodeId: 'absent', expectedRevision: 2 })).status, 404);
+    const primitive = reimport.document.pages[0].nodes.find(n => n.type === 'model3d' && !n.src)!;
+    assert.equal((await request(`/api/projects/${reimport.id}/export`, 'POST', { format: 'editable-scene', nodeId: primitive.id, expectedRevision: 2 })).status, 400);
     const server = serve({ fetch: request => app.fetch(request, bindings), hostname: '127.0.0.1', port: 0 });
     if (!server.listening) await new Promise<void>(resolve => server.once('listening', resolve));
     const address = server.address(); assert.ok(address && typeof address !== 'string');
