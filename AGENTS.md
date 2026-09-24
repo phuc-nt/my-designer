@@ -26,6 +26,7 @@ you ──bin/dsa──▶ http://localhost:<port> ◀──browser── the hu
 | Any design work: create, edit, inspect, export, hand over a link; web / slides / report / wireframe | `.claude/skills/my-designer/SKILL.md` |
 | 3D scenes: primitives, lights, PBR materials, GLB import, mesh editing (`dsa scene command`), rigs | `.claude/skills/my-designer-3d/SKILL.md` |
 | Animation: document timeline, keyframes, 2D character rigs, video / frame exports | `.claude/skills/my-designer-motion/SKILL.md` |
+| Vietnamese narrated explainer video from prepared text (HyperFrames, Gemini voice) | `.claude/skills/vi-explainer-video/SKILL.md` |
 
 Read the skill before composing anything; do not work from memory of a
 similar tool. The core skill's `references/cli.md` is the verified flag list.
