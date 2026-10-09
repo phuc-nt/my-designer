@@ -85,6 +85,7 @@ capability detail so the agent uses the whole kit instead of a subset:
 | `my-designer` | workflow, operations, 409 handling, inspection, export; references for web / slides / report / wireframe, the verified CLI flag list, and an upstream-MCP → CLI map |
 | `my-designer-3d` | scenes, lights, PBR materials, GLB import, mesh editing with `dsa scene command` (convert, remesh, loft, sculpt, loops, UV paint, rigs) |
 | `my-designer-motion` | timeline tracks and keyframes, 2D character rigs, video and frame exports |
+| `vi-explainer-video` | a Vietnamese narrated video from prepared text, rendered with HyperFrames (see below) |
 
 Skill + CLI replaces the MCP server: every upstream tool has a `bin/dsa`
 equivalent (`.claude/skills/my-designer/references/mcp-to-cli.md`).
@@ -103,12 +104,40 @@ The rules that keep this safe — revision checks, the shallow-merge
 behaviour of `update-node`, where 3D transforms live, "look at the render
 before claiming it is right" — are in [AGENTS.md](AGENTS.md).
 
+### Slides and narrated video
+
+The studio makes the slides: a deck is a document you and the agent edit, and
+it exports to `html`, `pdf` or an editable `pptx`. A narrated video is a
+different job, done outside the studio by [HyperFrames](https://hyperframes.heygen.com)
+(HTML compositions rendered to MP4) and the `vi-explainer-video` skill, which
+adds what Vietnamese needs on top of HyperFrames' explainer workflow: fonts with
+diacritics, a voice, captions that follow the script, three visual presets and
+five ready-made scene templates.
+
+```text
+text ─▶ script ─▶ voice (Gemini, or a voice cloned on this machine)
+                  ─▶ storyboard ─▶ frames ─▶ music + sound effects ─▶ MP4
+```
+
+A deck and a video of the same content come from the same source text; ask
+for both and the agent uses each tool for its own part. What the video skill
+needs on top of Node: HyperFrames (`npx`, nothing to install first), `ffmpeg`,
+and either a `GEMINI_API_KEY` or a local VoiceStudio for the voice. A cloned
+voice comes with consent terms the agent must follow; they are in the skill's
+`references/voices.md`. Video projects live in `videos/`, which is git-ignored,
+so voices, music and renders stay out of git.
+
+The agent cannot hear the audio or watch the motion. It checks stills,
+loudness numbers and a whisper transcript, and says what it could not verify;
+listen to the result before publishing.
+
 ## Layout
 
 ```
 bootstrap.mjs          setup / status / stop
 bin/dsa                CLI wrapper that reads the URL from .env.local
-.claude/skills/        agent skills (core, 3d, motion) + design references
+.claude/skills/        agent skills (core, 3d, motion, vi-explainer-video) + design references
+videos/                narrated video projects (git-ignored, created on demand)
 server/                Hono API on Node (SQLite in data/)
 src/                   React editor and renderer
 packages/cli/          the dsa CLI

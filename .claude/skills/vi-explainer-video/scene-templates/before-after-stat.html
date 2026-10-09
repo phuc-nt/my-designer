@@ -1,0 +1,103 @@
+<!--
+  before-after-stat: one number before and one number after, side by side, then a one-line conclusion.
+  Scene template of the vi-explainer-video skill. Adapted from templates/before-after-stat of
+  nutllwhy/hyperframes-motion-library (MIT License, Copyright (c) 2026 栗噔噔 (nutllwhy));
+  the full notice is in LICENSE-hyperframes-motion-library.txt. Changed here: frame format
+  of faceless-explainer, Vietnamese fonts and copy, content kept above the caption zone,
+  cue times taken from the narration, no exit animation.
+
+  To use it for frame NN (see README.md in this folder):
+    1. copy to compositions/frames/NN-slug.html; replace every "fNN-" with the frame prefix
+       (f03-) and every "NN-slug" with the frame id;
+    2. replace the tokens and the @font-face lines with those of the project's frame.md;
+    3. replace the copy: label, two tags, two values with their units (values of at most 3 characters), conclusion;
+    4. set T to the word starts of this frame (label, the before number, the after number, the conclusion) and END to its duration.
+-->
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-VN.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: block; }
+    @font-face { font-family: "JetBrains Mono"; src: url("assets/fonts/JetBrainsMono-VN.woff2") format("woff2"); font-weight: 100 800; font-style: normal; font-display: block; }
+
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+    }
+    /* tokens: ground, text, secondary text (>= 4.5:1 on the ground), accent, text on the accent, rules */
+    .fNN-bg, .fNN-scene {
+      --st-ground: #12100E;
+      --st-ink: #F4EFE7;
+      --st-muted: #B8ADA2;
+      --st-accent: #FF5A36;
+      --st-on-accent: #12100E;
+      --st-line: rgba(244, 239, 231, 0.26);
+      --st-display: "Inter", sans-serif;
+      --st-mono: "JetBrains Mono", monospace;
+    }
+    .fNN-bg { position: absolute; inset: 0; background: var(--st-ground); }
+    /* content box: ends at y = 862, above the caption zone (y > 896) */
+    .fNN-scene {
+      position: absolute;
+      left: 108px;
+      top: 72px;
+      width: 1704px;
+      height: 790px;
+      box-sizing: border-box;
+      font-family: var(--st-display);
+      color: var(--st-ink);
+    }
+    .fNN-scene * { box-sizing: border-box; }
+    .fNN-topbar { position: absolute; left: 0; top: 0; width: 1704px; height: 8px; background: var(--st-line); }
+    .fNN-topbar-fill { width: 38%; height: 100%; background: var(--st-accent); transform-origin: left center; }
+
+    .fNN-label { position: absolute; left: 0; top: 52px; width: 1704px; font-size: 46px; font-weight: 700; line-height: 1.2; color: var(--st-muted); opacity: 0; }
+    .fNN-box { position: absolute; top: 160px; width: 730px; height: 470px; padding: 34px 0 0 8px; opacity: 0; }
+    .fNN-before { left: 0; border-bottom: 4px solid var(--st-line); }
+    .fNN-after { left: 974px; border-bottom: 8px solid var(--st-accent); }
+    .fNN-tag { font-family: var(--st-mono); font-size: 32px; font-weight: 800; line-height: 1.2; letter-spacing: 0.06em; color: var(--st-muted); }
+    .fNN-after .fNN-tag { color: var(--st-accent); }
+    .fNN-num { position: absolute; left: 8px; bottom: 54px; display: flex; align-items: baseline; gap: 22px; }
+    .fNN-value { font-size: 250px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; transform-origin: left bottom; }
+    .fNN-after .fNN-value, .fNN-after .fNN-unit { color: var(--st-accent); }
+    .fNN-unit { font-size: 72px; font-weight: 800; line-height: 1.2; }
+    .fNN-arrow { position: absolute; left: 790px; top: 340px; width: 124px; height: 124px; display: grid; place-items: center; border: 3px solid var(--st-accent); color: var(--st-accent); font-size: 60px; font-weight: 800; line-height: 1; opacity: 0; }
+    .fNN-conclusion { position: absolute; left: 0; top: 678px; width: 1704px; padding-top: 28px; border-top: 1px solid var(--st-line); font-size: 44px; font-weight: 700; line-height: 1.25; opacity: 0; }
+  </style>
+
+  <div id="root" data-composition-id="NN-slug" data-width="1920" data-height="1080" data-duration="6.5">
+    <div id="fNN-bg" class="clip fNN-bg" data-start="0" data-duration="6.5" data-track-index="0"></div>
+    <div class="fNN-scene">
+      <div class="fNN-topbar" data-layout-ignore><div class="fNN-topbar-fill"></div></div>
+      <div class="fNN-label">Thời gian viết một báo cáo tuần</div>
+      <div class="fNN-box fNN-before"><div class="fNN-tag">TRƯỚC</div><div class="fNN-num"><span class="fNN-value">4</span><span class="fNN-unit">giờ</span></div></div>
+      <div class="fNN-arrow" data-layout-ignore>→</div>
+      <div class="fNN-box fNN-after"><div class="fNN-tag">SAU</div><div class="fNN-num"><span class="fNN-value">25</span><span class="fNN-unit">phút</span></div></div>
+      <div class="fNN-conclusion">Cùng một báo cáo, thời gian còn khoảng một phần mười.</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      // seconds from the start of the frame: when the narration reaches each part
+      var T = { label: 0.3, before: 1.2, after: 2.8, conclusion: 4.6 };
+      var END = 6.5;
+
+      tl.fromTo(".fNN-topbar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, 0.1);
+      tl.fromTo(".fNN-label", { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, T.label);
+      tl.fromTo(".fNN-before", { opacity: 0, x: -70 }, { opacity: 1, x: 0, duration: 0.55, ease: "expo.out" }, T.before);
+      tl.fromTo(".fNN-arrow", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.8)" }, T.after - 0.25);
+      tl.fromTo(".fNN-after", { opacity: 0, x: 70 }, { opacity: 1, x: 0, duration: 0.55, ease: "expo.out" }, T.after);
+      tl.fromTo(".fNN-after .fNN-value", { scale: 0.6 }, { scale: 1, duration: 0.6, ease: "back.out(1.6)" }, T.after + 0.05);
+      tl.fromTo(".fNN-conclusion", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.44, ease: "power3.out" }, T.conclusion);
+
+      // hold still to the end of the frame
+      tl.set({}, {}, END);
+      window.__timelines["NN-slug"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,103 @@
+<!--
+  three-step-flow: a title and three steps that light up one after another along a rail.
+  Scene template of the vi-explainer-video skill. Adapted from templates/three-step-flow of
+  nutllwhy/hyperframes-motion-library (MIT License, Copyright (c) 2026 栗噔噔 (nutllwhy));
+  the full notice is in LICENSE-hyperframes-motion-library.txt. Changed here: frame format
+  of faceless-explainer, Vietnamese fonts and copy, content kept above the caption zone,
+  cue times taken from the narration, no exit animation.
+
+  To use it for frame NN (see README.md in this folder):
+    1. copy to compositions/frames/NN-slug.html; replace every "fNN-" with the frame prefix
+       (f03-) and every "NN-slug" with the frame id;
+    2. replace the tokens and the @font-face lines with those of the project's frame.md;
+    3. replace the copy: title, three step names (<= 18 characters each) and three one-line descriptions;
+    4. set T to the word starts of this frame (title, step 1, step 2, step 3) and END to its duration.
+-->
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-VN.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: block; }
+    @font-face { font-family: "JetBrains Mono"; src: url("assets/fonts/JetBrainsMono-VN.woff2") format("woff2"); font-weight: 100 800; font-style: normal; font-display: block; }
+
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+    }
+    /* tokens: ground, text, secondary text (>= 4.5:1 on the ground), accent, text on the accent, rules */
+    .fNN-bg, .fNN-scene {
+      --st-ground: #12100E;
+      --st-ink: #F4EFE7;
+      --st-muted: #B8ADA2;
+      --st-accent: #FF5A36;
+      --st-on-accent: #12100E;
+      --st-line: rgba(244, 239, 231, 0.26);
+      --st-display: "Inter", sans-serif;
+      --st-mono: "JetBrains Mono", monospace;
+    }
+    .fNN-bg { position: absolute; inset: 0; background: var(--st-ground); }
+    /* content box: ends at y = 862, above the caption zone (y > 896) */
+    .fNN-scene {
+      position: absolute;
+      left: 108px;
+      top: 72px;
+      width: 1704px;
+      height: 790px;
+      box-sizing: border-box;
+      font-family: var(--st-display);
+      color: var(--st-ink);
+    }
+    .fNN-scene * { box-sizing: border-box; }
+    .fNN-topbar { position: absolute; left: 0; top: 0; width: 1704px; height: 8px; background: var(--st-line); }
+    .fNN-topbar-fill { width: 38%; height: 100%; background: var(--st-accent); transform-origin: left center; }
+
+    .fNN-title { position: absolute; left: 0; top: 56px; width: 1704px; margin: 0; font-size: 76px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; opacity: 0; }
+    .fNN-rail { position: absolute; left: 0; top: 289px; width: 1704px; height: 5px; background: var(--st-line); }
+    .fNN-rail-fill { width: 100%; height: 100%; background: var(--st-accent); transform-origin: left center; transform: scaleX(0); }
+    .fNN-steps { position: absolute; left: 0; top: 250px; width: 1704px; height: 540px; display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 36px; }
+    .fNN-step { position: relative; padding: 150px 24px 0 0; border-bottom: 4px solid var(--st-line); opacity: 0; }
+    .fNN-step:last-child { border-bottom: 8px solid var(--st-accent); }
+    .fNN-index { position: absolute; left: 0; top: 0; width: 82px; height: 82px; display: grid; place-items: center; background: var(--st-accent); color: var(--st-on-accent); font-family: var(--st-mono); font-size: 32px; font-weight: 800; }
+    .fNN-step-title { margin: 0 0 22px; font-size: 52px; font-weight: 800; line-height: 1.18; letter-spacing: -0.02em; }
+    .fNN-desc { margin: 0; color: var(--st-muted); font-size: 33px; font-weight: 600; line-height: 1.42; }
+  </style>
+
+  <div id="root" data-composition-id="NN-slug" data-width="1920" data-height="1080" data-duration="7">
+    <div id="fNN-bg" class="clip fNN-bg" data-start="0" data-duration="7" data-track-index="0"></div>
+    <div class="fNN-scene">
+      <div class="fNN-topbar" data-layout-ignore><div class="fNN-topbar-fill"></div></div>
+      <h1 class="fNN-title">Ba bước để giải thích một ý tưởng</h1>
+      <div class="fNN-rail" data-layout-ignore><div class="fNN-rail-fill"></div></div>
+      <div class="fNN-steps">
+        <article class="fNN-step" id="fNN-step-1"><div class="fNN-index">01</div><h2 class="fNN-step-title">Nêu vấn đề</h2><p class="fNN-desc">Trước hết, nói nó giải quyết điều gì</p></article>
+        <article class="fNN-step" id="fNN-step-2"><div class="fNN-index">02</div><h2 class="fNN-step-title">Mở cơ chế</h2><p class="fNN-desc">Rồi giải thích vì sao nó đúng</p></article>
+        <article class="fNN-step" id="fNN-step-3"><div class="fNN-index">03</div><h2 class="fNN-step-title">Chỉ việc cần làm</h2><p class="fNN-desc">Cuối cùng, chốt bằng một hành động</p></article>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      // seconds from the start of the frame: the word starts of the title and of each step
+      var T = { title: 0.3, steps: [1.4, 3.0, 4.6] };
+      var END = 7;
+
+      tl.fromTo(".fNN-topbar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, 0.1);
+      tl.fromTo(".fNN-title", { opacity: 0, x: -36 }, { opacity: 1, x: 0, duration: 0.45, ease: "circ.out" }, T.title);
+      T.steps.forEach(function (t, i) {
+        var step = "#fNN-step-" + (i + 1);
+        tl.fromTo(".fNN-rail-fill", { scaleX: i / 3 }, { scaleX: (i + 1) / 3, duration: 0.7, ease: "power3.inOut", immediateRender: false }, t);
+        tl.fromTo(step, { opacity: 0, y: 42 }, { opacity: 1, y: 0, duration: 0.56, ease: "back.out(1.2)" }, t);
+        tl.fromTo(step + " .fNN-index", { scale: 0 }, { scale: 1, duration: 0.38, ease: "back.out(2)" }, t + 0.12);
+      });
+
+      // hold still to the end of the frame
+      tl.set({}, {}, END);
+      window.__timelines["NN-slug"] = tl;
+    })();
+  </script>
+</template>

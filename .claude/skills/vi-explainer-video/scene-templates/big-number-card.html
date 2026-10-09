@@ -1,0 +1,94 @@
+<!--
+  big-number-card: one very large number with a lead-in line and a one-sentence explanation.
+  Scene template of the vi-explainer-video skill. Adapted from templates/big-number-card of
+  nutllwhy/hyperframes-motion-library (MIT License, Copyright (c) 2026 栗噔噔 (nutllwhy));
+  the full notice is in LICENSE-hyperframes-motion-library.txt. Changed here: frame format
+  of faceless-explainer, Vietnamese fonts and copy, content kept above the caption zone,
+  cue times taken from the narration, no exit animation.
+
+  To use it for frame NN (see README.md in this folder):
+    1. copy to compositions/frames/NN-slug.html; replace every "fNN-" with the frame prefix
+       (f03-) and every "NN-slug" with the frame id;
+    2. replace the tokens and the @font-face lines with those of the project's frame.md;
+    3. replace the copy: eyebrow, lead-in line, value (at most 3 characters) and unit, explanation (at most 3 lines);
+    4. set T to the word starts of this frame (eyebrow, lead-in, the number, the explanation) and END to its duration.
+-->
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-VN.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: block; }
+    @font-face { font-family: "JetBrains Mono"; src: url("assets/fonts/JetBrainsMono-VN.woff2") format("woff2"); font-weight: 100 800; font-style: normal; font-display: block; }
+
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+    }
+    /* tokens: ground, text, secondary text (>= 4.5:1 on the ground), accent, text on the accent, rules */
+    .fNN-bg, .fNN-scene {
+      --st-ground: #12100E;
+      --st-ink: #F4EFE7;
+      --st-muted: #B8ADA2;
+      --st-accent: #FF5A36;
+      --st-on-accent: #12100E;
+      --st-line: rgba(244, 239, 231, 0.26);
+      --st-display: "Inter", sans-serif;
+      --st-mono: "JetBrains Mono", monospace;
+    }
+    .fNN-bg { position: absolute; inset: 0; background: var(--st-ground); }
+    /* content box: ends at y = 862, above the caption zone (y > 896) */
+    .fNN-scene {
+      position: absolute;
+      left: 108px;
+      top: 72px;
+      width: 1704px;
+      height: 790px;
+      box-sizing: border-box;
+      font-family: var(--st-display);
+      color: var(--st-ink);
+    }
+    .fNN-scene * { box-sizing: border-box; }
+    .fNN-topbar { position: absolute; left: 0; top: 0; width: 1704px; height: 8px; background: var(--st-line); }
+    .fNN-topbar-fill { width: 38%; height: 100%; background: var(--st-accent); transform-origin: left center; }
+
+    .fNN-eyebrow { position: absolute; left: 0; top: 58px; padding: 12px 18px; border: 2px solid var(--st-accent); color: var(--st-accent); font-family: var(--st-mono); font-size: 26px; font-weight: 800; line-height: 1.2; letter-spacing: 0.08em; opacity: 0; }
+    .fNN-prefix { position: absolute; left: 0; top: 200px; width: 940px; font-size: 80px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; opacity: 0; }
+    .fNN-number { position: absolute; left: 0; bottom: 20px; display: flex; align-items: baseline; gap: 24px; transform-origin: left bottom; opacity: 0; }
+    .fNN-value { color: var(--st-accent); font-size: 340px; font-weight: 900; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+    .fNN-unit { color: var(--st-accent); font-size: 110px; font-weight: 800; line-height: 1.1; }
+    .fNN-caption { position: absolute; left: 1040px; bottom: 60px; width: 664px; padding: 36px 0 0 48px; border-top: 2px solid var(--st-line); border-left: 2px solid var(--st-line); font-size: 44px; font-weight: 600; line-height: 1.42; opacity: 0; }
+  </style>
+
+  <div id="root" data-composition-id="NN-slug" data-width="1920" data-height="1080" data-duration="6">
+    <div id="fNN-bg" class="clip fNN-bg" data-start="0" data-duration="6" data-track-index="0"></div>
+    <div class="fNN-scene">
+      <div class="fNN-topbar" data-layout-ignore><div class="fNN-topbar-fill"></div></div>
+      <div class="fNN-eyebrow">KẾT QUẢ</div>
+      <div class="fNN-prefix">Thời gian xử lý giảm</div>
+      <div class="fNN-number"><span class="fNN-value">72</span><span class="fNN-unit">%</span></div>
+      <div class="fNN-caption">Nhờ gom các bước lặp lại vào một quy trình tự động.</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      // seconds from the start of the frame: when the narration reaches each part
+      var T = { eyebrow: 0.3, prefix: 0.6, number: 1.6, caption: 3.2 };
+      var END = 6;
+
+      tl.fromTo(".fNN-topbar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, 0.1);
+      tl.fromTo(".fNN-eyebrow", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, T.eyebrow);
+      tl.fromTo(".fNN-prefix", { opacity: 0, y: 35 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, T.prefix);
+      tl.fromTo(".fNN-number", { opacity: 0, scale: 0.55 }, { opacity: 1, scale: 1, duration: 0.75, ease: "back.out(1.5)" }, T.number);
+      tl.fromTo(".fNN-caption", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, T.caption);
+
+      // hold still to the end of the frame
+      tl.set({}, {}, END);
+      window.__timelines["NN-slug"] = tl;
+    })();
+  </script>
+</template>

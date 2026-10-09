@@ -31,3 +31,6 @@ kit/env.local.sh
 
 # my-designer local state: real token, password and server pid. Never commit.
 .local/
+
+# HyperFrames video projects (vi-explainer-video skill): voice, music, renders.
+/videos/

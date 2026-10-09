@@ -1,12 +1,20 @@
 # Font tiếng Việt
 
-Skill kèm sẵn ba font trong `assets/fonts/`: subset latin + vietnamese, dạng woff2 variable, giấy phép OFL. Chúng được ghép với preset `code-editorial`:
+Skill kèm sẵn chín tệp font trong `assets/fonts/`: subset latin + vietnamese, dạng woff2, giấy phép OFL (tệp `OFL-*.txt` cùng thư mục). Bước 1 của SKILL.md chép tất cả vào dự án.
 
-| Tệp | Họ font | Trục weight |
-|---|---|---|
-| `EBGaramond-VN.woff2` | EB Garamond (serif tiêu đề) | 400–800 |
-| `Inter-VN.woff2` | Inter (chữ thân) | 100–900 |
-| `JetBrainsMono-VN.woff2` | JetBrains Mono (nhãn, tên tệp, lệnh) | 100–800 |
+| Tệp | Họ font | Trục weight | Dùng cho |
+|---|---|---|---|
+| `EBGaramond-VN.woff2` | EB Garamond (serif) | 400–800 | tiêu đề `code-editorial`; chữ nghiêng nhấn của `glass-keynote` |
+| `Inter-VN.woff2` | Inter | 100–900 | chữ thân `code-editorial`, `comic-multiverse` |
+| `JetBrainsMono-VN.woff2` | JetBrains Mono | 100–800 | nhãn, tên tệp, lệnh (cả ba) |
+| `PlusJakartaSans-VN.woff2` | Plus Jakarta Sans | 200–800 | mọi chữ của `glass-keynote` |
+| `Anton-VN.woff2` | Anton (condensed, in hoa) | 400 | tiêu đề `comic-multiverse` |
+| `Bangers-VN.woff2` | Bangers (chữ truyện tranh) | 400 | nhãn, từ tượng thanh `comic-multiverse` |
+| `VT323-VN.woff2` | VT323 (pixel, kiểu terminal cũ) | 400 | thanh tiêu đề, nhãn, tiêu đề lớn `win95-pixel` |
+| `BeVietnamPro-Medium-VN.woff2` | Be Vietnam Pro | 500 | chữ thân, giao diện `win95-pixel` |
+| `BeVietnamPro-Bold-VN.woff2` | Be Vietnam Pro | 700 | nút, chữ đậm, phụ đề `win95-pixel` |
+
+Ba preset trong `presets/` (`glass-keynote`, `comic-multiverse`, `win95-pixel`) đã có sẵn block `@font-face` trong `FRAME.md`, nên **không** cần làm bước 2 bên dưới. Block bên dưới dành cho preset `code-editorial` của faceless.
 
 Phạm vi glyph:
 
@@ -15,7 +23,9 @@ Phạm vi glyph:
 - Dấu kết hợp và General Punctuation.
 - Ký hiệu ₫ €.
 - Mũi tên (U+2190–21FF), toán tử (U+2200–22FF), hình học (U+25A0–25FF).
-- ✓ ✗ ✱.
+- ✓ ✗ ✱ (EB Garamond, Inter, JetBrains Mono).
+
+Anton, Bangers và Plus Jakarta Sans không có ✓ ✗ ✱; Bangers còn thiếu mũi tên. VT323 và Be Vietnam Pro không có mũi tên, ✓ ✗ ▶ ■ ● và ×; Be Vietnam Pro chỉ có hai độ đậm 500 và 700 (tệp tĩnh, không phải variable). Đặt các ký hiệu này bằng Inter hoặc JetBrains Mono.
 
 ## Cài vào dự án video
 

@@ -26,6 +26,7 @@ for agents *designing* with it.
 | Maintain the public documentation portal and discovery output | [Web documentation](web-documentation.md) |
 | See what was ported from upstream and the generators, and what comes next | [Roadmap](roadmap.md) |
 | Read about the multi-user sharing surface this kit leaves switched off | [Community](community.md) |
+| See what one real narrated-video run used, how long it took and what it left unchecked (Vietnamese) | [Narrated video practice](narrated-video-practice.md) |
 
 There is no deployment guide: this kit runs on one machine through
 [`bootstrap.mjs`](../bootstrap.mjs), which the root README documents. Upstream's hosting,

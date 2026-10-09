@@ -16,7 +16,7 @@ audience: "<ai sẽ xem, họ đã biết gì>"
 length: <ước lượng>s          # ~3 từ/giây lời đọc
 angle: concept            # concept | how-to | listicle | story
 narration: yes
-voice: Orus               # Orus (mặc định) | Kore | Aoede | Charon — xem references/voices.md
+voice: Leda               # Leda (mặc định) | Orus | Kore | Aoede | Charon | clone:<tên profile VoiceStudio> — xem references/voices.md
 ---
 
 ## Intent
@@ -27,6 +27,7 @@ Nội dung lấy từ <tệp đầu vào>. Được viết lại cho dễ nghe, 
 ## Notes
 
 - Giọng Gemini TTS (`gemini-3.8-flash-tts`), giọng ở `voice:`. Phụ đề căn theo chữ kịch bản; nhạc nền Lyria dài bằng lời đọc.
+  (Với `voice: clone:<tên>`: ghi "Giọng nhân bản chạy trên máy (VoiceStudio, OmniVoice), chủ giọng đã duyệt kịch bản; video phi thương mại.")
 - Không nêu số liệu cá nhân, token hay đường dẫn riêng.
 - <ràng buộc riêng: màu thương hiệu, thuật ngữ phải giữ nguyên, URL/lệnh được phép hiện…>
 ```

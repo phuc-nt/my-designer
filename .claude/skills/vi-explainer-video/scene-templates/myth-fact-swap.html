@@ -1,0 +1,105 @@
+<!--
+  myth-fact-swap: a common belief is struck out and the fact takes its place.
+  Scene template of the vi-explainer-video skill. Adapted from templates/myth-fact-swap of
+  nutllwhy/hyperframes-motion-library (MIT License, Copyright (c) 2026 栗噔噔 (nutllwhy));
+  the full notice is in LICENSE-hyperframes-motion-library.txt. Changed here: frame format
+  of faceless-explainer, Vietnamese fonts and copy, content kept above the caption zone,
+  cue times taken from the narration, no exit animation.
+
+  To use it for frame NN (see README.md in this folder):
+    1. copy to compositions/frames/NN-slug.html; replace every "fNN-" with the frame prefix
+       (f03-) and every "NN-slug" with the frame id;
+    2. replace the tokens and the @font-face lines with those of the project's frame.md;
+    3. replace the copy: two labels, the myth and the fact (each at most 3 lines of about 12 characters), closing line;
+    4. set T to the word starts of this frame (the myth, the turn ("nhưng", "thật ra"), the fact, the closing line) and END to its duration.
+-->
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-VN.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: block; }
+    @font-face { font-family: "JetBrains Mono"; src: url("assets/fonts/JetBrainsMono-VN.woff2") format("woff2"); font-weight: 100 800; font-style: normal; font-display: block; }
+
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+    }
+    /* tokens: ground, text, secondary text (>= 4.5:1 on the ground), accent, text on the accent, rules */
+    .fNN-bg, .fNN-scene {
+      --st-ground: #12100E;
+      --st-ink: #F4EFE7;
+      --st-muted: #B8ADA2;
+      --st-accent: #FF5A36;
+      --st-on-accent: #12100E;
+      --st-line: rgba(244, 239, 231, 0.26);
+      --st-display: "Inter", sans-serif;
+      --st-mono: "JetBrains Mono", monospace;
+    }
+    .fNN-bg { position: absolute; inset: 0; background: var(--st-ground); }
+    /* content box: ends at y = 862, above the caption zone (y > 896) */
+    .fNN-scene {
+      position: absolute;
+      left: 108px;
+      top: 72px;
+      width: 1704px;
+      height: 790px;
+      box-sizing: border-box;
+      font-family: var(--st-display);
+      color: var(--st-ink);
+    }
+    .fNN-scene * { box-sizing: border-box; }
+    .fNN-topbar { position: absolute; left: 0; top: 0; width: 1704px; height: 8px; background: var(--st-line); }
+    .fNN-topbar-fill { width: 38%; height: 100%; background: var(--st-accent); transform-origin: left center; }
+
+    .fNN-card { position: absolute; top: 60px; height: 560px; padding: 40px 0 0 8px; opacity: 0; }
+    .fNN-myth { left: 0; width: 700px; border-bottom: 4px solid var(--st-line); }
+    .fNN-fact { left: 924px; width: 780px; border-bottom: 8px solid var(--st-accent); }
+    .fNN-label { font-family: var(--st-mono); font-size: 30px; font-weight: 800; line-height: 1.2; letter-spacing: 0.06em; color: var(--st-accent); }
+    .fNN-text-wrap { position: relative; display: inline-block; margin-top: 44px; }
+    .fNN-text { margin: 0; font-size: 88px; font-weight: 800; line-height: 1.18; letter-spacing: -0.02em; }
+    .fNN-myth .fNN-text { color: var(--st-muted); }
+    .fNN-strike { position: absolute; left: -12px; right: -12px; top: 50%; height: 7px; margin-top: -3px; background: var(--st-accent); transform-origin: left center; transform: rotate(-6deg) scaleX(0); }
+    .fNN-swap { position: absolute; left: 758px; top: 286px; width: 108px; height: 108px; display: grid; place-items: center; border: 3px solid var(--st-accent); color: var(--st-accent); font-size: 56px; font-weight: 800; line-height: 1; opacity: 0; }
+    .fNN-caption { position: absolute; left: 0; top: 668px; width: 1704px; padding-top: 28px; border-top: 1px solid var(--st-line); font-size: 42px; font-weight: 700; line-height: 1.25; opacity: 0; }
+  </style>
+
+  <div id="root" data-composition-id="NN-slug" data-width="1920" data-height="1080" data-duration="7">
+    <div id="fNN-bg" class="clip fNN-bg" data-start="0" data-duration="7" data-track-index="0"></div>
+    <div class="fNN-scene">
+      <div class="fNN-topbar" data-layout-ignore><div class="fNN-topbar-fill"></div></div>
+      <article class="fNN-card fNN-myth">
+        <div class="fNN-label">NGỘ NHẬN</div>
+        <div class="fNN-text-wrap"><p class="fNN-text" data-layout-allow-occlusion>AI hiểu<br />mọi điều<br />bạn nói</p><div class="fNN-strike" data-layout-ignore></div></div>
+      </article>
+      <div class="fNN-swap" data-layout-ignore>→</div>
+      <article class="fNN-card fNN-fact">
+        <div class="fNN-label">SỰ THẬT</div>
+        <div class="fNN-text-wrap"><p class="fNN-text">AI đoán từ<br />tiếp theo</p></div>
+      </article>
+      <div class="fNN-caption">Hiểu đúng cơ chế thì đặt câu hỏi tốt hơn.</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      // seconds from the start of the frame: when the narration reaches each part
+      var T = { myth: 0.3, turn: 2.4, fact: 2.9, caption: 4.8 };
+      var END = 7;
+
+      tl.fromTo(".fNN-topbar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, 0.1);
+      tl.fromTo(".fNN-myth", { opacity: 0, x: -70 }, { opacity: 1, x: 0, duration: 0.62, ease: "expo.out" }, T.myth);
+      tl.fromTo(".fNN-strike", { rotation: -6, scaleX: 0 }, { rotation: -6, scaleX: 1, duration: 0.36, ease: "power4.out" }, T.turn);
+      tl.fromTo(".fNN-swap", { opacity: 0, scale: 0.6, rotation: -45 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.48, ease: "back.out(1.8)" }, T.turn + 0.18);
+      tl.fromTo(".fNN-fact", { opacity: 0, x: 80 }, { opacity: 1, x: 0, duration: 0.68, ease: "power4.out" }, T.fact);
+      tl.fromTo(".fNN-caption", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.44, ease: "power3.out" }, T.caption);
+
+      // hold still to the end of the frame
+      tl.set({}, {}, END);
+      window.__timelines["NN-slug"] = tl;
+    })();
+  </script>
+</template>
