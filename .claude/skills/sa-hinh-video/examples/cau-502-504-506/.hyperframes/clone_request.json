@@ -1,0 +1,405 @@
+{
+ "profile": "<tên profile>",
+ "gap_s": 0.3,
+ "tail_s": 0.5,
+ "lines": [
+  {
+   "id": "01",
+   "tail_s": 0.7,
+   "segments": [
+    "Trong sách ôn thi, mỗi câu sa hình chỉ là một tấm hình đứng yên.",
+    "Mũi tên vẽ sẵn, còn xe chạy thế nào thì bạn phải tự tưởng tượng.",
+    {
+     "script": "Hôm nay, các xe sẽ chạy thật.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Ba câu sa hình, ba kiểu tình huống.",
+     "gap_s": 0.9
+    },
+    {
+     "script": "Mỗi câu, ta đi bốn bước:",
+     "say": "Mỗi câu, ta đi bốn bước.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "đọc đề, tìm quy tắc, xem xe chạy, rồi chốt đáp án.",
+     "say": "Đọc đề, tìm quy tắc, xem xe chạy, rồi chốt đáp án.",
+     "gap_s": 0.25
+    }
+   ]
+  },
+  {
+   "id": "02",
+   "tail_s": 2.6,
+   "segments": [
+    {
+     "script": "Câu 502.",
+     "say": "Câu năm trăm lẻ hai."
+    },
+    {
+     "script": "Theo tín hiệu đèn, xe tải đi theo hướng nào là đúng quy tắc giao thông?",
+     "gap_s": 0.45
+    },
+    {
+     "script": "Một: hướng 2, 3, 4.",
+     "say": "Một: hướng hai, ba, bốn.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Hai: chỉ hướng 1.",
+     "say": "Hai: chỉ hướng một.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Ba: hướng 1 và 2.",
+     "say": "Ba: hướng một và hai.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Bốn: hướng 3 và 4.",
+     "say": "Bốn: hướng ba và bốn.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Bạn chọn phương án nào?",
+     "gap_s": 0.7
+    }
+   ]
+  },
+  {
+   "id": "03",
+   "tail_s": 0.8,
+   "segments": [
+    "Nhìn vào cột đèn.",
+    {
+     "script": "Đèn chính đang đỏ, nghĩa là xe tải phải dừng.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Nhưng bên cạnh còn một đèn phụ:",
+     "say": "Nhưng bên cạnh còn một đèn phụ.",
+     "gap_s": 0.6
+    },
+    {
+     "script": "mũi tên màu xanh, chỉ sang phải.",
+     "say": "Mũi tên màu xanh, chỉ sang phải.",
+     "gap_s": 0.25
+    },
+    {
+     "script": "Đèn phụ này cho phép xe đi, nhưng chỉ đi đúng theo hướng mũi tên.",
+     "gap_s": 0.6
+    }
+   ]
+  },
+  {
+   "id": "04",
+   "tail_s": 5.1,
+   "segments": [
+    "Thử hướng bốn, vòng sang trái.",
+    {
+     "script": "Mũi tên không chỉ về đó, nên sai.",
+     "gap_s": 4.4
+    },
+    {
+     "script": "Hướng ba, đi thẳng.",
+     "gap_s": 1
+    },
+    {
+     "script": "Cũng không phải hướng mũi tên, nên sai.",
+     "gap_s": 2.95
+    },
+    {
+     "script": "Hướng hai cũng rẽ phải, nhưng là rẽ muộn.",
+     "gap_s": 1
+    },
+    {
+     "script": "Xe phải đi thẳng vào giữa nút giao, rồi mới rẽ sang bên kia dải phân cách.",
+     "gap_s": 0.3
+    },
+    {
+     "script": "Mũi tên xanh không chỉ lối đó, nên sai.",
+     "gap_s": 0.7
+    },
+    {
+     "script": "Còn hướng một:",
+     "say": "Còn hướng một.",
+     "gap_s": 1.1
+    },
+    {
+     "script": "rẽ phải ngay tại góc đường, đúng theo mũi tên xanh.",
+     "say": "Rẽ phải ngay tại góc đường, đúng theo mũi tên xanh.",
+     "gap_s": 0.25
+    },
+    {
+     "script": "Xe tải đi.",
+     "gap_s": 0.6
+    }
+   ]
+  },
+  {
+   "id": "05",
+   "tail_s": 1.2,
+   "segments": [
+    {
+     "script": "Đáp án là phương án hai: chỉ hướng 1.",
+     "say": "Đáp án là phương án hai: chỉ hướng một."
+    },
+    {
+     "script": "Nhớ nhé: đèn chính đỏ thì dừng.",
+     "gap_s": 0.7
+    },
+    "Chỉ đi khi đèn phụ cho phép, và đi đúng hướng mũi tên."
+   ]
+  },
+  {
+   "id": "06",
+   "tail_s": 2.6,
+   "segments": [
+    {
+     "script": "Câu 504.",
+     "say": "Câu năm trăm lẻ bốn.",
+     "seed": 42,
+     "cfg": 2
+    },
+    {
+     "script": "Theo hướng mũi tên, thứ tự các xe đi như thế nào là đúng quy tắc giao thông?",
+     "gap_s": 0.45
+    },
+    {
+     "script": "Một: xe khách, xe tải, xe mô tô, xe con.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Hai: xe con, xe khách, xe tải, xe mô tô.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Ba: xe mô tô, xe tải, xe khách, xe con.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Bốn: xe mô tô, xe tải, xe con, xe khách.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Bạn chọn phương án nào?",
+     "gap_s": 0.7
+    }
+   ]
+  },
+  {
+   "id": "07",
+   "tail_s": 0.8,
+   "segments": [
+    "Đây là một vòng xuyến, với bốn xe cùng muốn vào.",
+    {
+     "script": "Trong hình không có biển báo đi theo vòng xuyến.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Vậy ta áp dụng quy tắc:",
+     "say": "Vậy, ta áp dụng quy tắc.",
+     "gap_s": 0.6
+    },
+    {
+     "script": "nhường đường cho xe đi đến từ bên phải.",
+     "say": "Nhường đường cho xe đi đến từ bên phải.",
+     "gap_s": 0.25
+    },
+    {
+     "script": "Xe nào có bên phải trống, xe đó đi trước.",
+     "gap_s": 0.6
+    }
+   ]
+  },
+  {
+   "id": "08",
+   "tail_s": 13,
+   "segments": [
+    "Xe mô tô trước.",
+    {
+     "script": "Bên phải của mô tô không có xe nào, nên mô tô đi.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Đến xe tải.",
+     "gap_s": 0.95
+    },
+    {
+     "script": "Bên phải của xe tải là mô tô.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Mô tô đã đi rồi, xe tải đi.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Đến xe khách.",
+     "gap_s": 8.15
+    },
+    {
+     "script": "Bên phải là xe tải.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Xe tải đã đi, xe khách đi.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Cuối cùng là xe con.",
+     "gap_s": 7.4
+    },
+    {
+     "script": "Bên phải là xe khách.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Xe khách đã đi, xe con đi sau cùng.",
+     "gap_s": 0.5
+    }
+   ]
+  },
+  {
+   "id": "09",
+   "tail_s": 1.2,
+   "segments": [
+    "Đáp án là phương án ba: xe mô tô, xe tải, xe khách, xe con.",
+    {
+     "script": "Mẹo nhớ: xe nào bên phải trống thì đi trước.",
+     "gap_s": 0.7
+    },
+    "Mỗi xe đi xong lại mở đường cho xe kế tiếp."
+   ]
+  },
+  {
+   "id": "10",
+   "tail_s": 2.6,
+   "segments": [
+    {
+     "script": "Câu 506.",
+     "say": "Câu năm trăm lẻ sáu.",
+     "seed": 43,
+     "cfg": 2
+    },
+    {
+     "script": "Theo hướng mũi tên, xe nào được quyền đi trước?",
+     "gap_s": 0.45
+    },
+    {
+     "script": "Một: xe tải.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Hai: xe con, B.",
+     "say": "Hai: xe con, bê.",
+     "gap_s": 0.4,
+     "seed": 44,
+     "cfg": 2
+    },
+    {
+     "script": "Ba: xe con, A.",
+     "say": "Ba: xe con, a.",
+     "gap_s": 0.4
+    },
+    {
+     "script": "Bạn chọn phương án nào?",
+     "gap_s": 0.7
+    }
+   ]
+  },
+  {
+   "id": "11",
+   "tail_s": 0.9,
+   "segments": [
+    "Ngã tư này không có đèn tín hiệu, nên ta nhìn biển báo.",
+    {
+     "script": "Phía xe A và phía xe tải là biển tam giác ngược:",
+     "say": "Phía xe a và phía xe tải là biển tam giác ngược.",
+     "gap_s": 0.7
+    },
+    {
+     "script": "giao nhau với đường ưu tiên.",
+     "say": "Giao nhau với đường ưu tiên.",
+     "gap_s": 0.3
+    },
+    {
+     "script": "Hai xe này phải nhường.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Phía xe B là biển tam giác:",
+     "say": "Phía xe bê là biển tam giác.",
+     "gap_s": 0.9
+    },
+    {
+     "script": "giao nhau với đường không ưu tiên.",
+     "say": "Giao nhau với đường không ưu tiên.",
+     "gap_s": 0.3
+    },
+    {
+     "script": "Nghĩa là xe B đang đi trên đường ưu tiên.",
+     "say": "Nghĩa là xe bê đang đi trên đường ưu tiên.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Xe trên đường ưu tiên được đi trước.",
+     "gap_s": 0.7
+    }
+   ]
+  },
+  {
+   "id": "12",
+   "tail_s": 3.4,
+   "segments": [
+    {
+     "script": "Xe B đi thẳng qua ngã tư trước.",
+     "say": "Xe bê đi thẳng qua ngã tư trước."
+    },
+    {
+     "script": "Xe A và xe tải đứng chờ.",
+     "say": "Xe a và xe tải đứng chờ.",
+     "gap_s": 1.2
+    }
+   ]
+  },
+  {
+   "id": "13",
+   "tail_s": 1.2,
+   "segments": [
+    {
+     "script": "Đáp án là phương án hai: xe con, B.",
+     "say": "Đáp án là phương án hai: xe con, bê."
+    },
+    {
+     "script": "Nhớ nhé: gặp biển giao nhau với đường ưu tiên thì nhường.",
+     "gap_s": 0.7
+    },
+    "Xe trên đường ưu tiên đi trước."
+   ]
+  },
+  {
+   "id": "14",
+   "tail_s": 3.4,
+   "segments": [
+    "Ba câu, ba cách nhìn.",
+    {
+     "script": "Có đèn tín hiệu thì theo đèn.",
+     "gap_s": 0.6
+    },
+    {
+     "script": "Không có đèn thì nhìn biển báo.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Không đèn, không biển thì nhường xe đến từ bên phải.",
+     "gap_s": 0.5
+    },
+    {
+     "script": "Chúc bạn ôn thi thật vững.",
+     "gap_s": 0.9
+    }
+   ]
+  }
+ ]
+}

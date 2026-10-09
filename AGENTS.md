@@ -26,7 +26,43 @@ you ──bin/dsa──▶ http://localhost:<port> ◀──browser── the hu
 | Any design work: create, edit, inspect, export, hand over a link; web / slides / report / wireframe | `.claude/skills/my-designer/SKILL.md` |
 | 3D scenes: primitives, lights, PBR materials, GLB import, mesh editing (`dsa scene command`), rigs | `.claude/skills/my-designer-3d/SKILL.md` |
 | Animation: document timeline, keyframes, 2D character rigs, video / frame exports | `.claude/skills/my-designer-motion/SKILL.md` |
-| Vietnamese narrated explainer video from prepared text (HyperFrames, Gemini voice) | `.claude/skills/vi-explainer-video/SKILL.md` |
+| Vietnamese narrated explainer video from prepared text (HyperFrames; Gemini voice or a locally cloned voice) | `.claude/skills/vi-explainer-video/SKILL.md` |
+| Driving-test junction ("sa hình") questions as a narrated 3D video, from a brief written in the `sat-hach-lai-xe` repo | `.claude/skills/sa-hinh-video/SKILL.md` |
+
+### Slides versus narrated video
+
+The two tools make different things; pick by the output, and use both when a
+request asks for a deck and a video of the same content.
+
+| Output | Tool |
+| --- | --- |
+| Editable slides, pages, reports; export `html`, `pdf`, `pptx` | `bin/dsa` and the `my-designer` skill |
+| Animation or a clip made inside a document; export `webm`, `mp4` | `my-designer-motion` |
+| A narrated video: voice, captions, music, sound effects, rendered to MP4 | HyperFrames, driven by `vi-explainer-video` |
+
+HyperFrames renders HTML compositions to video. It is the official release,
+installed the upstream way: `npx hyperframes`, with its skills
+(`faceless-explainer` for the storyboard-to-frames-to-render workflow,
+`media-use` for voice, music and sound effects, and `hyperframes*`) in
+`~/.claude/skills`. Around it:
+
+- **Voice:** Gemini TTS, or a voice cloned and kept on this machine
+  (VoiceStudio). A cloned voice has consent terms; the skill's
+  `references/voices.md` states them and they are binding.
+- **Music and effects:** Lyria through `media-use`. **Measurement:** ffmpeg for
+  loudness, true peak and black frames; whisper to hear the narration back.
+- **`vi-explainer-video`** is the Vietnamese layer, maintained here: fonts with
+  diacritics, voice, captions that follow the script, three presets and five
+  scene templates (`scene-templates/`).
+- **`sa-hinh-video`** sits on top of it for driving-test junction questions: a
+  three.js layer under the frames, with its engine, models and one worked
+  example in the skill. Briefs come from the `sat-hach-lai-xe` repo; what a
+  brief must contain is in `references/brief-contract.md`.
+- **Projects** live in `videos/`, which is git-ignored: voices, music and
+  renders never go into git, and `git add -f` there is not allowed.
+
+The secure build lives in its own repo, `hyperframes-secure-sandbox`; never
+copy its skills into this repo, since both sets use the same skill names.
 
 Read the skill before composing anything; do not work from memory of a
 similar tool. The core skill's `references/cli.md` is the verified flag list.
