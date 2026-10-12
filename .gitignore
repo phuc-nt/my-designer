@@ -34,3 +34,6 @@ kit/env.local.sh
 
 # HyperFrames video projects (vi-explainer-video skill): voice, music, renders.
 /videos/
+
+# House projects (house-plans-3d skill): the owner's drawings, dimensions and addresses.
+/project/

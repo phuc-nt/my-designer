@@ -1,0 +1,5 @@
+# Cloudflare Pages response headers. The model shows a private home, so search engines are asked not to index it.
+/*
+  X-Robots-Tag: noindex, nofollow
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer

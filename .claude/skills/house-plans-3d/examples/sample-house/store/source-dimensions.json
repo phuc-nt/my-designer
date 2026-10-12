@@ -1,0 +1,51 @@
+{
+  "about": "SAMPLE. These figures are invented for the example house of the skill. In a real project this file is the hand-written transcription of every dimension, level and name printed on the original documents: the CAD sheets draw these values as documented dimensions and the build fails if the model disagrees with them. Nothing here may be measured from an image or estimated.",
+  "units": { "length": "mm", "level": "m" },
+  "unit": "sample-house",
+  "documents": [
+    { "id": "00", "file": null, "title": "No document: the figures of the sample are invented", "scale": "1/100", "carries": "both dimension chains, the plot boundary, the levels" }
+  ],
+  "origin": { "x": "axis-1", "z": "axis-C", "note": "Model x runs from axis 1 toward axis 3, model z from axis C (rear) toward axis A (front)." },
+  "chains": [
+    {
+      "id": "across",
+      "direction": "x",
+      "sources": ["00"],
+      "stations": ["boundary-left", "axis-1", "axis-2", "axis-3", "boundary-right"],
+      "segments_mm": [1000, 3000, 3000, 100],
+      "overall_mm": 7100,
+      "note": "Set overall_mm to null when the documents print no total for this chain."
+    },
+    {
+      "id": "along",
+      "direction": "z",
+      "sources": ["00"],
+      "stations": ["boundary-rear", "axis-C", "axis-B", "axis-A", "boundary-front"],
+      "segments_mm": [2000, 4500, 4500, 4000],
+      "overall_mm": 15000,
+      "note": "The first station is the rear of the plot: the top of the drawing."
+    }
+  ],
+  "unexplained": [],
+  "boundary": {
+    "note_on_document": "",
+    "source": "00",
+    "interpretation": "The end stations of both chains are the plot boundary."
+  },
+  "levels": [
+    { "id": "ground", "label": "FFL:-0.300", "value_m": -0.3, "where": "yards", "sources": ["00"] },
+    { "id": "f1", "label": "FFL:±0.000", "value_m": 0.0, "where": "floor 1", "sources": ["00"] },
+    { "id": "f2", "label": "FFL:+3.600", "value_m": 3.6, "where": "floor 2", "sources": ["00"] },
+    { "id": "roof", "label": "FFL:+6.900", "value_m": 6.9, "where": "top of the floor-2 ceiling slab", "sources": ["00"] }
+  ],
+  "room_names": {
+    "f1": ["BẾP + P.ĂN", "P.KHÁCH", "WC", "KHO"],
+    "f2": ["P.NGỦ 1", "P.NGỦ 2", "WC", "BAN CÔNG"]
+  },
+  "references_on_documents": [],
+  "not_on_documents": [
+    "Interior dimensions: room sizes, wall thicknesses, door and window sizes, stair treads and risers.",
+    "Sill and head heights, ceiling heights, the roof pitch.",
+    "A north arrow."
+  ]
+}

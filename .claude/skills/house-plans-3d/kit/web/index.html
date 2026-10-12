@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#EDF0F2">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Mô hình 3D và bản vẽ mặt bằng ngôi nhà.">
+  <title>Mô hình 3D và bản vẽ</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232F4858'/%3E%3Cpath d='M6 16 16 7l10 9v9H6z' fill='%23F4EDE1'/%3E%3Crect x='13.5' y='18' width='5' height='7' fill='%23C77D4F'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <main id="stage">
+      <canvas id="scene" aria-label="Mô hình 3D của ngôi nhà"></canvas>
+      <div id="labels"></div>
+      <div id="plan" hidden aria-label="Bản vẽ mặt bằng"></div>
+
+      <div id="tools" role="toolbar" aria-label="Công cụ xem">
+        <div id="mode" role="group" aria-label="Kiểu xem" hidden>
+          <button id="btn-model" type="button" aria-pressed="true" title="Xem mô hình 3D">3D</button>
+          <button id="btn-plan" type="button" aria-pressed="false" title="Xem bản vẽ mặt bằng có số đo">Bản vẽ</button>
+        </div>
+        <div class="toolset" id="tools-model">
+          <button id="btn-labels" type="button" class="tool" aria-pressed="true" title="Bật hoặc tắt toàn bộ chú thích">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/></svg><span>Chú thích</span>
+          </button>
+          <button id="btn-cut" type="button" class="tool" aria-pressed="true" title="Cắt tường ở cao 1,25 m để nhìn mặt bằng">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18M3 9v8h18V9M8 9v8M14 9v8"/></svg><span>Cắt tường</span>
+          </button>
+          <button id="btn-top" type="button" class="tool icon" title="Nhìn thẳng từ trên xuống" aria-label="Nhìn thẳng từ trên xuống">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="1.5"/><path d="M5 12h14M12 5v14"/></svg><span>Từ trên</span>
+          </button>
+          <button id="btn-reset" type="button" class="tool icon" title="Trở về góc nhìn ban đầu" aria-label="Trở về góc nhìn ban đầu">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v5h5"/></svg><span>Góc đầu</span>
+          </button>
+        </div>
+        <div class="toolset" id="tools-plan" hidden>
+          <button type="button" class="tool text" data-layers="dims" aria-pressed="true" title="Bật hoặc tắt các đường kích thước">Số đo</button>
+          <button type="button" class="tool text" data-layers="names" aria-pressed="true" title="Bật hoặc tắt tên phòng, ký hiệu cửa và cao độ">Chú thích</button>
+          <button type="button" class="tool text" data-layers="furniture" aria-pressed="true" title="Bật hoặc tắt nội thất">Nội thất</button>
+          <button type="button" class="tool text" data-layers="grid" aria-pressed="true" title="Bật hoặc tắt lưới trục">Trục</button>
+          <button id="btn-fit" type="button" class="tool icon" title="Xem vừa cả bản vẽ" aria-label="Xem vừa cả bản vẽ">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Vừa khung</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="room-card" hidden>
+        <button id="room-close" type="button" aria-label="Đóng thông tin phòng"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <p class="kicker" id="room-kind"></p>
+        <h2 id="room-name"></h2>
+        <dl id="room-facts"></dl>
+        <p id="room-note"></p>
+      </div>
+      <p id="plan-key" hidden><span><b>0000</b> số ghi trên bản vẽ gốc</span><span><b class="estimated">(3340)</b> số ước lượng, cần đo lại</span></p>
+
+      <div id="explode" hidden>
+        <button id="btn-explode" type="button" title="Tách các tầng ra rồi lắp lại">Bóc tầng</button>
+        <input id="explode-range" type="range" min="0" max="100" value="0" aria-label="Tách các tầng theo chiều cao">
+      </div>
+
+      <div id="acts" hidden><p id="acts-note" hidden></p><div id="acts-row"></div></div>
+
+      <p id="hint">Kéo để xoay · chụm hoặc cuộn để phóng to · hai ngón để dời</p>
+      <div id="loading" role="status"><span class="spinner"></span><span id="loading-text">Đang tải mô hình…</span></div>
+    </main>
+
+    <aside id="panel">
+      <nav id="views" aria-label="Chọn phần nhà để xem"></nav>
+      <header id="heading">
+        <p class="kicker" id="kicker"></p>
+        <h1 id="view-title"></h1>
+        <p id="view-sub"></p>
+        <button id="btn-more" type="button" aria-expanded="false" aria-controls="notes">
+          <span>Xem ghi chú</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+        </button>
+      </header>
+      <section id="notes"></section>
+      <footer id="foot">Mô hình và bản vẽ dựng lại từ bản vẽ mặt bằng gốc. Kích thước phòng là số ước lượng, một số chiều cao là giả định. Dùng để hình dung không gian, không thay bản vẽ thi công.</footer>
+    </aside>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

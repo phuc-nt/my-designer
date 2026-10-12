@@ -1,0 +1,67 @@
+{
+  "slug": "sample-house",
+  "title": "Nhà mẫu hai tầng",
+  "description": "Mô hình 3D và bản vẽ mặt bằng nhà mẫu hai tầng: xem từng tầng, toàn nhà và một phương án chia lại tầng 2.",
+  "title_block": "NHÀ MẪU HAI TẦNG, TRỤC 1-3",
+  "issued": "01/01/2026",
+  "source_line": "Số liệu mẫu của skill, không phải bản vẽ của một ngôi nhà thật",
+  "paper": "A3",
+  "level_places": {
+    "ground": "Sân trước, sân sau",
+    "f1": "Sàn tầng 1",
+    "f2": "Sàn tầng 2",
+    "roof": "Mặt trên sàn mái"
+  },
+  "floors": [
+    {
+      "code": "f1",
+      "site": {
+        "floor": "site",
+        "level": "ground",
+        "names": [
+          { "text": "SÂN SAU", "x": 4.7, "z": -1.5 },
+          { "text": "SÂN TRƯỚC", "x": 4.3, "z": 11.6 }
+        ]
+      }
+    },
+    { "code": "f2", "above": "roof" },
+    { "code": "f2a", "variant_of": "f2" }
+  ],
+  "covers": [
+    {
+      "code": "roof",
+      "floor": "roof",
+      "title": "MẶT BẰNG MÁI",
+      "planes": ["tiles"]
+    }
+  ],
+  "sheets": [
+    { "number": "KT-01", "floor": "f1", "title": "MẶT BẰNG TẦNG 1" },
+    { "number": "KT-02", "floor": "f2", "title": "MẶT BẰNG TẦNG 2" },
+    { "number": "KT-02A", "floor": "f2a", "title": "MẶT BẰNG TẦNG 2, PHƯƠNG ÁN A" },
+    { "number": "KT-03", "covers": ["roof"], "title": "MẶT BẰNG MÁI" }
+  ],
+  "notes": {
+    "floor": [
+      "{units}",
+      "{documented}",
+      "{estimated}",
+      "{cut}",
+      "{illustration}"
+    ],
+    "cover": [
+      "{units}",
+      "{documented}",
+      "Độ dốc mái 30° là giả định vì chưa có bản vẽ mặt cắt.",
+      "{slope}"
+    ],
+    "variant": [
+      "Màu cam là vách nhẹ xây mới. Nét đứt đỏ là tường, cửa tháo dỡ so với bản vẽ gốc."
+    ],
+    "levels_foot": "Cột cuối là hiệu hai cao độ ghi trên bản vẽ gốc."
+  },
+  "plot": {
+    "width_note": "From the left to the right boundary station of the across chain.",
+    "area_note": "Width times depth of the two documented chains. Not checked against a land title."
+  }
+}
