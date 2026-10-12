@@ -2,7 +2,7 @@
 # Start a sa hình video project in videos/<name>: a HyperFrames project, the Vietnamese fonts, the
 # glass-keynote design, and the kit of this skill (3D engine, models, overlay kit, scripts).
 # With --example, the per-video files of a finished video are copied too, as the starting point.
-#   bash .claude/skills/sa-hinh-video/scripts/new-project.sh <name> [--example v02-nga-tu-co-bien]
+#   bash .claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/scripts/new-project.sh <name> [--example v02-nga-tu-co-bien]
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 ROOT="$(git -C "$HERE" rev-parse --show-toplevel)"

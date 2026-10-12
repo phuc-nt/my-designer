@@ -28,6 +28,37 @@ multi-tenancy, and the server refuses to bind to anything but loopback in local 
 multi-user code inherited from upstream (community publishing, OAuth) is still in the tree
 but switched off and untested here. Do not put this on a network.
 
+## What you can make
+
+Each row names the skill the agent loads for that job. The first four rows run entirely in
+the studio; the last three add their own tools on top of it.
+
+| You want | Skill | Needs beyond setup |
+| --- | --- | --- |
+| A web page, slide deck, report or wireframe; export `html`, `pdf`, `png`, `svg`, an editable `pptx`, `react` | `my-designer` | nothing |
+| A table as `xlsx` or `csv`; a design system extracted from a codebase | `my-designer` | nothing |
+| A 3D scene or model, from primitives to sculpted and rigged meshes; export `glb`, `gltf` | `my-designer-3d` | nothing |
+| An animation or a short clip; export `webm`, `mp4`, frame sequences, spritesheets | `my-designer-motion` | nothing |
+| A Vietnamese narrated explainer video: voice, captions, music, sound effects, MP4 | `vi-explainer-video` | HyperFrames, ffmpeg, whisper.cpp, a Gemini key; VoiceStudio for a cloned voice |
+| A driving-test junction ("sa hình") question as a narrated 3D video | `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video` | the same, plus a brief from the `sat-hach-lai-xe` repo |
+| A driving-technique lesson as a narrated first-person 3D drive | `chuong-3-ky-thuat-lai-xe-video` | the same, plus a lesson brief from the `sat-hach-lai-xe` repo |
+| A how-the-car-works lesson as a narrated 2D diagram bench | `chuong-4-cau-tao-va-sua-chua-video` | the same, plus a lesson brief from the `sat-hach-lai-xe` repo |
+| A house from its drawings: 3D viewer for phones, CAD sheets at 1:100, a data store, re-division variants | `house-plans-3d` | uv; wrangler only to publish |
+
+### Built in, and external
+
+| Where it comes from | Tools |
+| --- | --- |
+| **In the repository** | The studio (server in `server/`, editor in `src/`), the `dsa` CLI, six skills, and the kits inside the skills: Vietnamese fonts, video presets and scene templates, 12 GLB models with a three.js junction engine, a house-building library with a CAD step and a web viewer |
+| **Installed by `node bootstrap.mjs`** | npm packages (three.js, pptxgenjs, Playwright and the rest of `package.json`) and the Chromium that renders previews and exports |
+| **External programs** | [HyperFrames](https://hyperframes.heygen.com), ffmpeg and whisper.cpp for narrated video; VoiceStudio for a cloned voice; [uv](https://docs.astral.sh/uv/) for CAD sheets; wrangler to publish a house viewer |
+| **External services** | Gemini for voice and music; an AI provider for the `generate` commands; Cloudflare Pages for a public address. Each needs a key or an account you own |
+| **Other repositories** | `sat-hach-lai-xe` (briefs for junction videos); the sibling kits `my-pptx-generator` and `my-excel-generator` |
+
+Nothing outside the first two rows is needed for studio work. The full inventory, with every
+CLI group, export format and external tool, and what each use case cannot do, is in
+[docs/tools-and-use-cases.md](docs/tools-and-use-cases.md).
+
 ## Requirements
 
 - Node.js 24 or newer
@@ -35,6 +66,10 @@ but switched off and untested here. Do not put this on a network.
 
 No AI provider key is required. Templates, manual editing, inspection and
 every export work without one; only `generate` commands need a provider.
+
+Narrated video and house drawings need a few external tools on top of this; the table above
+names them and [docs/tools-and-use-cases.md](docs/tools-and-use-cases.md) says how each one
+gets installed.
 
 ## Setup
 
@@ -86,6 +121,10 @@ capability detail so the agent uses the whole kit instead of a subset:
 | `my-designer-3d` | scenes, lights, PBR materials, GLB import, mesh editing with `dsa scene command` (convert, remesh, loft, sculpt, loops, UV paint, rigs) |
 | `my-designer-motion` | timeline tracks and keyframes, 2D character rigs, video and frame exports |
 | `vi-explainer-video` | a Vietnamese narrated video from prepared text, rendered with HyperFrames (see below) |
+| `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video` | driving-test junction questions as a narrated 3D video, on top of `vi-explainer-video`: 3D models, a junction engine and a worked example, from a brief written in the `sat-hach-lai-xe` repo |
+| `chuong-3-ky-thuat-lai-xe-video` | driving-technique lessons (Chương III) as a narrated first-person drive, on top of `vi-explainer-video` and the `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video` engine: a road world with night, fog, rain and lamps, a text-frame and storyboard generator, and the Bài 5 worked example |
+| `chuong-4-cau-tao-va-sua-chua-video` | how-the-car-works lessons (Chương IV) as a narrated 2D diagram bench, on top of `vi-explainer-video` and the scripts of the `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video` kit: drawn parts that move with the narration, a three-step text column, narration and bench-check tools, and the Bài 1 worked example |
+| `house-plans-3d` | a house from its drawings: the model written once as code, then CAD floor-plan sheets (DXF, PDF, SVG), a data store, a phone-friendly web viewer and studio pages rebuilt from it |
 
 Skill + CLI replaces the MCP server: every upstream tool has a `bin/dsa`
 equivalent (`.claude/skills/my-designer/references/mcp-to-cli.md`).
@@ -122,10 +161,11 @@ text ─▶ script ─▶ voice (Gemini, or a voice cloned on this machine)
 A deck and a video of the same content come from the same source text; ask
 for both and the agent uses each tool for its own part. What the video skill
 needs on top of Node: HyperFrames (`npx`, nothing to install first), `ffmpeg`,
-and either a `GEMINI_API_KEY` or a local VoiceStudio for the voice. A cloned
-voice comes with consent terms the agent must follow; they are in the skill's
-`references/voices.md`. Video projects live in `videos/`, which is git-ignored,
-so voices, music and renders stay out of git.
+whisper.cpp, and a `GEMINI_API_KEY` for the voice and the music. A voice cloned
+with a local VoiceStudio can replace the Gemini voice; the music still comes
+from Gemini. A cloned voice comes with consent terms the agent must follow;
+they are in the skill's `references/voices.md`. Video projects live in
+`videos/`, which is git-ignored, so voices, music and renders stay out of git.
 
 The agent cannot hear the audio or watch the motion. It checks stills,
 loudness numbers and a whisper transcript, and says what it could not verify;
@@ -136,12 +176,13 @@ listen to the result before publishing.
 ```
 bootstrap.mjs          setup / status / stop
 bin/dsa                CLI wrapper that reads the URL from .env.local
-.claude/skills/        agent skills (core, 3d, motion, vi-explainer-video) + design references
+.claude/skills/        six agent skills with their references and kits
 videos/                narrated video projects (git-ignored, created on demand)
+project/               house projects made by house-plans-3d (git-ignored, created on demand)
 server/                Hono API on Node (SQLite in data/)
 src/                   React editor and renderer
 packages/cli/          the dsa CLI
-docs/                  architecture, contributing, and guides inherited from upstream
+docs/                  tools and use cases, architecture, contributing, inherited guides
 migrations/            SQLite schema, applied in order
 ```
 

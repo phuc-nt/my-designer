@@ -2,7 +2,7 @@
 # Export the 3D studio projects behind the kit's models to GLB again (read-only on the studio side).
 # The ids are those of the studio database on the machine the models were built on; elsewhere the
 # GLB files in kit/assets/models are the source. Needs the local studio: node bootstrap.mjs --status
-#   bash .claude/skills/sa-hinh-video/scripts/export-models.sh [<output dir>]      default: kit/assets/models
+#   bash .claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/scripts/export-models.sh [<output dir>]      default: kit/assets/models
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 ROOT="$(git -C "$HERE" rev-parse --show-toplevel)"

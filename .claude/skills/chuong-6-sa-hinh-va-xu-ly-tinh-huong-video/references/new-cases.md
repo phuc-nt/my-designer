@@ -100,7 +100,7 @@ Mô hình dựng bằng studio 3D của repo này. Đọc `.claude/skills/my-des
 ```bash
 node bootstrap.mjs --status                                   # studio phải đang chạy
 bin/dsa projects export <id> --format glb --output videos/<ten-du-an>/assets/models/<ten>.glb
-node .claude/skills/sa-hinh-video/scripts/glbdump.mjs videos/<ten-du-an>/assets/models/<ten>.glb
+node .claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/scripts/glbdump.mjs videos/<ten-du-an>/assets/models/<ten>.glb
 ```
 
 Rig trong `models.js` nhận mô hình theo **tên node**, nên mô hình mới phải theo đúng quy ước:

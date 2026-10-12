@@ -1,6 +1,6 @@
 // Print the node tree of a GLB: name, transform, bounding box and colour of each mesh. Use it to
 // check a new model before the rigs in models.js meet it (node names, forward axis, size in metres).
-//   node .claude/skills/sa-hinh-video/scripts/glbdump.mjs <file.glb> [...]      DEPTH=3 for deeper, ALL=1 for every node
+//   node .claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/scripts/glbdump.mjs <file.glb> [...]      DEPTH=3 for deeper, ALL=1 for every node
 import { readFileSync } from "node:fs";
 const D = +(process.env.DEPTH ?? 2);
 for (const file of process.argv.slice(2)) {

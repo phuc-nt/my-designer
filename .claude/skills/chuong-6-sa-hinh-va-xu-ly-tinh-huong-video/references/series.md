@@ -155,7 +155,7 @@ export const VIEWS = { wide: { tx: 0, tz: 0, d: 400, ox: 0, oy: -60 }, 1: { tx: 
 
 1. Đọc `video-briefs/README.md` (luật có đổi không) và brief `VIDEO-BRIEF-V<NN>-….md`; mở ảnh cắt của cả bốn câu.
 2. Xếp từng tình huống vào bảng "Nút giao" ở §6. Thứ chưa có (biển, đèn, loại xe, kiểu nút giao) thì liệt kê và nói trong tin nhắn nhận việc. Tình huống có ảnh vẽ từ ghế lái (brief có mục "Dựng lại từ trên cao") chưa được thử: hỏi người dùng trước khi nhận.
-3. `bash .claude/skills/sa-hinh-video/scripts/new-project.sh sa-hinh-v<NN> --example v02-nga-tu-co-bien`
+3. `bash .claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/scripts/new-project.sh chuong-6-v<NN> --example v02-nga-tu-co-bien`
 4. Viết `SCRIPT.md` theo §2, đếm âm tiết theo §3, chạy `scan-words.mjs`.
 5. Tạo giọng theo §4, rồi làm tiếp từ bước 5 của `SKILL.md`.
 6. Tình huống cần đèn tín hiệu hay vòng xuyến: chép phần của nó (số đo, đường đi, hàm dựng ô) từ ví dụ `cau-502-504-506` vào `plan.js`, `roads.js`, `sites.js` của dự án. Phần kính lúp của ví dụ đó viết theo cách cũ: bỏ `glass: …` và bảng tên `PLATE`, dùng cách ở §5.

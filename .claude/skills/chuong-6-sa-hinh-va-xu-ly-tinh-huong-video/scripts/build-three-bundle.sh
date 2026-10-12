@@ -1,7 +1,7 @@
 #!/bin/bash
 # Rebuild kit/assets/lib/three-bundle.js from the three.js in this repo's node_modules. Only needed
 # to move to another three.js version or to add a loader; the bundle in the kit was built from 0.185.1.
-#   bash .claude/skills/sa-hinh-video/scripts/build-three-bundle.sh
+#   bash .claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/scripts/build-three-bundle.sh
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 ROOT="$(git -C "$HERE" rev-parse --show-toplevel)"

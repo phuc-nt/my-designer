@@ -1,5 +1,5 @@
 ---
-name: sa-hinh-video
+name: chuong-6-sa-hinh-va-xu-ly-tinh-huong-video
 description: "Sản xuất loạt video giải thích tình huống sa hình (V01–V29) bằng hình động 3D: nhận brief do repo sat-hach-lai-xe soạn, dựng lại nút giao bằng mô hình 3D có sẵn, cho xe chạy đúng thứ tự theo lời đọc, thêm giọng đọc (mặc định Gemini Leda), phụ đề, nhạc rồi render MP4. Dùng khi người dùng nói 'làm video sa hình', 'tạo video V03', 'video câu <số>', 'tạo video theo VIDEO-BRIEF', 'sản xuất video cho sat-hach-lai-xe', hoặc đưa một brief có các tình huống sa hình."
 ---
 
@@ -22,7 +22,7 @@ Skill này đóng gói cách đã làm video thử nghiệm (câu 502, 504, 506)
 ## Trong skill có gì
 
 ```
-sa-hinh-video/
+chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/
   SKILL.md
   references/     tài liệu (bảng ở cuối tệp này)
   scripts/        new-project.sh, build-three-bundle.sh, export-models.sh, glbdump.mjs
@@ -83,7 +83,7 @@ Cấu hình đã chạy thật: **bốn tình huống một video**, một hàng
 
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
-K=$ROOT/.claude/skills/sa-hinh-video
+K=$ROOT/.claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video
 SK=$ROOT/.claude/skills/vi-explainer-video
 HF=<thư mục có faceless-explainer; new-project.sh in ra ở dòng "HF:">
 FX=$HF/faceless-explainer/scripts
@@ -108,7 +108,7 @@ Brief thiếu thứ không suy ra được từ ảnh (đáp án gốc, tình hu
 ### 2. Tạo dự án
 
 ```bash
-bash .claude/skills/sa-hinh-video/scripts/new-project.sh sa-hinh-v<NN> --example v02-nga-tu-co-bien
+bash .claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/scripts/new-project.sh chuong-6-v<NN> --example v02-nga-tu-co-bien
 ```
 
 Lệnh tạo `videos/<ten-du-an>` (HyperFrames trống, font tiếng Việt, `glass-keynote`), chép `kit/` và phần riêng của ví dụ vào. Ghi lại dòng `HF:` nó in ra. `videos/` nằm trong `.gitignore`; không `git add -f` gì ở đó.

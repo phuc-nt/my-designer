@@ -14,6 +14,7 @@ for agents *designing* with it.
 
 | Decision | Guide |
 | --- | --- |
+| See what the kit can make, which tool makes it, and which tools are in the repo or external | [Tools and use cases](tools-and-use-cases.md) |
 | Understand product intent, constraints, and requested outcomes | [Product brief](product-brief.md) |
 | Locate shared contracts, runtime boundaries, and their executable owners | [Architecture](architecture.md) |
 | Change this repository: checks to run, things not to break | [Contributing](contributing.md) |
