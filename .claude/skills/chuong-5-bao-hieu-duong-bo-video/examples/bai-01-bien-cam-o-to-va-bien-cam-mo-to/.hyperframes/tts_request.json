@@ -1,0 +1,97 @@
+{
+  "provider": "gemini",
+  "tts_model": "gemini-3.8-flash-tts",
+  "voice": "Leda",
+  "lang": "vi",
+  "style": "Speak Vietnamese with a natural Northern (Hanoi) accent. Calm, warm and clear, like a patient driving instructor standing at a street corner and explaining road signs to a beginner. Unhurried pace, a short pause after each sentence. Slow down a little on each vehicle name and on each rule.",
+  "lines": [
+    {
+      "id": "01",
+      "text": "Trước lối vào một con phố có tấm biển tròn viền đỏ, bên trong là hình một chiếc ô tô con bị gạch chéo. Một người đi xe máy tới nơi và phân vân: biển chỉ có hình ô tô con, vậy xe máy có bị cấm không? Còn xe tải, xe khách thì sao?"
+    },
+    {
+      "id": "02",
+      "text": "Gặp một biển cấm, nên đọc theo ba bước. Bước một, nhìn dáng và màu. Tròn, viền đỏ, nền trắng là lệnh cấm. Gạch chéo đỏ nhấn thêm chữ không."
+    },
+    {
+      "id": "03",
+      "text": "Bước hai, nhìn hình bên trong. Hình cho biết loại xe hoặc việc làm bị cấm. Có hình đại diện cho cả một nhóm xe."
+    },
+    {
+      "id": "04",
+      "text": "Bước ba, nhớ rằng tên mỗi loại xe có nghĩa riêng trong luật, và nghĩa ấy không trùng hẳn với cách gọi hằng ngày. Xe cơ giới là xe chạy bằng động cơ: ô tô các loại, xe mô tô, xe gắn máy và các xe tương tự."
+    },
+    {
+      "id": "05",
+      "text": "Xe mô tô hai bánh là thứ mà mọi người quen gọi là xe máy. Xe gắn máy là loại xe máy nhỏ, chạy chậm hơn. Luật xếp nó thành một loại riêng, không gọi là xe mô tô."
+    },
+    {
+      "id": "06",
+      "text": "Xe mô tô ba bánh vẫn là xe mô tô, nhưng không phải xe mô tô hai bánh. Xe ưu tiên là những xe đang đi làm nhiệm vụ khẩn cấp theo quy định, như xe chữa cháy hay xe cứu thương. Nắm chắc mấy cái tên này thì phần còn lại chỉ là suy ra."
+    },
+    {
+      "id": "07",
+      "text": "Phần lớn biển cấm có hình tròn, viền đỏ, nền trắng, hình màu đen, thường có một gạch chéo đỏ. Hình bên trong cho biết loại xe hoặc nhóm xe bị cấm."
+    },
+    {
+      "id": "08",
+      "text": "Trở lại tấm biển ở đầu phố: bên trong là hình một chiếc ô tô con nhìn từ phía trước, có gạch chéo đỏ. Đây là biển cấm xe ô tô. Chiếc ô tô con ở đây đứng thay cho cả nhóm xe cơ giới."
+    },
+    {
+      "id": "09",
+      "text": "Biển tròn viền đỏ có hình ô tô con nhìn từ phía trước bị gạch chéo đỏ cấm các loại xe cơ giới đi vào, trừ xe mô tô hai bánh, xe gắn máy và các xe ưu tiên theo quy định."
+    },
+    {
+      "id": "10",
+      "text": "Như vậy ô tô con, ô tô khách, ô tô tải đều bị cấm. Xe mô tô ba bánh cũng bị cấm, vì nó là xe cơ giới và không nằm trong ba đối tượng được trừ ra."
+    },
+    {
+      "id": "11",
+      "text": "Có thể hình dung lý do như sau. Biển này hay đặt ở những đoạn đường hẹp hoặc đông người, nơi xe to không nên vào. Xe hai bánh nhỏ gọn nên vẫn được đi. Trở lại câu hỏi lúc đầu: người đi xe máy hai bánh được đi tiếp. Xe tải và xe khách thì không."
+    },
+    {
+      "id": "12",
+      "text": "Bây giờ đổi hình bên trong: một người đang ngồi trên xe mô tô, có gạch chéo đỏ. Đây là biển cấm xe mô tô. Biển gọi đúng tên một loại xe: xe mô tô. Xe gắn máy là loại xe khác, nên biển này không cấm xe gắn máy."
+    },
+    {
+      "id": "13",
+      "text": "Ghép với biển cấm xe ô tô thì thấy xe gắn máy đi qua được cả hai. Ở biển cấm xe mô tô, nó không phải xe mô tô. Ở biển cấm xe ô tô, nó nằm trong nhóm được trừ ra."
+    },
+    {
+      "id": "14",
+      "text": "Biển tròn viền đỏ có hình người đi xe mô tô bị gạch chéo đỏ là biển cấm xe mô tô. Xe gắn máy không phải xe mô tô, nên được đi vào ở cả biển cấm xe mô tô lẫn biển cấm xe ô tô."
+    },
+    {
+      "id": "15",
+      "text": "Xe mô tô hai bánh và xe mô tô ba bánh chở hàng cùng mang tên mô tô, nhưng gặp biển thì khác nhau. Để so, thêm một tấm biển nữa: hình một chiếc xe tải nhìn ngang bị gạch chéo. Đó là biển cấm xe ô tô tải. Xe gắn máy thì cả ba biển đều đi được."
+    },
+    {
+      "id": "16",
+      "text": "Xe mô tô hai bánh bị cấm ở biển có hình người đi xe mô tô, nhưng được đi vào ở biển có hình ô tô con nhìn từ phía trước và biển có hình xe tải. Ở biển có hình ô tô con, nó thuộc nhóm được trừ ra. Còn biển có hình xe tải thì nhắm vào xe tải."
+    },
+    {
+      "id": "17",
+      "text": "Xe mô tô ba bánh chở hàng bị cấm ở cả biển có hình người đi xe mô tô lẫn biển có hình ô tô con nhìn từ phía trước. Nó là xe mô tô, nhưng không phải xe mô tô hai bánh, nên không được trừ ra. Riêng biển có hình xe tải thì không cấm nó."
+    },
+    {
+      "id": "18",
+      "text": "Ngoài biển cấm xe ô tô tải, người lái xe tải còn phải để ý ba biển sau. Cả ba đều tròn, viền đỏ, có gạch chéo đỏ. Biển có hình ô tô con nhìn từ phía trước cấm cả nhóm xe cơ giới, nên cấm xe tải."
+    },
+    {
+      "id": "19",
+      "text": "Biển có hai hình xếp chồng, xe khách ở trên lệch về bên phải, xe tải ở dưới lệch về bên trái, cấm cả ô tô khách lẫn ô tô tải."
+    },
+    {
+      "id": "20",
+      "text": "Biển còn lại có hình một chiếc xe tải kéo theo rơ moóc phía sau, thể hiện bằng hai khối hộp đen nối với nhau bằng một thanh kéo. Biển này cấm xe đang kéo rơ moóc. Xe tải chạy một mình không bị cấm."
+    },
+    {
+      "id": "21",
+      "text": "Xe ô tô tải bị cấm ở biển có hình ô tô con nhìn từ phía trước và ở biển có hình xe khách xếp trên hình xe tải. Biển có hình xe tải kéo rơ moóc không cấm xe tải chạy một mình."
+    },
+    {
+      "id": "22",
+      "text": "Lần tới gặp một biển cấm, hãy đọc theo ba bước: dáng và màu, hình bên trong, rồi tên đúng của chiếc xe mình đang đi."
+    }
+  ]
+}
