@@ -1,0 +1,93 @@
+{
+  "provider": "gemini",
+  "tts_model": "gemini-3.8-flash-tts",
+  "voice": "Leda",
+  "lang": "vi",
+  "style": "Speak Vietnamese with a natural Northern (Hanoi) accent. Calm, precise and warm, like an instructor reading the wording of the law aloud over a scale model of a road and pointing at each part as it is named. Unhurried pace. Read each definition clause by clause, with a clear short pause at every comma and a longer pause after every sentence. A slightly lighter, more conversational tone on lines that begin with 'Chỗ dễ nhầm' or 'Cách nhớ'. Questions end open, answers are firm.",
+  "lines": [
+    {
+      "id": "01",
+      "text": "Con đường gồm những phần nào? Luật đặt tên riêng cho từng phần của con đường, và mỗi tên gắn với một công dụng. Các quy tắc về làn, về vượt, về dừng đỗ đều dùng những tên này."
+    },
+    {
+      "id": "02",
+      "text": "Phần đường xe chạy là phần của đường bộ được sử dụng cho phương tiện giao thông đường bộ đi lại."
+    },
+    {
+      "id": "03",
+      "text": "Chỗ dễ nhầm: phần đường xe chạy không phải là mặt đường cộng lề đường, cũng không chỉ là phần dành cho xe cơ giới."
+    },
+    {
+      "id": "04",
+      "text": "Làn đường là một phần của phần đường xe chạy, được chia theo chiều dọc của đường, có đủ chiều rộng cho xe chạy an toàn. Dấu hiệu của làn đường là đủ chiều rộng cho xe chạy an toàn."
+    },
+    {
+      "id": "05",
+      "text": "Dải phân cách dùng để phân chia phần đường xe chạy thành hai chiều riêng biệt, hoặc để phân chia phần đường dành cho xe cơ giới và xe thô sơ, hoặc của nhiều loại xe khác nhau trên cùng một chiều đường."
+    },
+    {
+      "id": "06",
+      "text": "Vạch kẻ đường là vạch chỉ sự phân chia làn đường, vị trí hoặc hướng đi, vị trí dừng lại. Chỗ dễ nhầm: định nghĩa vạch kẻ đường không nói tới việc cảnh báo nguy hiểm hay báo thông tin về đường bộ."
+    },
+    {
+      "id": "07",
+      "text": "Cách nhớ: dải phân cách chia chiều đi và chia loại xe. Vạch kẻ đường chia làn, chỉ hướng đi, chỉ chỗ dừng."
+    },
+    {
+      "id": "08",
+      "text": "Khổ giới hạn của đường bộ là khoảng trống có kích thước giới hạn về chiều rộng và chiều cao của đường bộ, để các xe, kể cả hàng hóa xếp trên xe, đi qua được an toàn. Nó được xác định theo quy chuẩn, tiêu chuẩn kỹ thuật của đường bộ."
+    },
+    {
+      "id": "09",
+      "text": "Chỗ dễ nhầm: khổ giới hạn gồm cả chiều rộng lẫn chiều cao, và tính cho cả xe lẫn hàng trên xe. Chỉ nói chiều rộng, hoặc chỉ nói chiều cao, đều thiếu."
+    },
+    {
+      "id": "10",
+      "text": "Đường cao tốc là một cấp kỹ thuật của đường bộ, chỉ dành cho một số loại xe cơ giới, xe máy chuyên dùng theo quy định của pháp luật."
+    },
+    {
+      "id": "11",
+      "text": "Đường có dải phân cách chia hai chiều xe chạy riêng biệt, không giao nhau cùng mức với đường khác, chỉ cho xe ra, vào ở những điểm nhất định."
+    },
+    {
+      "id": "12",
+      "text": "Đường có hàng rào bảo vệ và trang thiết bị phục vụ, bảo đảm giao thông liên tục, an toàn, rút ngắn thời gian hành trình."
+    },
+    {
+      "id": "13",
+      "text": "Chỗ dễ nhầm: đường cao tốc được định nghĩa bằng cấu tạo của nó. Việc một tuyến đường nối Thủ đô với trung tâm tỉnh, hay nối các tỉnh với nhau, không làm nó thành đường cao tốc."
+    },
+    {
+      "id": "14",
+      "text": "Theo chức năng phục vụ, đường bộ gồm đường chính, đường nhánh, đường gom, đường bên, đường dành cho giao thông công cộng, đường nội bộ, đường dành riêng cho người đi bộ, người đi xe đạp và các đường khác. Chỗ dễ nhầm: hai loại hay bị kể sót là đường bên và đường nội bộ."
+    },
+    {
+      "id": "15",
+      "text": "Thử áp dụng. Xe tải chở hàng cao hơn nóc cabin sắp chui qua gầm cầu. Người lái so chiều cao nào với khổ giới hạn?"
+    },
+    {
+      "id": "16",
+      "text": "Chiều cao tính cả hàng xếp trên xe."
+    },
+    {
+      "id": "17",
+      "text": "Một con đường có dải phân cách giữa nhưng vẫn có ngã tư cắt ngang trên cùng mặt bằng. Theo định nghĩa, đó có phải đường cao tốc không?"
+    },
+    {
+      "id": "18",
+      "text": "Không. Đường cao tốc không giao nhau cùng mức với đường khác."
+    },
+    {
+      "id": "19",
+      "text": "Trên một chiều đường, có dải phân cách tách xe thô sơ khỏi xe cơ giới. Dải phân cách ấy có đúng công dụng không?"
+    },
+    {
+      "id": "20",
+      "text": "Có. Dải phân cách còn dùng để chia phần đường của xe cơ giới và xe thô sơ trên cùng một chiều đường."
+    },
+    {
+      "id": "21",
+      "text": "Hãy nhớ: hiểu sai một tên là hiểu sai cả quy tắc đi kèm."
+    }
+  ]
+}
