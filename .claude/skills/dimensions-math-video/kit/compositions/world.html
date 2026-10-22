@@ -1,0 +1,25 @@
+<template id="world-template">
+  <div data-composition-id="world" data-width="1920" data-height="1080" data-start="0" data-duration="10">
+    <style>
+      @font-face { font-family: "Plus Jakarta Sans"; src: url("assets/fonts/PlusJakartaSans-VN.woff2") format("woff2"); font-weight: 200 800; font-style: normal; font-display: block; }
+      [data-composition-id="world"] { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; background: #FBF6EA; }
+      [data-composition-id="world"] canvas { position: absolute; inset: 0; width: 1920px; height: 1080px; display: block; }
+    </style>
+    <!-- the counting bench: the zoo animals, the hand that counts them and the marks counting leaves -->
+    <canvas id="world-canvas" width="1920" height="1080"></canvas>
+    <script type="module">
+      import { createWorld } from "../assets/lib/world/world.js";
+      const world = createWorld({ canvas: document.getElementById("world-canvas") });
+      window.__world = world;
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady["world"] = world.ready;
+      const tl = gsap.timeline({ paused: true });
+      tl.set({}, {}, world.total);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["world"] = tl;
+      window.addEventListener("hf-seek", (e) => world.renderAt(e.detail.time));
+      world.renderAt(window.__hfThreeTime || 0);
+    </script>
+  </div>
+</template>

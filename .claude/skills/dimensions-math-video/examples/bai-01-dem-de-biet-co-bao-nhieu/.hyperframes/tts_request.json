@@ -1,0 +1,101 @@
+{
+  "provider": "gemini",
+  "tts_model": "gemini-3.8-flash-tts",
+  "voice": "Leda",
+  "lang": "vi",
+  "style": "Speak Vietnamese with a natural Northern (Hanoi) accent. A warm, cheerful kindergarten teacher talking to one six-year-old child sitting next to her: gentle, smiling, slow and very clear. When numbers are separated by full stops ('Một. Hai. Ba.'), say each number on its own, evenly, about one number per second, as if touching one animal per number. When numbers are separated by commas, say them in one quick breath. Questions sound curious and inviting, answers are calm and sure, praise is bright. Never rushed.",
+  "lines": [
+    {
+      "id": "01",
+      "text": "Chào con! Đây là vườn thú. Ở đây có một đàn khỉ đang chơi. Có bao nhiêu con khỉ nhỉ? Con thử đếm xem nào."
+    },
+    {
+      "id": "02",
+      "text": "Muốn biết có bao nhiêu, ta đếm: chỉ vào từng con, và nói một số. Cô và con cùng học cách đếm cho đúng nhé."
+    },
+    {
+      "id": "03",
+      "text": "Đây là đàn ngựa vằn. Chỉ con thứ nhất, nói: một. Chỉ con thứ hai, nói: hai. Chỉ con thứ ba, nói: ba. Không còn con nào chưa được chỉ, vậy là đếm xong."
+    },
+    {
+      "id": "04",
+      "text": "Tay chỉ và miệng đếm phải đi cùng nhau. Chỉ vào một con, đếm một tiếng. Con nào cũng chỉ đếm một lần thôi."
+    },
+    {
+      "id": "05",
+      "text": "Nếu bỏ sót một con thì sao? Một. Hai. Chỉ được hai. Bị thiếu một con rồi."
+    },
+    {
+      "id": "06",
+      "text": "Còn nếu một con được đếm hai lần? Một. Hai. Ba. Bốn. Thành ra bốn. Bị thừa rồi."
+    },
+    {
+      "id": "07",
+      "text": "Có khi miệng đếm nhanh quá, tay chưa kịp chỉ: một, hai, ba, bốn, năm! Thế là sai. Mỗi tiếng đếm đi cùng đúng một lần chỉ."
+    },
+    {
+      "id": "08",
+      "text": "Bây giờ mình đếm đàn khỉ nhé. Một. Hai. Ba. Bốn. Năm. Sáu."
+    },
+    {
+      "id": "09",
+      "text": "Con khỉ cuối cùng ứng với tiếng sáu. Nhưng sáu không phải tên của con khỉ ấy. Sáu là số khỉ của cả đàn. Đếm tới sáu là hết. Vậy có sáu con khỉ."
+    },
+    {
+      "id": "10",
+      "text": "Có ai hỏi: có bao nhiêu con khỉ? Con không cần đếm lại từ đầu. Con cuối cùng con đếm là mấy? Là sáu. Vậy cả nhóm có mấy con? Có sáu con."
+    },
+    {
+      "id": "11",
+      "text": "Con voi thì rất to. Con kiến thì rất nhỏ. Nhưng một con voi và một con kiến đều đếm là một. Đếm không phụ thuộc con vật to hay nhỏ."
+    },
+    {
+      "id": "12",
+      "text": "Với đồ vật thật, như những quả cam này, đếm quả nào, ta gạt quả ấy sang một bên. Một. Hai. Ba. Bốn. Thế là không bị lẫn."
+    },
+    {
+      "id": "13",
+      "text": "Còn trong tranh, đồ vật đứng yên, không gạt đi được. Khi chúng xếp lộn xộn, rất dễ đếm sót, hoặc đếm một cái hai lần."
+    },
+    {
+      "id": "14",
+      "text": "Có hai cách. Cách thứ nhất: đi theo một đường, từ trái sang phải, hết hàng thì xuống hàng dưới, như khi đọc sách. Cách thứ hai: đếm cái nào, đánh dấu cái ấy."
+    },
+    {
+      "id": "15",
+      "text": "Đây là những hạt lạc, xếp thành hình thoi, không thẳng hàng. Mình đếm từ hàng trên cùng xuống, mỗi hàng từ trái sang phải. Đếm hạt nào, đánh dấu hạt đó."
+    },
+    {
+      "id": "16",
+      "text": "Một. Hai. Ba. Bốn. Năm. Sáu. Bảy. Tám. Chín. Được chín hạt lạc."
+    },
+    {
+      "id": "17",
+      "text": "Nếu đếm từ hàng dưới cùng lên thì sao? Một, hai, ba, bốn, năm, sáu, bảy, tám, chín. Vẫn được chín hạt. Đếm theo đường nào cũng ra cùng một số, miễn là mỗi hạt được đếm đúng một lần."
+    },
+    {
+      "id": "18",
+      "text": "Số đếm được, ta ghi bằng chữ số. Mình đếm đàn sư tử nhé. Một. Hai. Ba. Bốn. Năm. Sáu. Bảy."
+    },
+    {
+      "id": "19",
+      "text": "Có bảy con sư tử. Số bảy viết thế này."
+    },
+    {
+      "id": "20",
+      "text": "Một nhóm sư tử, tiếng đọc bảy, và chữ số bảy. Đó là ba cách nói cùng một số lượng."
+    },
+    {
+      "id": "21",
+      "text": "Cả vườn thú cũng vậy. Một con hươu cao cổ. Hai con voi. Ba con ngựa vằn. Bốn con hổ. Năm con cá sấu."
+    },
+    {
+      "id": "22",
+      "text": "Sáu con khỉ. Bảy con sư tử. Tám con gấu. Chín con khỉ đột. Mười con rắn."
+    },
+    {
+      "id": "23",
+      "text": "Nhớ nhé: muốn biết có bao nhiêu, ta đếm. Mỗi con đếm đúng một lần. Số đếm sau cùng cho biết cả nhóm có bao nhiêu, và số ấy được ghi bằng chữ số. Con giỏi lắm!"
+    }
+  ]
+}
