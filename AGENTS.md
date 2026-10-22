@@ -30,6 +30,9 @@ you ──bin/dsa──▶ http://localhost:<port> ◀──browser── the hu
 | Driving-test junction ("sa hình") questions as a narrated 3D video, from a brief written in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/SKILL.md` |
 | A driving-technique lesson (Chương III · Kỹ thuật lái xe) as a narrated first-person 3D drive, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-3-ky-thuat-lai-xe-video/SKILL.md` |
 | A how-the-car-works lesson (Chương IV · Cấu tạo và sửa chữa) as a narrated 2D diagram bench, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-4-cau-tao-va-sua-chua-video/SKILL.md` |
+| A road-sign lesson (Chương V · Báo hiệu đường bộ) as a narrated 2D street where the sign is the main character, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-5-bao-hieu-duong-bo-video/SKILL.md` |
+| A general traffic-rule lesson (Chương I · Quy định chung và quy tắc giao thông) as a narrated scale model of the road, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-1-quy-dinh-chung-va-quy-tac-giao-thong-video/SKILL.md` |
+| A grade 1 maths lesson (Toán lớp 1, after Dimensions Math) with no text on screen, for children who cannot read yet, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/dimensions-math-video/SKILL.md` |
 | A house from its drawings: 3D model per floor, CAD floor-plan sheets at 1:100 (DXF, PDF, SVG), a data store, a phone-friendly web viewer, studio pages, re-division variants | `.claude/skills/house-plans-3d/SKILL.md` |
 
 ### Slides versus narrated video
@@ -73,6 +76,14 @@ installed the upstream way: `npx hyperframes`, with its skills
   three named steps. It has its own narration and bench-check tools and
   borrows the cue, assembly and check scripts of `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit`. Lesson
   rules and what each remaining lesson still needs are in
+  `references/series.md`.
+- **`chuong-5-bao-hieu-duong-bo-video`**, **`chuong-1-quy-dinh-chung-va-quy-tac-giao-thong-video`** and **`dimensions-math-video`** are
+  siblings of the same kind for the road-sign lessons (a 2D street where the
+  sign is the main character), the general traffic-rule lessons (an isometric
+  scale model of the road built clause by clause) and grade 1 maths (a child's
+  hand counting on a 2D canvas, with no text on screen at all). Each borrows the
+  cue, assembly and check scripts of `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit`.
+  Lesson rules and what each remaining lesson still needs are in
   `references/series.md`.
 - **Projects** live in `videos/`, which is git-ignored: voices, music and
   renders never go into git, and `git add -f` there is not allowed.
