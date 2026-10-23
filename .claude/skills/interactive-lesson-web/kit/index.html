@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{{TITLE}}</title>
+    <meta name="description" content="{{DESCRIPTION}}" />
+    <meta name="theme-color" content="#f6eddd" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2313807e'/%3E%3Cpath d='M12 9l12 7-12 7z' fill='%23fffaf0'/%3E%3C/svg%3E" />
+    <link rel="preload" href="assets/fonts/PlusJakartaSans-VN.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="top">
+      {{BACK}}<div class="kicker">{{KICKER}}</div>
+      <h1>{{HEADING}}</h1>
+    </header>
+
+    <main class="layout">
+      <section class="watch">
+        <div class="stage" id="stage">
+          <div class="layers" id="layers"></div>
+          <div class="marks" id="marks"></div>
+          <div class="pop" id="pop" hidden></div>
+          <button class="chip-btn labels" id="labels" type="button" aria-pressed="true" hidden>Ẩn nhãn</button>
+          <div class="veil" id="veil">
+            <div class="veil-card">
+              <p id="veil-text">Đang tải bài giảng…</p>
+              <button class="big-play" id="start" type="button" disabled>Bắt đầu nghe</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="player">
+          <button class="icon-btn" id="prev" type="button" aria-label="Bước trước">
+            <svg viewBox="0 0 24 24"><path d="M6 5v14M19 5l-9 7 9 7z" /></svg>
+          </button>
+          <button class="icon-btn play" id="play" type="button" aria-label="Phát">
+            <svg class="i-play" viewBox="0 0 24 24"><path d="M7 4.5l13 7.5-13 7.5z" /></svg>
+            <svg class="i-pause" viewBox="0 0 24 24"><path d="M7 4.5h3.6v15H7zM13.4 4.5H17v15h-3.6z" /></svg>
+          </button>
+          <button class="icon-btn" id="next" type="button" aria-label="Bước sau">
+            <svg viewBox="0 0 24 24"><path d="M18 5v14M5 5l9 7-9 7z" /></svg>
+          </button>
+          <div class="scrub">
+            <div class="ticks" id="ticks"></div>
+            <input id="seek" type="range" min="0" step="0.01" value="0" aria-label="Tua bài giảng" />
+          </div>
+          <span class="time" id="time">0:00</span>
+          <button class="chip-btn" id="rate" type="button" aria-label="Tốc độ">1×</button>
+        </div>
+
+        <p class="caption" id="caption" aria-live="polite"></p>
+      </section>
+
+      <aside class="panel">
+        <label class="switch" id="quiz-switch" hidden>
+          <input type="checkbox" id="quiz" checked />
+          <span class="track"><span class="knob"></span></span>
+          <span><b>Tự giải</b><small>Dừng sau mỗi câu hỏi để bạn trả lời trước khi nghe lời giải</small></span>
+        </label>
+
+        <div class="card ask" id="ask" hidden></div>
+
+        <div class="tabs" id="tabs" role="tablist"></div>
+        <ol class="steps" id="steps"></ol>
+        <div class="card verdict" id="verdict" hidden></div>
+
+        <p class="hint" id="hint" hidden></p>
+        {{NEXT}}
+      </aside>
+    </main>
+
+    <div class="sheet" id="sheet" hidden></div>
+    <audio id="audio" preload="auto"></audio>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
