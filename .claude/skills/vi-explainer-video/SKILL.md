@@ -14,7 +14,7 @@ Skill này là **lớp tiếng Việt** đặt lên quy trình `faceless-explain
 
 Phần lớn các bước là lệnh của HyperFrames, hoặc thao tác mà agent tự làm theo hướng dẫn dưới đây. Skill kèm thêm:
 
-- `scripts/`: tám script Node, chỉ cần Node và ffmpeg, không cần gói npm hay Python.
+- `scripts/`: chín script Node, chỉ cần Node và ffmpeg, không cần gói npm hay Python.
   - `mix-balance.mjs` đo nhạc nằm dưới giọng đọc bao nhiêu dB, rồi gợi ý `bgm.volume`.
   - `beat-grid.mjs` tìm BPM và nhịp đầu (BEAT0) của bài nhạc.
   - `beat-snap.mjs` kéo điểm cắt khung vào đúng nhịp.
@@ -23,6 +23,8 @@ Phần lớn các bước là lệnh của HyperFrames, hoặc thao tác mà age
   - `retime-frames.mjs` kéo các khung đã dựng theo giọng đọc mới, khi đổi giọng cho video đã xong (`references/audio.md` §7).
   - `use-scene-template.mjs` chép một scene template thành tệp khung, đặt sẵn tiền tố, id và thời lượng (bước 8).
   - `motion-audit.mjs` đo bản render đứng hình bao nhiêu giây ở từng khung (bước 10).
+  - `lint-tells.mjs` đọc tệp khung và chỉ ra các thói quen làm hình trông như máy làm: màu nhấn dùng nhiều lần, dòng chữ hoa nhỏ trên mọi tiêu đề, số `01 / 02` không cần thiết, thẻ có một cạnh viền dày, emoji, hộp lấn vùng phụ đề (bước 8). Chỉ để tham khảo, không chặn.
+- `references/external-tools.md`: hai công cụ ngoài, tuỳ chọn: `ui` (gói `ease-design`, đo màu và so ảnh) và script biến hình vẽ nét thành nét SVG để vẽ dần ra.
 - `presets/`: ba preset hình cho `build-frame`, đã kèm font tiếng Việt:
   - `glass-keynote`: nền chàm tối, thẻ kính;
   - `comic-multiverse`: truyện tranh, khung viền mực;
@@ -235,6 +237,15 @@ grep -l "visibility: *['\"]visible" compositions/frames/*.html                  
 - **Lỗi khác:** giao lại khung đó cho một worker mới, kèm thông báo lỗi.
 - **Đạt:** đổi `- status: outline` thành `- status: animated`.
 
+Rồi đọc nhanh các thói quen "máy làm" (`references/pitfalls.md` mục "Dấu hiệu máy làm"):
+
+```bash
+node "$SK"/scripts/lint-tells.mjs .              # màu nhấn lấy từ frame.md; thiếu thì thêm --accent "#hex"
+node "$SK"/scripts/lint-tells.mjs . --caption-top 880   # win95-pixel: taskbar chiếm 56px dưới cùng
+```
+
+Lệnh luôn thoát 0. Mỗi dòng là một câu hỏi: xem dòng đó trên contact sheet ở bước 9 rồi quyết sửa hay giữ. Giữ khi `frame.md` của preset yêu cầu (ví dụ dòng eyebrow ✱ của `code-editorial`), hoặc khi số thứ tự thật sự là thứ tự (các bước, các mốc). Sửa trong tệp khung, không cần giao lại cho worker.
+
 ### 9. Lắp ráp và QA (faceless Step 6)
 
 Lắp ráp:
@@ -277,6 +288,7 @@ Kết quả lệnh snapshot là các tệp `contact-sheet-1..N.jpg`. **Đọc (R
 - có gì lấn vào vùng phụ đề (y > 896) không;
 - có khung trống hoặc đen không;
 - màu nhấn dùng đúng luật của `frame.md` (ví dụ coral của `code-editorial`, hay gradient của `glass-keynote`, chỉ một lần mỗi khung).
+- các dòng `lint-tells` còn giữ lại ở bước 8 trông đúng ý, không thừa.
 
 Cách xử lý kết quả của `check`:
 - **Cảnh báo phụ đề lệch 1–4px** (`caption-word`, `caption-line`): bỏ qua.

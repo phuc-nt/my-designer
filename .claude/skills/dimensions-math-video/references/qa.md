@@ -111,6 +111,7 @@ cd "$P" && node scripts/bench-check.mjs | tail -1      # phải là: fingerprint
 
 - Chỉ chép các tệp của kit (`bench.js`, `counting.js`, `draw.js`, `zoo.js`, `tenframe.js`); `world.js`, `beats.js` và `cues.js` của dự án giữ nguyên.
 - Khác dấu vân tay: chạy `--frames` trên bản cũ và bản mới để biết khung nào đổi, rồi sửa kit cho tới khi trùng. Chỉ chấp nhận dấu vân tay mới khi thay đổi là cố ý (sửa một lỗi vẽ của Bài 1); khi đó ghi dấu mới vào đây và vào bảng "Đã làm" của `series.md` §6.
+- Thay đổi cố ý: chụp cùng mốc trước và sau bằng `bench-shots.mjs`, đổi JPG sang PNG bằng ffmpeg, rồi `"$ROOT"/node_modules/.bin/ui vr diff old.png new.png --out diff.png` (gói `ease-design`; thiếu thì bỏ qua). Mở `diff.png` để xác nhận chỉ vùng muốn đổi được tô, thay vì đọc kỹ cả hai ảnh.
 - `projects/` không vào git. Máy khác không có dự án Bài 1 thì không kiểm được bằng cách này; ghi điều đó vào báo cáo.
 
 ## 6. Những lỗi đã gặp

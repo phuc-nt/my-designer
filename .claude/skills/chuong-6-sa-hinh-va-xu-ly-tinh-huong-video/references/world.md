@@ -47,6 +47,8 @@ plan.shots = [
 ];
 ```
 
+**Camera đứng yên rồi mới chỉ.** Trong lúc camera lướt (từ `T − move` tới `T`), không mở kính lúp hay đường dẫn nào, và đóng mọi cái đang mở trước `T − move` của cảnh kế. Khi camera đang trôi, vật trượt trên màn hình nên kính và nét đường dẫn trượt theo, mắt người xem phải đuổi theo hai thứ cùng lúc. Mở sớm nhất ở `T + 0.2`. Kiểm bằng ảnh "Quanh mỗi lần camera đổi câu" (`qa.md` §3).
+
 **Chọn `d`:** đủ gần để nút giao gần chạm mép vùng hình (người dùng chê bản đầu còn nhiều khoảng trống), đủ xa để xe đứng chờ ở cả các nhánh vẫn nằm trong khung. Chụp một ảnh lúc mọi xe đang đứng chờ để kiểm.
 
 ## 4. Mốc lời đọc: `cueKit`

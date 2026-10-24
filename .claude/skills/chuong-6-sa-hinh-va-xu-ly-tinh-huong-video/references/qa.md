@@ -14,6 +14,8 @@ Các lệnh chạy trong thư mục dự án (`$P`). `hyperframes` là `npx -y h
 | Sau `assemble.sh` | Luật tệp khung (tự chạy), `lint`, `check` | §4 |
 | Sau `assemble.sh` | Contact sheet giữa khung và cuối khung, rồi ảnh chụp thêm | §3 |
 | Sau khi render | Số đo MP4, ảnh trích từ MP4 so với ảnh chụp | `vi-explainer-video/SKILL.md` bước 10 |
+| Sau khi sửa `kit/` | Ví dụ V02 vẽ y như cũ: `vr-check.sh` | §4b |
+| Khi dựng một khuôn mới | `lint-tells.mjs` (chỉ góp ý), rồi một người đọc mới theo `AGENTS.md` mục "A fresh reader for a new mould" | `vi-explainer-video/references/pitfalls.md` mục "Dấu hiệu máy làm" |
 
 Sửa xong một lỗi thì chạy lại các phép kiểm phía sau nó, không chỉ phép đã báo lỗi.
 
@@ -70,7 +72,7 @@ Contact sheet chỉ cho thấy lúc xe đứng yên. Chụp thêm bằng `snap.s
 | Xe ảo của phương án sai | Giữa lần chạy thử và ngay lúc bị chốt sai | Xe ảo nhìn khác xe thật; dấu sai hiện đúng xe |
 | Từng kính lúp | Lúc kính đang mở | Xem "Kính lúp" bên dưới |
 | Bánh xe lúc rẽ | Giữa một cua, với loại xe nào cũng một lần | Xem "Bánh xe" bên dưới |
-| Quanh mỗi lần camera đổi câu | 0,5 giây trước, giữa, và 0,5 giây sau | Không có thẻ chữ lơ lửng; ô cũ không còn xe đang chạy; panel và cột chữ vào ra cùng nhau |
+| Quanh mỗi lần camera đổi câu | 0,5 giây trước, giữa, và 0,5 giây sau | Không có thẻ chữ lơ lửng; ô cũ không còn xe đang chạy; panel và cột chữ vào ra cùng nhau; không kính lúp hay đường dẫn nào đang mở (`world.md` §3, "Camera đứng yên rồi mới chỉ") |
 | Mỗi lần tô sáng theo nhịp | Đúng lúc đọc một tên xe, một tên biển hay một số thứ tự | Số trên cột chữ và huy hiệu trên bản đồ sáng **cùng lúc** và nổi rõ |
 | Mũi tên trên đường | Lúc đang là hướng được xét, và lúc không | Hướng đang xét nổi hẳn; hướng còn lại vẫn đọc được, không lem màu |
 
@@ -124,6 +126,28 @@ Kết quả của V02: `lint` 0 lỗi; `check` passed; contrast 84/84.
 **Không chấp nhận:** mọi lỗi (`error`), và `content_overlap` hay `text_occluded` kéo dài ngoài điểm chuyển khung. Panel `#world-side` phải có `data-layout-allow-overflow` (đã có trong `kit/compositions/world.html`).
 
 Dòng `Invalid PCM packet` của ffmpeg trong lúc chạy `mix-balance.mjs` vô hại.
+
+## 4b. Sau khi sửa `kit/`: ví dụ phải vẽ y như cũ
+
+`scripts/vr-check.sh` chụp ảnh cả composition (thế giới 3D, cột chữ, phụ đề) ở các mốc cho trước, rồi so từng điểm ảnh với ảnh gốc bằng `ui vr gate` (gói `ease-design`, devDependency của my-designer). Ảnh chụp dùng SwiftShader, nên hai lần chạy trên cùng máy ra cùng điểm ảnh. Làm trên một bản sao của V02, không đụng dự án đã duyệt:
+
+```bash
+ROOT=$(git rev-parse --show-toplevel); K=$ROOT/.claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit
+T=$ROOT/projects/sat-hach-lai-xe/videos/chuong-6-v02; P=$ROOT/projects/sat-hach-lai-xe/videos/chuong-6-kit-check
+rm -rf "$P" && rsync -a --exclude renders --exclude snapshots "$T/" "$P/"
+cp "$K/scripts/vr-check.sh" "$P/scripts/"                                   # dự án làm trước 2026-10-24 chưa có
+(cd "$P" && bash scripts/vr-check.sh base "$(node scripts/frame-times.mjs mid)")    # ảnh của kit cũ
+cp "$K/assets/lib/world/<tệp vừa sửa>" "$P/assets/lib/world/"              # chỉ chép đúng các tệp đã sửa
+(cd "$P" && bash scripts/vr-check.sh check "$(node scripts/frame-times.mjs mid)")
+```
+
+- **Mã 0:** mọi ảnh giống. Ghi "ví dụ vẽ y như cũ, `vr gate` N/N" vào báo cáo.
+- **Mã 1:** có ảnh khác. Chỉ mở ảnh trong `snapshots/vr-diff/` (vùng khác được tô), không đọc lại cả hai bộ ảnh. Sửa có chủ ý đổi hình thì xác nhận chỉ vùng muốn đổi bị tô.
+- **Mã 3:** không có `ui` (bản secure không có npm). Ghi "chưa kiểm điểm ảnh" vào báo cáo, rồi so contact sheet bằng mắt như §3.
+- Sửa script dựng khung (`frames.*`, `assemble.sh`) thì chép cả script đó và chạy lại `assemble.sh` trong `$P` trước `check`.
+- Thêm mốc giữa lúc kính lúp hay xe đang chạy nếu tệp đã sửa liên quan tới chúng; `mid` chỉ chụp giữa khung.
+
+Xong thì xoá `$P`. `vr-check.sh` chưa chạy trên một lần sửa kit thật: lần đầu dùng, ghi kết quả vào đây.
 
 ## 5. Giọng: số, chữ cái và ghim `seed`/`cfg`
 

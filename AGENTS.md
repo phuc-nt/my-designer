@@ -148,6 +148,45 @@ one project `http://localhost:<port>/?project=<id>`. `/projects/<id>` is
    defect, capability the kit lacks — say it plainly. Do not under-claim
    either: check the skill before saying "the kit cannot do X".
 
+## Reporting finished work
+
+Every handover or final report (to the human, to another agent, in a
+`HANDOFF.md`) uses the same five headings, in this order, so a reader can
+tell what was proven from what was assumed:
+
+```
+BUILD         what was made or changed, with paths
+CHECK         commands run and their result (lint, check, fingerprint, gate)
+LOOK          what was measured on images or numbers (contact sheets read, SSIM, LUFS)
+EYE           what only the human can judge and has or has not seen (motion, sound, taste)
+NOT_VERIFIED  what was skipped or could not be checked, and why
+```
+
+Leave a heading in with "none" rather than dropping it. A skill's own report
+template may add sections; it keeps these five.
+
+## A fresh reader for a new mould
+
+When a skill gets a new mould (the first lesson of a chapter that has no
+skill yet, such as Chương II or Phần 7, or a new layout for Chương VI), the
+agent that built it does not judge it alone. Before showing it to the human,
+spawn one agent with fresh context, which gets only the rendered contact
+sheets, the brief and a short rubric (does each frame say one thing; can a
+viewer follow without the narration; anything overlapping, cut off or
+unreadable; does it look like the series or like a template). It reports
+findings; the builder fixes them. At most two rounds, then hand over with
+the remaining findings under `NOT_VERIFIED`. Not for ordinary lessons in an
+approved mould: the user watches token cost.
+
+## Optional design checks: `ui`
+
+`ease-design` is a devDependency (`node_modules/.bin/ui`). The kits use it
+for pixel regression (`vr-check.sh`, `vr diff`), static page checks
+(`interactive-lesson-web` and `house-plans-3d` checks) and colour contrast.
+Every use is optional: the secure HyperFrames build has no npm, so a missing
+`ui` means "not verified", never a failure. Its licence is PolyForm Shield
+1.0.0: use the tool, do not copy its code or text into this repo.
+
 ## Things you must never do
 
 - Commit or print `.env.local`, `.local/`, or `data/` — encryption key,

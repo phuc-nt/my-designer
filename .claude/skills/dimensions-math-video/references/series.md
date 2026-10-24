@@ -74,6 +74,26 @@ Bài 2–5 Chương 2 dùng chung bốn mục (README Chương 2: Câu chuyện,
 
 Bài 6 Chương 1 và Bài 8 Chương 2 là luyện tập chung, viết thành bài giải mẫu (**Bài toán**, **Cách nghĩ**): mỗi bài toán một nhóm khung, cô nêu đề, rồi bàn tay làm từng bước của Cách nghĩ trên đồ vật; không có Nói với trẻ mới.
 
+### Dựng một khung Dễ nhầm: bốn nhịp
+
+Một ngộ nhận không mất đi vì được nghe điều đúng. Bé chỉ đổi cách nghĩ khi cách cũ tự cho ra một kết quả mà chính bé thấy là sai, và cách mới vừa dễ hiểu vừa giải thích được điều đó (Posner, Strike, Hewson & Gertzog, 1982, "Accommodation of a scientific conception", *Science Education* 66(2)). Vì vậy mỗi điều Dễ nhầm đi qua bốn nhịp, thường trong hai hoặc ba khung:
+
+1. **Ngộ nhận:** bàn tay làm theo cách nghĩ sai, như một bé thật sẽ làm. Không chê.
+2. **Câu hỏi bản lề:** cô hỏi một câu mà câu trả lời theo cách sai và theo cách đúng khác nhau. Bong bóng "?" hiện, rồi **im khoảng hai giây** (khoảng lặng trong tệp giọng, như `vi-explainer-video/references/audio.md` §3) để bé đoán trước khi hình trả lời.
+3. **Tình huống phản chứng:** hình làm một việc cụ thể (đếm lại, xếp vào khung mười ô, ghép từng cặp) cho thấy câu trả lời theo cách sai không đúng. Bé thấy, không phải nghe cô nói.
+4. **Cách đúng:** đọc câu Nói với trẻ, và làm lại đúng một lần trên chính những đồ vật ấy.
+
+Ngộ nhận của bé cho các bài chưa làm (lấy từ Dễ nhầm của brief; brief có điều khác thì theo brief):
+
+| Bài | Ngộ nhận của bé | Câu hỏi bản lề | Tình huống phản chứng |
+|---|---|---|---|
+| Ch.1 Bài 3 · Số 0 | "Không còn gì thì không có số" | Đĩa còn ba quả, rồi hai, rồi một, rồi không còn: "Giờ đĩa có mấy quả?" | Đếm ngược trên khung mười ô: 3, 2, 1, rồi khung trống vẫn có chỗ của nó, là 0 |
+| Ch.1 Bài 5 · So sánh | "Hàng trải dài hơn là nhiều hơn" | Sáu viên kẹo trải dài, bảy viên xếp sát: "Hàng nào nhiều hơn?" | Xếp cả hai hàng vào khung mười ô (hoặc ghép từng cặp): hàng xếp sát thừa ra một viên |
+| Ch.2 Bài 1 · Hai phần | "Hai phần phải bằng nhau", "0 không phải một phần" | Năm quả, một đĩa một quả và một đĩa bốn quả: "Đây có phải hai phần không?" | Gộp hai đĩa lại vẫn đủ năm; một đĩa trống, gộp lại vẫn đủ năm |
+| Ch.2 Bài 6 · Phần bị giấu | "Đếm ô trống là ra phần bị giấu" | Tấm che trên một nhóm bảy: "Dưới tấm che có mấy?" | Mở tấm che: số ô trống chỉ đúng khi cả nhóm là 10 |
+
+**Cho chương dạy dấu bằng** (sau Chương 2, chưa có brief): ngộ nhận "dấu bằng nghĩa là ra kết quả". Câu hỏi bản lề `6 + 3 = _ + 5`; bé theo cách sai sẽ điền 9. Tình huống phản chứng là một cái cân hai đĩa: đĩa trái sáu và ba khối, đĩa phải năm khối và chỗ trống; đặt chín khối thì cân lệch, đặt bốn khối thì cân thăng bằng. Giữ mọi số ≤ 10 (luật §1).
+
 ## 4. Ngân sách thời lượng
 
 Bài 1: 684 âm tiết phần giảng trong brief, ra 583 âm tiết lời đọc, 23 khung, trung bình 25 âm tiết mỗi khung, và **308,9 giây** (1,9 âm tiết mỗi giây, chậm vì tiếng đếm cách nhau một giây). `BRIEF.md` đặt 240 giây; thực tế dài hơn 29%.

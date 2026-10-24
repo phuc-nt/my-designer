@@ -65,6 +65,32 @@ Các lỗi dưới đây gặp khi dựng video đầu tiên (my-agent-crew, 11 
 | 47 | Lệnh chờ tạo giọng nhân bản bị ngắt sau 10 phút | Mỗi câu mất 13–20 s; lệnh Bash chạy trước có giới hạn 10 phút | Chạy `clone-voice.mjs` nền, ghi ra tệp log, rồi đọc log |
 | 38 | `zsh: command not found: npx -y hyperframes` | Cất lệnh vào biến `CLI="npx -y hyperframes"` rồi gọi `$CLI`; zsh không tách chữ trong biến | Bước 0: viết lệnh trực tiếp, không qua biến |
 
+## Dấu hiệu máy làm
+
+Những thói quen làm một khung trông như máy dựng hàng loạt. `scripts/lint-tells.mjs` dò sáu cái từ HTML của khung (bước 8). Lệnh chỉ góp ý, không bao giờ làm hỏng bước dựng: mỗi dòng là một câu hỏi để trả lời bằng contact sheet.
+
+| Dấu hiệu | Lệnh báo khi | Giữ khi | Sửa thế nào |
+|---|---|---|---|
+| `accent` | màu nhấn tô hơn một thứ trong khung | không bao giờ ở preset có luật "một lần mỗi khung" | giữ màu nhấn cho đúng một chữ hay một vật: thứ người xem phải nhớ |
+| `kicker` | dòng chữ hoa nhỏ, giãn chữ, nằm trên tiêu đề ở ≥ 60% số khung | `frame.md` yêu cầu (eyebrow ✱ của `code-editorial`) | bỏ ở khung mà nó không gọi tên gì; tiêu đề tự đứng được |
+| `numbering` | số có số 0 đứng đầu ("01", "02 / 05") | thứ tự là nội dung: các bước, các mốc, câu hỏi số mấy | bỏ số; hoặc viết số không có số 0 |
+| `side-stripe` | thẻ có một viền trái hay phải dày ≥ 3px | viền đó mang nghĩa (trích dẫn, mã) | viền đủ bốn cạnh, nền thẻ khác màu, hay không viền |
+| `emoji` | có emoji màu | không | vẽ icon, hoặc dùng bộ icon của preset (`win95-pixel/icons/`) |
+| `caption-zone` | hộp `absolute` chạm dưới y = 896 (880 với `win95-pixel`) | hộp nằm trong một thẻ cha, nên số đo của lệnh tính từ thẻ cha | dời lên; xác nhận trên contact sheet |
+
+Ngoài sáu dấu hiệu lệnh dò được, khi đọc contact sheet hãy để ý thêm: mọi khung cùng một bố cục thẻ giữa màn hình; chữ to nói lại đúng điều lời đọc vừa nói; hiệu ứng phát sáng hay gradient ở mọi chỗ.
+
+**Đo bảng màu trước khi dựng** (khi tự chọn màu, hoặc đổi màu của preset), bằng `ui` của gói `ease-design` (devDependency của my-designer; bản secure không có, khi đó ghi "chưa đo tương phản"):
+
+```bash
+UI=$(git rev-parse --show-toplevel)/node_modules/.bin/ui
+$UI color contrast "#<chữ phụ đề>" "#<nền>"     # chữ thường cần ≥ 4.5:1, chữ ≥ 48px cần ≥ 3:1
+$UI color contrast "#<màu nhấn>" "#<nền>"       # màu nhấn dùng cho chữ cũng cần ≥ 4.5:1
+$UI color scale "#<màu nhấn>"                   # dãy sáng tối của một màu, để chọn bậc vừa đủ tương phản
+```
+
+`hyperframes check` vẫn đo tương phản trên ảnh thật ở bước 9; phép đo này chỉ để chọn đúng màu từ đầu.
+
 ## Đã chấp nhận, không sửa
 
 - **Hai phần tử chồng lên nhau thoáng qua** (~0.3 s) khi đang chuyển động. Vẫn ghi vào báo cáo cuối.

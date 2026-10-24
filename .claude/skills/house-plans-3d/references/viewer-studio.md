@@ -103,6 +103,14 @@ Chạy trong Chromium không màn hình ở bốn cỡ: `phone` 390 × 844, `sma
 
 Ảnh chụp nằm trong `tmp/check-web/`. Lệnh thoát với mã 1 khi có mục hỏng. Thiếu `playwright` thì nó nói cách cài.
 
+Khi kiểm `web/` trên máy (không phải địa chỉ mạng), trước trình duyệt nó chạy phần kiểm tĩnh `ui gate` (gói `ease-design`, devDependency của my-designer, tìm `node_modules/.bin/ui` từ dự án đi lên):
+
+- Dòng `static`: lỗi a11y (tương phản, nhãn) và layout là mục hỏng. `STATIC_ALLOW` ở đầu tệp liệt kê báo nhầm đã biết: chữ trắng trên thẻ tối trong suốt đặt trên canvas (`#hint`), vì `gate` bỏ qua độ trong suốt của nền.
+- Dòng `note static`: góp ý (taste, tell, `heading-empty` do tiêu đề được điền lúc chạy). Không chặn.
+- Dòng `skip static`: không tìm thấy `ui`. Ghi "chưa kiểm tĩnh" vào báo cáo.
+
+Thêm vào `STATIC_ALLOW` chỉ khi đã nhìn ảnh và thấy chữ đọc được, kèm một dòng chú thích vì sao.
+
 **Lệnh này kiểm tra hành vi, không kiểm tra hình thức.** Sau khi nó báo đạt, vẫn phải mở ảnh chụp: mô hình có nằm giữa khung không, nhãn có đè lên nhau không, bảng thông tin có che mất nhà không.
 
 ## 5. Trang studio

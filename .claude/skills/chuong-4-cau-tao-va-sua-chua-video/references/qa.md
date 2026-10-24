@@ -88,7 +88,14 @@ fingerprint 889487f1843520e1
 ```
 
 - **Sửa không nhằm đổi hình:** dấu vân tay phải đúng `889487f1843520e1` (nó băm mọi lệnh vẽ của mọi lần dựng hình), và `diff` không in gì.
-- **Sửa có chủ ý đổi hình:** `node scripts/bench-check.mjs --frames` ở cả hai bên cho biết khung nào đổi; chụp các khung đó bằng `bench-shots.mjs` và đọc ảnh để xác nhận chỉ thứ muốn đổi đã đổi. Ghi dấu vân tay mới vào mục này.
+- **Sửa có chủ ý đổi hình:** `node scripts/bench-check.mjs --frames` ở cả hai bên cho biết khung nào đổi; chụp các khung đó bằng `bench-shots.mjs` và đọc ảnh để xác nhận chỉ thứ muốn đổi đã đổi. Ghi dấu vân tay mới vào mục này. Muốn biết **vùng nào** đổi thay vì đọc hai ảnh: chụp cùng mốc ở cả hai bên bằng `bench-shots.mjs` với tên `old` và `new`, đổi JPG sang PNG, rồi `ui vr diff` (gói `ease-design` của my-designer; thiếu thì bỏ qua):
+
+  ```bash
+  for s in old new; do ffmpeg -v error -y -i "snapshots/bench/$s.jpg" "snapshots/bench/$s.png"; done
+  "$(git rev-parse --show-toplevel)"/node_modules/.bin/ui vr diff snapshots/bench/old.png snapshots/bench/new.png --out snapshots/bench/diff.png
+  ```
+
+  Mở `diff.png`: chỉ vùng muốn đổi được tô. Cả composition (chữ, phụ đề) thì `scripts/vr-check.sh base|check "<giây,…>"`, cách dùng ở `chuong-6-…/references/qa.md` §4b.
 - **Thiếu `projects/sat-hach-lai-xe/videos/chuong-4-bai-01-dong-co`** (máy khác): tạo lại giọng cho ví dụ theo bước 4–8 của `SKILL.md`. Mốc sẽ khác, nên dấu vân tay cũng khác; khi đó chỉ so được bằng mắt.
 
 Xong thì xoá `projects/sat-hach-lai-xe/videos/chuong-4-kit-check`.

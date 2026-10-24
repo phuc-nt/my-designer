@@ -85,6 +85,15 @@ for f in "$P"/snapshots/cmp/contact-sheet-*.jpg; do ffmpeg -hide_banner -nostats
 
 - Sửa không nhằm đổi hình: `diff` không in gì và SSIM `All:1.000000` ở mọi tờ. Lần đóng gói skill đạt đúng như vậy.
 - Sửa có chủ ý đổi hình (ví dụ đổi màu vạch): khung vẫn phải giống từng byte nếu không đụng `frames.*`; đọc các tờ `cmp` của hai bên để xác nhận chỉ thứ muốn đổi đã đổi.
+- Muốn thấy **chỗ nào** khác thay vì một con số SSIM: `vr-check.sh` (cùng cách như `chuong-6-…/references/qa.md` §4b) cho ảnh tô vùng khác ở `snapshots/vr-diff/`. Dự án `$P` vừa tạo đã có script; `$T` thì chép từ `chuong-6-…/kit/scripts/`:
+
+  ```bash
+  cp "$ROOT"/.claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit/scripts/vr-check.sh "$T/scripts/"
+  (cd "$T" && bash scripts/vr-check.sh base "$(node scripts/frame-times.mjs mid)")
+  mkdir -p "$P/snapshots" && cp -R "$T/snapshots/vr-base" "$P/snapshots/"
+  (cd "$P" && bash scripts/vr-check.sh check "$(node scripts/frame-times.mjs mid)")   # 0 giống; 1 xem vr-diff/; 3 không có ui
+  ```
+
 - Thiếu `projects/sat-hach-lai-xe/videos/chuong-3-bai-05-khi-khong-nhin-ro` (máy khác): tạo lại giọng cho ví dụ theo bước 4–8 của `SKILL.md`, rồi chỉ so được bằng mắt.
 
 Xong thì xoá `projects/sat-hach-lai-xe/videos/chuong-3-kit-check`. Bảng màu `day` của `road.js` mới được chụp thử trên cảnh của Bài 5 (đổi `palette: "day"` trong `world.js`), chưa dùng trong video nào: video đầu tiên dùng ban ngày phải kiểm màu chữ nhãn 3D và độ nổi của vạch đường.

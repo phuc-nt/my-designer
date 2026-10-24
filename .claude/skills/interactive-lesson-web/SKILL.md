@@ -65,6 +65,11 @@ SP=<scratchpad>                                  # ảnh kiểm, bản dựng th
    node $S/scripts/check.mjs $SP/b-<bai> $SP/shots-<bai>
    ```
    Mỗi cỡ màn hình in một dòng JSON: `errs` phải rỗng, `playing.paused` false, `asked`/`right` true nếu bài có câu hỏi, `overflow` false. Xem `desktop-at55-full.png` và `phone-at55-full.png`. Trang cảnh báo `question of "…" not found` trong console nghĩa là câu hỏi không khớp chữ phụ đề: sửa `ask.after`.
+   Dòng `static` là phần kiểm tĩnh bằng `ui gate` (gói `ease-design` của my-designer) trên HTML và CSS của bài, chạy trước Chrome:
+   - `errors` phải rỗng: lỗi a11y (tương phản, nhãn, thứ tự tiêu đề) hay layout. Có lỗi thì lệnh thoát 1. Sửa trong `kit/`, không sửa `dist/`.
+   - `advice` (taste, tell, content, và cảnh báo a11y/layout) chỉ để đọc, không chặn. Hay gặp mà bỏ qua được: `heading-empty` (tiêu đề do `app.js` điền lúc chạy), nhãn đặt trên canvas.
+   - `skipped`: chưa `npm install` ở gốc my-designer, hoặc bản không có npm. Ghi "chưa kiểm tĩnh" vào báo cáo.
+   - Ngày 2026-10-24 kit đã sửa tương phản (`--teal`, chữ phụ đề mờ, nút Play lúc đang tải) và bọc mọi `:hover` trong `@media (hover: hover)`. Site đã deploy trước đó vẫn là CSS cũ cho tới lần dựng và deploy sau.
 5. **Đặt `META.code`** (site có `curriculum`): mã bài trong `curriculum.json` (`C3-B05`); một video chưa khớp bài nào của chương trình thì chỉ mã chương (`C6`), nó vào mục "Luyện thêm" của chương. Hai bài web cùng mã (phần 1, phần 2) đứng liền nhau theo tên thư mục.
 6. **Dựng cả site** (`node $S/scripts/build-site.mjs $WEB`), chụp trang chủ, rồi deploy.
 
@@ -95,6 +100,6 @@ Pages không trả lời yêu cầu Range (luôn 200 cả tệp) và Safari khô
 
 - URL site và từng bài; mỗi bài có gì (số bước, câu hỏi nào, chạm được gì, khung cắt).
 - Câu chữ chép nguyên văn từ đâu; chỗ nào video có mà trang không có (chữ trên khung, hình chỉ có ở lớp HTML).
-- Đã kiểm gì (`check.mjs` ba cỡ màn hình) và **chưa kiểm trên máy thật**.
+- Đã kiểm gì (`check.mjs` ba cỡ màn hình, dòng `static`) và **chưa kiểm trên máy thật**.
 - **Agent không nghe được âm thanh và không xem được chuyển động.**
 - Chưa commit gì (trừ khi người dùng bảo).

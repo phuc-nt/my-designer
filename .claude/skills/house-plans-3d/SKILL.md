@@ -190,7 +190,7 @@ Nói rõ khi có liên quan, đừng để người dùng tự phát hiện:
 - Mọi kích thước bên trong nhà là số ước lượng, trừ khi tài liệu gốc in ra và đã được chép vào chuỗi.
 - File DXF chưa được mở bằng phần mềm CAD trên máy tính. Quy ước vẽ theo TCVN lấy từ tài liệu thứ cấp.
 - Trang studio là hình tĩnh, nhãn không bám theo máy quay, và mỗi lần dựng thay toàn bộ các trang.
-- `check-web.mjs` kiểm tra hành vi, không kiểm tra hình thức.
+- `check-web.mjs` kiểm tra hành vi, và phần tĩnh chỉ bắt tương phản, nhãn và tràn khung (`references/viewer-studio.md`); bố cục có đẹp không vẫn phải nhìn ảnh.
 - Chữ trên bản vẽ giả định có tài liệu gốc. Nhà thiết kế mới hoàn toàn cần sửa lời trong `project.json` và `content.js`.
 
 ## Tham khảo
