@@ -5,7 +5,7 @@
 //   web/vendor/           three.js, copied from the repo's node_modules
 //   web/index.html        only its <title>, its description and the sample figure of the drawing legend are rewritten
 //
-//   node project/<name>/tools/build-web.mjs
+//   node projects/<name>/tools/build-web.mjs
 //
 // The viewer itself (index.html, styles.css, app.js, plan.js) is hand-written; content.js holds the views and the
 // wording of this house. It needs no studio server: serve web/ with any static server, or deploy it (see CLAUDE.md).

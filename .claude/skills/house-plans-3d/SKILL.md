@@ -64,7 +64,7 @@ Skill không chứa số liệu của một ngôi nhà thật nào. Nhà mẫu l
 - **Không sửa số của tài liệu gốc cho khớp mô hình.** Khi hai bên lệch nhau thì mô hình sai, hoặc tài liệu gốc tự mâu thuẫn. Trường hợp sau: ghi vào `unexplained` của `source-dimensions.json` và báo người dùng.
 - **Nhìn rồi mới khẳng định.** Sau mỗi lần dựng, mở PNG của tờ bản vẽ và ảnh chụp màn hình web. Lệnh báo đạt chưa có nghĩa là hình đúng.
 - **Bản vẽ là bản dựng lại để tham khảo.** Không dùng để xin phép hay thi công. Dòng này in trên mọi tờ, đừng bỏ.
-- **Nhà của người dùng là dữ liệu riêng.** Không chép số liệu, địa chỉ, tên chủ nhà vào skill hay vào ví dụ. Thư mục `project/` nằm trong `.gitignore`, không `git add -f` gì ở đó. Hỏi trước khi đưa lên một địa chỉ công khai.
+- **Nhà của người dùng là dữ liệu riêng.** Không chép số liệu, địa chỉ, tên chủ nhà vào skill hay vào ví dụ. Thư mục `projects/` nằm trong `.gitignore`, không `git add -f` gì ở đó. Hỏi trước khi đưa lên một địa chỉ công khai.
 - Chữ tiếng Việt viết câu ngắn, giọng tự nhiên, không dùng dấu gạch ngang dài.
 
 ## Đường dẫn
@@ -74,7 +74,7 @@ Mỗi lệnh Bash là một shell mới, nên đặt lại biến ở đầu m�
 ```bash
 SK=.claude/skills/house-plans-3d
 NAME=<tên thư mục dự án, tiếng Anh, chữ thường, gạch nối>
-P=project/$NAME
+P=projects/$NAME
 ```
 
 ## Quy trình
@@ -97,7 +97,7 @@ bash $SK/scripts/new-project.sh $NAME
 node $P/tools/build-plans.mjs && node $P/tools/build-web.mjs && node $P/tools/check-web.mjs
 ```
 
-- Lệnh đầu chép `kit/` và nhà mẫu vào `project/$NAME`. Lệnh thứ hai dựng nhà mẫu để biết máy đã đủ công cụ trước khi sửa gì.
+- Lệnh đầu chép `kit/` và nhà mẫu vào `projects/$NAME`. Lệnh thứ hai dựng nhà mẫu để biết máy đã đủ công cụ trước khi sửa gì.
 - Chép tài liệu gốc của người dùng vào `$P/original-drawings/`, đặt tên file tiếng Anh có số thứ tự.
 
 ### 2. Chép số từ tài liệu gốc

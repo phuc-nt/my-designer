@@ -65,8 +65,8 @@ Cách viết: câu ngắn, giọng tự nhiên, không dùng dấu gạch ngang 
 ## 2. Dựng dữ liệu cho web
 
 ```bash
-node project/<name>/tools/build-web.mjs
-python3 -m http.server 8080 --directory project/<name>/web     # xem tại http://localhost:8080
+node projects/<name>/tools/build-web.mjs
+python3 -m http.server 8080 --directory projects/<name>/web     # xem tại http://localhost:8080
 ```
 
 `build-web.mjs` ghi `web/data/house.json`, chép ảnh vân vào `web/textures/` và three.js vào `web/vendor/`. Nó cũng ghi lại `<title>` và câu mô tả của `web/index.html` theo `project.json`. Chạy `build-plans.mjs` trước: chế độ bản vẽ cần `web/cad/` và `web/data/building.json`.
@@ -89,9 +89,9 @@ python3 -m http.server 8080 --directory project/<name>/web     # xem tại http:
 ## 4. Kiểm tra trên trình duyệt
 
 ```bash
-node project/<name>/tools/check-web.mjs                          # tự phục vụ web/ và kiểm tra
-node project/<name>/tools/check-web.mjs https://<địa chỉ>/        # kiểm tra bản đã đưa lên mạng
-VERBOSE=1 node project/<name>/tools/check-web.mjs --sizes phone --views f1,f2
+node projects/<name>/tools/check-web.mjs                          # tự phục vụ web/ và kiểm tra
+node projects/<name>/tools/check-web.mjs https://<địa chỉ>/        # kiểm tra bản đã đưa lên mạng
+VERBOSE=1 node projects/<name>/tools/check-web.mjs --sizes phone --views f1,f2
 ```
 
 Chạy trong Chromium không màn hình ở bốn cỡ: `phone` 390 × 844, `small` 360 × 740, `landscape` 844 × 390, `desktop` 1440 × 900. Với mỗi góc nhìn nó kiểm tra:
@@ -109,7 +109,7 @@ Chạy trong Chromium không màn hình ở bốn cỡ: `phone` 390 × 844, `sma
 
 ```bash
 node bootstrap.mjs --status                                   # máy chủ studio phải đang chạy, xem AGENTS.md
-node project/<name>/tools/build-studio.mjs
+node projects/<name>/tools/build-studio.mjs
 bin/dsa projects inspect <id> --mode page --page 1 --max-dimension 1600 --output view.png
 ```
 
@@ -139,7 +139,7 @@ Chỉ làm khi người dùng yêu cầu. **Địa chỉ `*.pages.dev` là công
 
 ```bash
 wrangler pages project create <tên pages> --production-branch main        # một lần
-wrangler pages deploy project/<name>/web --project-name <tên pages> --branch main --commit-dirty=true 2>&1 | grep -v "@\|account"
+wrangler pages deploy projects/<name>/web --project-name <tên pages> --branch main --commit-dirty=true 2>&1 | grep -v "@\|account"
 ```
 
 - `grep` ở cuối bỏ các dòng có địa chỉ email và tên tài khoản khỏi kết quả in ra.

@@ -1,6 +1,6 @@
 # Loạt video Chương IV · Cấu tạo và sửa chữa
 
-Brief nằm ở `/Users/phucnt/workspace/sat-hach-lai-xe/video-briefs/chuong-4-cau-tao-va-sua-chua/`: `README.md` (luật của chương, bảng thuật ngữ, hình có sẵn, mức độ kiểm chứng), `BAI-01…BAI-09-*.md` (mỗi bài một tệp), `DOI-CHIEU.md` (bảng đối chiếu nguồn, chỉ để soát). Repo đó chỉ đọc.
+Brief nằm ở `/Users/phucnt/workspace/sat-hach-lai-xe/projects/sat-hach-lai-xe/video-briefs/chuong-4-cau-tao-va-sua-chua/`: `README.md` (luật của chương, bảng thuật ngữ, hình có sẵn, mức độ kiểm chứng), `BAI-01…BAI-09-*.md` (mỗi bài một tệp), `DOI-CHIEU.md` (bảng đối chiếu nguồn, chỉ để soát). Repo đó chỉ đọc.
 
 ## 1. Luật nội dung và cách áp dụng
 
@@ -128,4 +128,4 @@ Thứ tự gợi ý nếu người dùng không chỉ định, tính theo phần
 
 | Video | Dự án | Nội dung | Số đo | Ghi chú |
 |---|---|---|---|---|
-| Bài 1, phần 1 | `videos/chuong-4-bai-01-dong-co` | Câu hỏi mở đầu thứ nhất, ý lớn, ý 1 (động cơ làm việc gì), ý 2 (động cơ 4 kỳ), ba dòng ghi nhớ tương ứng; khung cuối nêu câu hỏi của ý 3 | 21 khung, 924 âm tiết, 343 giây (5:43), 1920×1080, 30 khung/giây; −13,7 LUFS, true peak −1,6 dBFS; 6 SFX | Người dùng duyệt ngày 2026-10-12. Độ to cao hơn khoảng mục tiêu 0,3 LU và được giữ. Xe vẽ máy đặt trước, bánh sau chủ động; xe kê trên giá ở khung bánh xe chủ động: hai lựa chọn minh hoạ, ghi trong BRIEF.md |
+| Bài 1, phần 1 | `projects/sat-hach-lai-xe/videos/chuong-4-bai-01-dong-co` | Câu hỏi mở đầu thứ nhất, ý lớn, ý 1 (động cơ làm việc gì), ý 2 (động cơ 4 kỳ), ba dòng ghi nhớ tương ứng; khung cuối nêu câu hỏi của ý 3 | 21 khung, 924 âm tiết, 343 giây (5:43), 1920×1080, 30 khung/giây; −13,7 LUFS, true peak −1,6 dBFS; 6 SFX | Người dùng duyệt ngày 2026-10-12. Độ to cao hơn khoảng mục tiêu 0,3 LU và được giữ. Xe vẽ máy đặt trước, bánh sau chủ động; xe kê trên giá ở khung bánh xe chủ động: hai lựa chọn minh hoạ, ghi trong BRIEF.md |

@@ -57,10 +57,10 @@ Directions in this file and in the code comments are plan directions: rear is âˆ
 Run from the repo root. Replace `<name>` with the name of this folder.
 
 ```sh
-node project/<name>/tools/build-plans.mjs     # cad/, store/, web/cad/, web/data/building.json; needs uv
-node project/<name>/tools/build-web.mjs       # web/data/house.json, web/textures/, web/vendor/
-node project/<name>/tools/check-web.mjs       # the viewer at four screen sizes; screenshots in tmp/check-web/
-node project/<name>/tools/build-studio.mjs    # the studio pages; needs the studio server (see AGENTS.md)
+node projects/<name>/tools/build-plans.mjs     # cad/, store/, web/cad/, web/data/building.json; needs uv
+node projects/<name>/tools/build-web.mjs       # web/data/house.json, web/textures/, web/vendor/
+node projects/<name>/tools/check-web.mjs       # the viewer at four screen sizes; screenshots in tmp/check-web/
+node projects/<name>/tools/build-studio.mjs    # the studio pages; needs the studio server (see AGENTS.md)
 ```
 
 Run the first two after every change to `house.mjs`, `project.json`, `store/source-dimensions.json` or `web/content.js`. Neither needs the studio server.
@@ -72,9 +72,9 @@ Run the first two after every change to `house.mjs`, `project.json`, `store/sour
 Look at the viewer locally, and deploy it when the owner asks for a public address:
 
 ```sh
-python3 -m http.server 8080 --directory project/<name>/web
+python3 -m http.server 8080 --directory projects/<name>/web
 wrangler pages project create <pages name> --production-branch main      # once
-wrangler pages deploy project/<name>/web --project-name <pages name> --branch main --commit-dirty=true
+wrangler pages deploy projects/<name>/web --project-name <pages name> --branch main --commit-dirty=true
 ```
 
 A `*.pages.dev` address is public: anyone who has it can open it. Say so to the owner before deploying a real home.

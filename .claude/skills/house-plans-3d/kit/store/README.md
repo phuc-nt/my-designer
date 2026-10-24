@@ -59,7 +59,7 @@ Các bảng trong `house.sqlite`: `levels`, `grid`, `source_segments`, `floors`,
 Chạy từ thư mục gốc của repo, cần cài `uv`. Thay `<name>` bằng tên thư mục của dự án:
 
 ```sh
-node project/<name>/tools/build-plans.mjs
+node projects/<name>/tools/build-plans.mjs
 ```
 
 Lệnh này ghi lại `cad/`, thư mục này (trừ `source-dimensions.json` và file này), `web/cad/` và `web/data/building.json`.

@@ -1,6 +1,6 @@
 # Loạt video Chương I · Quy định chung và quy tắc giao thông
 
-Nguồn: `/Users/phucnt/workspace/sat-hach-lai-xe/video-briefs/chuong-1-quy-dinh-chung-va-quy-tac-giao-thong/` (`README.md`, `BAI-01` … `BAI-21`, `DOI-CHIEU.md`). Đọc `README.md` của thư mục đó trước mỗi bài: tệp này chỉ tóm tắt và nói cách áp dụng vào video.
+Nguồn: `/Users/phucnt/workspace/sat-hach-lai-xe/projects/sat-hach-lai-xe/video-briefs/chuong-1-quy-dinh-chung-va-quy-tac-giao-thong/` (`README.md`, `BAI-01` … `BAI-21`, `DOI-CHIEU.md`). Đọc `README.md` của thư mục đó trước mỗi bài: tệp này chỉ tóm tắt và nói cách áp dụng vào video.
 
 ## 1. Luật nội dung và cách áp dụng
 
@@ -132,4 +132,4 @@ Thứ vẽ mới ở bài nào thì chuyển về `kit/` ngay sau bài đó (SKI
 
 | Ngày | Bài | Dự án | Video | Ghi chú |
 |---|---|---|---|---|
-| 2026-10-12 | 1 · Con đường gồm những phần nào? (đủ năm mục, ba tình huống) | `videos/chuong-1-bai-01-con-duong-gom-nhung-phan-nao` | 21 khung, 637 âm tiết lời đọc, 3:56, Leda, 14 SFX, −14,6 LUFS | Video thử nghiệm của chương, người dùng duyệt ("rất tốt"). Nguồn của `kit/` và `examples/bai-01-con-duong-gom-nhung-phan-nao`. Mọi câu Quy tắc đọc nguyên văn. Bản render ra −13,0 LUFS, đã hạ riêng âm thanh 1,6 dB |
+| 2026-10-12 | 1 · Con đường gồm những phần nào? (đủ năm mục, ba tình huống) | `projects/sat-hach-lai-xe/videos/chuong-1-bai-01-con-duong-gom-nhung-phan-nao` | 21 khung, 637 âm tiết lời đọc, 3:56, Leda, 14 SFX, −14,6 LUFS | Video thử nghiệm của chương, người dùng duyệt ("rất tốt"). Nguồn của `kit/` và `examples/bai-01-con-duong-gom-nhung-phan-nao`. Mọi câu Quy tắc đọc nguyên văn. Bản render ra −13,0 LUFS, đã hạ riêng âm thanh 1,6 dB |

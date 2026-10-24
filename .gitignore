@@ -32,8 +32,10 @@ kit/env.local.sh
 # my-designer local state: real token, password and server pid. Never commit.
 .local/
 
-# HyperFrames video projects (vi-explainer-video skill): voice, music, renders.
-/videos/
+# Client projects, one folder each: projects/house-hp3-12 (house-plans-3d),
+# projects/sat-hach-lai-xe/videos and projects/dimensions-math/videos (lesson videos).
+# Drawings, addresses, voices, music and renders are private and never go into git.
+/projects/
 
-# House projects (house-plans-3d skill): the owner's drawings, dimensions and addresses.
-/project/
+# Other HyperFrames video projects (vi-explainer-video skill): voice, music, renders.
+/videos/

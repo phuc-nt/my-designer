@@ -3,8 +3,8 @@
 // page per view, with the floors, hidden parts and camera angle of that view, a title block, and its room labels.
 //
 // Run with the studio server of the repository running (see AGENTS.md):
-//   node project/<name>/tools/build-studio.mjs             build and save to the project listed in studio.json
-//   node project/<name>/tools/build-studio.mjs --dump f    only write the document to file f, do not save
+//   node projects/<name>/tools/build-studio.mjs             build and save to the project listed in studio.json
+//   node projects/<name>/tools/build-studio.mjs --dump f    only write the document to file f, do not save
 //
 // Without a studio.json the script creates the studio project, uploads the texture images the model uses and
 // writes studio.json. Every run replaces all pages of the project: manual edits made in the studio are lost, so

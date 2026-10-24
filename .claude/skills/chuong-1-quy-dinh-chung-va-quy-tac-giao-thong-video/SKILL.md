@@ -110,8 +110,8 @@ SK=$ROOT/.claude/skills/vi-explainer-video
 HF=<thư mục có faceless-explainer; new-project.sh in ra ở dòng "HF:">
 FX=$HF/faceless-explainer/scripts
 ENGINE=$HF/media-use/audio/scripts/audio.mjs
-P=$ROOT/videos/<ten-du-an>
-BRIEFS=/Users/phucnt/workspace/sat-hach-lai-xe/video-briefs/chuong-1-quy-dinh-chung-va-quy-tac-giao-thong
+P=$ROOT/projects/sat-hach-lai-xe/videos/<ten-du-an>
+BRIEFS=/Users/phucnt/workspace/sat-hach-lai-xe/projects/sat-hach-lai-xe/video-briefs/chuong-1-quy-dinh-chung-va-quy-tac-giao-thong
 ```
 
 Mỗi lệnh Bash là một shell mới: khai báo lại biến trong cùng lệnh, và dùng `(cd "$P" && …)`. Lệnh CLI viết `hyperframes …`; máy không có lệnh đó thì thay bằng `npx -y hyperframes …` (viết thẳng, không cất vào biến).
@@ -135,7 +135,7 @@ Brief thiếu thứ không suy ra được thì hỏi người dùng một lần
 bash .claude/skills/chuong-1-quy-dinh-chung-va-quy-tac-giao-thong-video/scripts/new-project.sh chuong-1-bai-<NN>-<ten-ngan>
 ```
 
-Lệnh tạo `videos/<ten-du-an>` (HyperFrames trống, font tiếng Việt, `glass-keynote`), chép phần mượn của `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit`, `kit/` của chương và các tệp của ví dụ Bài 1. Ghi lại dòng `HF:`. `--bare` bỏ phần ví dụ; dự án khi đó chưa chạy được cho tới khi có đủ bốn tệp riêng của bài. `videos/` nằm trong `.gitignore`; không `git add -f` gì ở đó.
+Lệnh tạo `projects/sat-hach-lai-xe/videos/<ten-du-an>` (HyperFrames trống, font tiếng Việt, `glass-keynote`), chép phần mượn của `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit`, `kit/` của chương và các tệp của ví dụ Bài 1. Ghi lại dòng `HF:`. `--bare` bỏ phần ví dụ; dự án khi đó chưa chạy được cho tới khi có đủ bốn tệp riêng của bài. `projects/sat-hach-lai-xe/videos/` nằm trong `.gitignore`; không `git add -f` gì ở đó.
 
 ### 3. BRIEF.md và SCRIPT.md
 

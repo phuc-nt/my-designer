@@ -7,7 +7,7 @@
 //   store/house.sqlite          the same data for SQL
 //   web/cad/, web/data/         copies for the web viewer: one interactive SVG per plan, the downloads and the store
 //
-//   node project/<name>/tools/build-plans.mjs
+//   node projects/<name>/tools/build-plans.mjs
 //
 // This script only exports the model (plan records, room seeds and meshes of every floor); the drafting itself is
 // the Python step in tools/cad/, run through uv because ezdxf and shapely have no equal in the Node world.

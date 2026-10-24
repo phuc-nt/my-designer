@@ -3,7 +3,7 @@
 `tools/build-plans.mjs` xuất hình học từ `house.mjs`, rồi chạy bước vẽ bằng Python (`tools/cad/draft.py`, qua `uv`). Bước vẽ đọc `project.json` và `store/source-dimensions.json`, xem [project-files.md](project-files.md).
 
 ```bash
-node project/<name>/tools/build-plans.mjs
+node projects/<name>/tools/build-plans.mjs
 ```
 
 Cần `uv` trên máy. Lần chạy đầu `uv` tự tải `ezdxf`, `shapely`, `pymupdf`, `pillow`. Không cần máy chủ studio.

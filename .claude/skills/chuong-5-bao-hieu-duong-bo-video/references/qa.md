@@ -53,7 +53,7 @@ Kết quả của `lint` và `check` đã biết là báo nhầm: như bảng �
 Sửa bất kỳ tệp nào của `kit/`, hay của hai bộ mà skill này mượn (`chuong-6-…/kit/`, và các tệp chép từ `chuong-4-…/kit/`), thì ví dụ Bài 1 phải ra đúng như trước. Dựng lại phần hình và phần chữ của ví dụ trong một dự án tạm, mượn mốc của video đã làm; không tạo giọng, không lắp ráp, không render:
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel); T=$ROOT/videos/chuong-5-bai-01-bien-cam-o-to-va-bien-cam-mo-to; P=$ROOT/videos/chuong-5-kit-check
+ROOT=$(git rev-parse --show-toplevel); T=$ROOT/projects/sat-hach-lai-xe/videos/chuong-5-bai-01-bien-cam-o-to-va-bien-cam-mo-to; P=$ROOT/projects/sat-hach-lai-xe/videos/chuong-5-kit-check
 rm -rf "$P" && bash "$ROOT"/.claude/skills/chuong-5-bao-hieu-duong-bo-video/scripts/new-project.sh chuong-5-kit-check
 for f in assets/lib/world/cues.js audio_meta.json audio_engine_meta.json audio_request.json caption-overrides.json .hyperframes/whisper_words.json .hyperframes/bgm_status.json; do cp "$T/$f" "$P/$f"; done
 (cd "$P" && node scripts/build-frames.mjs | tail -1 && node scripts/build-storyboard.mjs | tail -1)
@@ -95,7 +95,7 @@ Video dài khác thì tính lại: `b:v ≈ (dung lượng đích tính bằng k
 Viết bằng tiếng Việt, cho người dùng.
 
 ```markdown
-**Kết quả:** videos/<tên dự án>/renders/video.mp4 — 1920×1080, 30 fps, <thời lượng>, <dung lượng>.
+**Kết quả:** projects/sat-hach-lai-xe/videos/<tên dự án>/renders/video.mp4 — 1920×1080, 30 fps, <thời lượng>, <dung lượng>.
 
 **Phạm vi:** Bài <N> · <tên bài>, ý <…>. <Số> khung, <số> âm tiết lời đọc. Ý để lại cho phần sau: <…> vì <…>.
 

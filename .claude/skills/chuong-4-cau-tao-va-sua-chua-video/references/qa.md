@@ -63,7 +63,7 @@ Không bỏ qua: `content_overlap` kéo dài hàng chục giây (một khung rò
 Sửa bất kỳ tệp nào của `kit/`, hay của `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit/` mà skill này mượn, thì ví dụ Bài 1 phải ra đúng như trước. Dựng lại ví dụ trong một dự án tạm, mượn âm thanh và mốc của video đã làm để không tạo lại giọng:
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel); T=$ROOT/videos/chuong-4-bai-01-dong-co; P=$ROOT/videos/chuong-4-kit-check
+ROOT=$(git rev-parse --show-toplevel); T=$ROOT/projects/sat-hach-lai-xe/videos/chuong-4-bai-01-dong-co; P=$ROOT/projects/sat-hach-lai-xe/videos/chuong-4-kit-check
 rm -rf "$P" && bash "$ROOT"/.claude/skills/chuong-4-cau-tao-va-sua-chua-video/scripts/new-project.sh chuong-4-kit-check     # ghi lại dòng HF:
 for f in assets/voice assets/bgm assets/sfx; do rm -rf "$P/$f"; cp -R "$T/$f" "$P/$f"; done
 for f in assets/lib/world/cues.js audio_meta.json audio_engine_meta.json audio_request.json caption-overrides.json .hyperframes/whisper_words.json .hyperframes/bgm_status.json; do cp "$T/$f" "$P/$f"; done
@@ -89,9 +89,9 @@ fingerprint 889487f1843520e1
 
 - **Sửa không nhằm đổi hình:** dấu vân tay phải đúng `889487f1843520e1` (nó băm mọi lệnh vẽ của mọi lần dựng hình), và `diff` không in gì.
 - **Sửa có chủ ý đổi hình:** `node scripts/bench-check.mjs --frames` ở cả hai bên cho biết khung nào đổi; chụp các khung đó bằng `bench-shots.mjs` và đọc ảnh để xác nhận chỉ thứ muốn đổi đã đổi. Ghi dấu vân tay mới vào mục này.
-- **Thiếu `videos/chuong-4-bai-01-dong-co`** (máy khác): tạo lại giọng cho ví dụ theo bước 4–8 của `SKILL.md`. Mốc sẽ khác, nên dấu vân tay cũng khác; khi đó chỉ so được bằng mắt.
+- **Thiếu `projects/sat-hach-lai-xe/videos/chuong-4-bai-01-dong-co`** (máy khác): tạo lại giọng cho ví dụ theo bước 4–8 của `SKILL.md`. Mốc sẽ khác, nên dấu vân tay cũng khác; khi đó chỉ so được bằng mắt.
 
-Xong thì xoá `videos/chuong-4-kit-check`.
+Xong thì xoá `projects/sat-hach-lai-xe/videos/chuong-4-kit-check`.
 
 ## 5. Bản gửi qua kênh giới hạn dung lượng
 
@@ -110,7 +110,7 @@ Video dài khác thì tính lại: `b:v ≈ (dung lượng đích tính bằng k
 Viết bằng tiếng Việt, cho người dùng.
 
 ```markdown
-**Kết quả:** videos/<tên dự án>/renders/video.mp4 — 1920×1080, 30 fps, <thời lượng>, <dung lượng>.
+**Kết quả:** projects/sat-hach-lai-xe/videos/<tên dự án>/renders/video.mp4 — 1920×1080, 30 fps, <thời lượng>, <dung lượng>.
 
 **Phạm vi:** Bài <N> · <tên bài>, ý <…>. <Số> khung, <số> âm tiết lời đọc. Ý để lại cho phần sau: <…> vì <…>.
 

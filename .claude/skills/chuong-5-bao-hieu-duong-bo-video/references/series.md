@@ -1,6 +1,6 @@
 # Loạt video Chương V · Báo hiệu đường bộ
 
-Nguồn: `/Users/phucnt/workspace/sat-hach-lai-xe/video-briefs/chuong-5-bao-hieu-duong-bo/` (`README.md`, `BAI-01` … `BAI-28`, `DOI-CHIEU.md`, ảnh tham khảo `images/crops/cau-<số câu>.jpg`). Đọc `README.md` của thư mục đó trước mỗi bài: tệp này chỉ tóm tắt và nói cách áp dụng vào video.
+Nguồn: `/Users/phucnt/workspace/sat-hach-lai-xe/projects/sat-hach-lai-xe/video-briefs/chuong-5-bao-hieu-duong-bo/` (`README.md`, `BAI-01` … `BAI-28`, `DOI-CHIEU.md`, ảnh tham khảo `images/crops/cau-<số câu>.jpg`). Đọc `README.md` của thư mục đó trước mỗi bài: tệp này chỉ tóm tắt và nói cách áp dụng vào video.
 
 ## 1. Luật nội dung và cách áp dụng
 
@@ -125,4 +125,4 @@ Thứ vẽ mới ở bài nào thì chuyển về `kit/` ngay sau bài đó (SKI
 
 | Ngày | Bài | Dự án | Video | Ghi chú |
 |---|---|---|---|---|
-| 2026-10-12 | 1 · Biển cấm ô tô và biển cấm mô tô (đủ năm ý) | `videos/chuong-5-bai-01-bien-cam-o-to-va-bien-cam-mo-to` | 22 khung, 977 âm tiết lời đọc, 5:49, Leda, 11 SFX, −13,8 LUFS | Video thử nghiệm của chương, người dùng duyệt ("rất tốt"). Nguồn của `kit/` và `examples/bai-01-bien-cam-o-to-va-bien-cam-mo-to` |
+| 2026-10-12 | 1 · Biển cấm ô tô và biển cấm mô tô (đủ năm ý) | `projects/sat-hach-lai-xe/videos/chuong-5-bai-01-bien-cam-o-to-va-bien-cam-mo-to` | 22 khung, 977 âm tiết lời đọc, 5:49, Leda, 11 SFX, −13,8 LUFS | Video thử nghiệm của chương, người dùng duyệt ("rất tốt"). Nguồn của `kit/` và `examples/bai-01-bien-cam-o-to-va-bien-cam-mo-to` |
