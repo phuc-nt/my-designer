@@ -9,6 +9,7 @@ const PX = 2560;
 const SPAN = RIM * 2;
 export const FAR = 60; // carriageways run this far out, well past the rim
 export const TAU = Math.PI * 2;
+// a STYLE in plan.js may override these (and add `edge`, an ink colour for the kerb line) before the tiles are painted
 export const COL = { grass: "#a4d489", walk: "#d3d7dc", kerb: "#f3f4f6", road: "#676e79", mark: "#f7f7f1" };
 
 // a grass sheet to paint on: { c: canvas, g: context scaled to metres, r: seeded random }
@@ -49,6 +50,16 @@ export function lay(g, shapes, r) {
     g.beginPath();
     s(g);
     g.fill();
+  }
+  // an ink line along the kerb, when the style asks for one (COL.edge)
+  if (COL.edge) {
+    g.strokeStyle = COL.edge;
+    g.lineWidth = 0.16;
+    for (const s of shapes) {
+      g.beginPath();
+      s(g);
+      g.stroke();
+    }
   }
   // grain, so the asphalt is not a flat fill
   for (const s of shapes) {

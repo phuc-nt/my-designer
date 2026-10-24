@@ -161,12 +161,12 @@ export function createLens(items, { renderer, scene, camera }) {
   let labels = null;
   const V = new THREE.Vector3();
 
-  // (ox, oy) = the view offset of the main pass, which is put back afterwards
+  // (ox, oy) = the view offset of the main pass, which is put back afterwards; returns how many glasses are open
   function render(t, ox, oy) {
     const live = items.filter((it) => t >= it.t0 - 0.001 && t <= it.t1 + OUT).slice(0, SLOTS);
     for (const s of slots) s.mesh.visible = false;
     veil.visible = false;
-    if (!live.length) return;
+    if (!live.length) return 0;
     if (!labels) {
       labels = [];
       scene.traverse((o) => o.userData.label && labels.push(o));
@@ -217,6 +217,7 @@ export function createLens(items, { renderer, scene, camera }) {
     renderer.autoClear = false;
     renderer.render(lensScene, ortho);
     renderer.autoClear = true;
+    return live.length;
   }
   return { render };
 }

@@ -174,5 +174,6 @@ Sau khi người dùng duyệt:
 |---|---|---|---|---|
 | (thử nghiệm, khuôn cũ) | 502, 504, 506 | ngã ba có đèn, vòng xuyến, ngã tư có biển | 14 khung, 4,6 phút, giọng nhân bản | engine, 12 mô hình, biển `yield` và `priority` |
 | V02 | 487, 496, 492, 497 | ngã tư có biển (bốn lần) | 17 khung, 6:31, giọng Leda | biển `stop`, `diamond`, biển phụ hướng đường ưu tiên, mặt sau biển; kính lúp trên chi tiết với nền xám; `scan-words.mjs` |
+| V02, bản thử kiểu giấy (`chuong-6-v02-paper`) | như V02 | như V02 | cùng lời đọc, nhạc, phụ đề; chỉ đổi kiểu vẽ; chưa duyệt | `STYLE` (§9b `world.md`): camera trực giao, nền giấy, viền mực, `callout.js` |
 
 V01 trong danh sách brief là ba câu 502, 504, 506 viết lại theo luật mới; bản thử nghiệm ở dòng đầu làm theo khuôn cũ và không thay cho V01.

@@ -1,6 +1,6 @@
 # Hợp đồng brief
 
-Tệp này là bản phía sản xuất của `VIDEO-HANDOFF.md` (nằm ở gốc repo `sat-hach-lai-xe`). Hai tệp nói cùng một bộ điều kiện: tệp kia viết cho người soạn brief, tệp này viết cho người dựng video. Đổi điều kiện ở một tệp thì sửa cả tệp kia.
+Tệp này là bản phía sản xuất của `VIDEO-HANDOFF.md` (nằm ở `projects/sat-hach-lai-xe/` của repo `sat-hach-lai-xe`). Hai tệp nói cùng một bộ điều kiện: tệp kia viết cho người soạn brief, tệp này viết cho người dựng video. Đổi điều kiện ở một tệp thì sửa cả tệp kia.
 
 Loạt V01–V29 có thêm luật riêng ở `video-briefs/README.md` §2 của repo đó (không mở đầu, không phương án, nội dung đứng riêng). Bản phía sản xuất của các luật ấy là `series.md` §1. Chỗ nào tệp này còn nói "đề, phương án, đáp án trên hình" thì luật của loạt thắng: các mục đó nằm ở "Đối chiếu nguồn" và chỉ dùng để soát.
 

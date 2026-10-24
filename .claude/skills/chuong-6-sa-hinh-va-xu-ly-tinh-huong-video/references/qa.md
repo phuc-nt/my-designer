@@ -215,7 +215,7 @@ Mỗi dòng là một lỗi có thật ở video đầu. Đọc trước khi d�
 Viết bằng tiếng Việt. Sáu mục đầu theo `vi-explainer-video`; hai mục cuối riêng cho video sa hình.
 
 ```markdown
-**Kết quả:** videos/<tên dự án>/renders/video.mp4 — 1920×1080, 30 fps, <thời lượng>, <dung lượng>.
+**Kết quả:** projects/sat-hach-lai-xe/videos/<tên dự án>/renders/video.mp4 — 1920×1080, 30 fps, <thời lượng>, <dung lượng>.
 Các tình huống: <danh sách>. Số khung: <N>. Mục tiêu <phút>; dài hơn <giây> vì <lý do>; cách rút: <…>.
 
 **Giọng đọc:** Gemini <tên giọng>, <số> đoạn; chỗ whisper nghe khác kịch bản: <…>.

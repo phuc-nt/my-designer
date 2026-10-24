@@ -181,6 +181,49 @@ Kính lúp vẽ lại cảnh thật qua một ống kính hẹp của cùng came
 - Kính che một phần xe đứng cạnh biển; đừng mở kính trong lúc xe chạy.
 - **Luôn cắt ảnh kính ở độ phân giải đầy đủ để đọc** (`qa.md` §3). Chi tiết nằm sau một lớp trong suốt có thể biến mất trong kính mà ảnh thu nhỏ không cho thấy.
 
+## 9b. Đường dẫn, viền mực, camera trực giao (`STYLE`, bản thử)
+
+Thử trên V02 ở dự án `chuong-6-v02-paper` (2026-10-23), **chưa được duyệt làm kiểu mặc định**. Không có `STYLE` thì thế giới vẽ y như cũ: đã so ảnh của V02 với kit cũ, 5/5 khung giống từng byte.
+
+`plan.js` có thể xuất `STYLE`; mọi khoá đều tuỳ chọn:
+
+```js
+export const STYLE = {
+  ortho: true,      // camera trực giao, cùng góc nghiêng; d là chiều cao vùng nhìn (FOCAL / d pixel một mét ở mọi chỗ)
+  paper: true,      // trời, nền, ánh sáng màu giấy kem #f6eddd
+  ground: { grass, walk, kerb, road, mark, edge },   // ghi đè COL của ground.js; edge = nét mực dọc lề
+  ink: { color: "#18213d", skip: [] },               // viền mực trên mọi mô hình GLB; skip = khoá mẫu không viền
+  callout: { ink: "#18213d", halo: "#fffaf0" },      // màu nét đường dẫn và viền sáng quanh nó
+};
+```
+
+- **Viền mực** là `EdgesGeometry(geom, 30)` gắn vào mỗi mesh có `userData.ink` (khoá mẫu, do `loadTemplates` gắn). Xe ảo không viền. Nét mờ theo độ mờ của xe. Mặt đường, vạch sơn và cỏ không viền.
+- **Đường dẫn:** mỗi ô trả thêm `calloutItems`, `callout.js` vẽ sau kính lúp:
+
+```js
+{ t0, t1,                       // hiện và tắt (giây); nét tự vẽ ra trong 0,3 s, tắt trong 0,25 s
+  pos: () => Vector3,           // điểm thế giới của vật
+  to: [x, y],                   // mép thẻ trong cột chữ, toạ độ 1920×1080
+  acc: accent(INK.amber) }      // màu chấm và vòng trên vật
+```
+
+  - Nhiều nhất hai đường cùng lúc. Không vẽ khi có kính mở: `lens.render()` trả về số kính đang mở.
+  - Nét đứt tự ngắt ở chỗ đi qua một nhãn `tag()`, nên tên trên đường không bị gạch ngang.
+  - Mốc lấy từ lời đọc, và **không bắt đầu khi xe còn chạy**. `sites.js` của dự án thử có hàm `pointAt()`:
+    - mỗi lần chỉ một đường, nên hai đường không cắt nhau;
+    - đường bắt đầu ở mốc muộn nhất trong ba mốc: lúc xe được gọi tên, lúc xe dừng hẳn + 0,15 s, và lúc đường trước bắt đầu + 1,4 s.
+  - Toạ độ `y` của từng dòng thẻ phải đo trên ảnh chụp, vì cột chữ là HTML và không chia sẻ toạ độ với thế giới 3D.
+
+**Phát thế giới trên một trang web** (bản thử: `projects/sat-hach-lai-xe/web/chuong-6-v02`). Video chỉ truyền `canvas`, nên các tuỳ chọn dưới đây không đổi gì trong video:
+
+- `createWorld({ canvas, centre: true, callouts: false })`:
+  - `centre` bỏ độ lệch khung nhìn dành cho cột chữ, để ô nằm giữa canvas;
+  - `callouts: false` bỏ đường dẫn, vì đầu kia của chúng nằm trong cột chữ, mà trang không có cột chữ.
+- `setLabels(on)` ẩn hoặc hiện mọi nhãn bằng một nút.
+- `actorsOnScreen()` trả về `[{ site, id, x, y }]` theo toạ độ canvas 1920×1080. Một ô muốn cho chạm vào xe thì trả thêm `actors: [{ id, obj }]`.
+- Trang gọi `renderAt(audio.currentTime)` trong vòng rAF. Âm thanh là track của MP4 đã render, chép bằng `-c:a copy`.
+- Cloudflare Pages trả cả tệp cho yêu cầu Range, nên trang tải âm thanh về thành blob rồi mới phát.
+
 ## 10. Dựng một ô: `sitekit.js`
 
 ```js
@@ -235,7 +278,7 @@ export function buildPlan(CUES) → {
 
 **`roads.js`** xuất `PAINT[id]()` (canvas mặt đường) và `ROAD[id](x, z, m)` (điểm có nằm trên đường hay sát đường trong vòng `m` mét không; `planting` dùng để không trồng cây giữa đường).
 
-**`sites.js`** xuất `SITES`: mảng hàm `(T, plan, beats) => { id, root, x, update, lensItems }`, theo thứ tự các ô.
+**`sites.js`** xuất `SITES`: mảng hàm `(T, plan, beats) => { id, root, x, update, lensItems, calloutItems? }`, theo thứ tự các ô.
 
 ## 12. Xem thử
 

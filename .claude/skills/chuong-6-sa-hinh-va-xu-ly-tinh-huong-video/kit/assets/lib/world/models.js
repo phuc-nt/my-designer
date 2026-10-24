@@ -27,6 +27,7 @@ export async function loadTemplates(base) {
       prune(g.scene);
       g.scene.traverse((m) => {
         if (!m.isMesh) return;
+        m.userData.ink = k; // which template it came from, for the ink outline of a STYLE
         // no environment map in this world: keep paint from going dark
         m.material.metalness = Math.min(m.material.metalness ?? 0, 0.08);
         m.material.roughness = Math.max(m.material.roughness ?? 1, 0.55);
@@ -138,6 +139,7 @@ export function makeVehicle(T, kind, file, { ghost = false } = {}) {
   root.traverse((m) => {
     if (!m.isMesh) return;
     if (ghost) {
+      m.userData.ink = null;
       m.material = ghostMat;
       m.castShadow = false;
       m.receiveShadow = false;

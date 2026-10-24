@@ -16,7 +16,7 @@ Skill này đóng gói cách đã làm video thử nghiệm (câu 502, 504, 506)
 | `sat-hach-lai-xe` (repo nội dung) | Chọn tình huống, soạn brief: câu hỏi và kết luận nêu trong video; mô tả hình; giải thích; mẹo nhớ; gợi ý chuyển động; đề và đáp án gốc để đối chiếu |
 | `my-designer` (repo này) | Dựng video từ brief, kiểm, render, báo cáo lại; báo chỗ brief không khớp hình hay đáp án |
 
-- Bên soạn brief đọc `VIDEO-HANDOFF.md` ở gốc repo `sat-hach-lai-xe`. Tệp đó nói vai trò của bên này và brief cần có gì. Luật riêng của loạt và danh sách 29 brief nằm ở `video-briefs/README.md` của repo đó.
+- Bên soạn brief đọc `VIDEO-HANDOFF.md` trong `projects/sat-hach-lai-xe/` của repo `sat-hach-lai-xe`. Tệp đó nói vai trò của bên này và brief cần có gì. Luật riêng của loạt và danh sách 29 brief nằm ở `video-briefs/README.md` của repo đó.
 - Bên này kiểm brief theo `references/brief-contract.md`. Khi đổi điều kiện ở một trong hai tệp, sửa cả tệp kia.
 
 ## Trong skill có gì
@@ -88,7 +88,7 @@ SK=$ROOT/.claude/skills/vi-explainer-video
 HF=<thư mục có faceless-explainer; new-project.sh in ra ở dòng "HF:">
 FX=$HF/faceless-explainer/scripts
 ENGINE=$HF/media-use/audio/scripts/audio.mjs
-P=$ROOT/videos/<ten-du-an>
+P=$ROOT/projects/sat-hach-lai-xe/videos/<ten-du-an>
 ```
 
 Mỗi lệnh Bash là một shell mới: khai báo lại biến trong cùng lệnh. Không `cd` trần sang thư mục khác; dùng đường dẫn tuyệt đối hoặc `(cd "$P" && …)`. Lệnh CLI viết `hyperframes …`; máy không có lệnh đó thì thay bằng `npx -y hyperframes …`.
@@ -111,7 +111,7 @@ Brief thiếu thứ không suy ra được từ ảnh (đáp án gốc, tình hu
 bash .claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/scripts/new-project.sh chuong-6-v<NN> --example v02-nga-tu-co-bien
 ```
 
-Lệnh tạo `videos/<ten-du-an>` (HyperFrames trống, font tiếng Việt, `glass-keynote`), chép `kit/` và phần riêng của ví dụ vào. Ghi lại dòng `HF:` nó in ra. `videos/` nằm trong `.gitignore`; không `git add -f` gì ở đó.
+Lệnh tạo `projects/sat-hach-lai-xe/videos/<ten-du-an>` (HyperFrames trống, font tiếng Việt, `glass-keynote`), chép `kit/` và phần riêng của ví dụ vào. Ghi lại dòng `HF:` nó in ra. `projects/sat-hach-lai-xe/videos/` nằm trong `.gitignore`; không `git add -f` gì ở đó.
 
 Bỏ `--example` khi muốn bắt đầu chỉ với engine. Dự án khi đó chưa chạy được cho tới khi có đủ `plan.js`, `roads.js`, `sites.js`, `beats.js`, `build-frames.mjs`, `build-storyboard.mjs`.
 
