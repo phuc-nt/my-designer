@@ -1,0 +1,203 @@
+<!doctype html>
+<!--
+  Starter of the short-film-video skill: a 10 s product sting in one file, no narration.
+  Five shots on a 120 BPM grid, every cut on a beat, every cut listed in SEAMS with the
+  direction the picture travels through it. The product, its name and its copy are made
+  up; replace all of it. Keep or drop the structure as the film needs.
+-->
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-VN.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: block; }
+      @font-face { font-family: "JetBrains Mono"; src: url("assets/fonts/JetBrainsMono-VN.woff2") format("woff2"); font-weight: 100 800; font-style: normal; font-display: block; }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0E0F12; }
+      #root {
+        --ground: #0E0F12;
+        --ink: #F3F1EC;
+        --muted: #A9A69E;
+        --accent: #FF5A36;
+        --on-accent: #0E0F12;
+        --line: rgba(243, 241, 236, 0.24);
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: "Inter", sans-serif;
+      }
+      /* shots are plain stacked layers, not timed clips: a cut switches the next one on and
+         the previous one off; the ground stays put and only .body travels through the cut */
+      .shot { position: absolute; inset: 0; background: var(--ground); }
+      .shot + .shot { opacity: 0; }
+      .body { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 160px; }
+      .mono { font-family: "JetBrains Mono", monospace; font-size: 34px; font-weight: 600; line-height: 1.4; color: var(--muted); }
+
+      .lockup { display: flex; align-items: center; gap: 44px; }
+      .mark { width: 150px; height: 150px; background: var(--accent); }
+      .word { font-size: 300px; font-weight: 800; line-height: 1.25; letter-spacing: -0.04em; }
+      .rule { width: 1100px; height: 10px; margin: 8px 0 40px; background: var(--line); }
+      .rule-fill { width: 100%; height: 100%; background: var(--accent); transform-origin: left center; }
+
+      .card { width: 1240px; padding: 44px 56px 28px; border: 4px solid var(--line); }
+      .card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+      .card-title { font-size: 64px; font-weight: 800; line-height: 1.25; letter-spacing: -0.02em; }
+      .row { position: relative; display: flex; align-items: center; gap: 32px; height: 104px; border-top: 4px solid var(--line); }
+      .row-dot { width: 28px; height: 28px; background: var(--line); }
+      .row-text { flex: 1; font-size: 46px; font-weight: 700; line-height: 1.3; }
+      .row-hot { position: absolute; left: -56px; top: 0; width: 16px; height: 100%; background: var(--accent); transform-origin: center bottom; }
+
+      #s3 { background: var(--accent); color: var(--on-accent); }
+      .num { width: 1200px; font-size: 520px; font-weight: 800; line-height: 1.05; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+      .num-label { font-size: 72px; font-weight: 800; line-height: 1.3; letter-spacing: -0.02em; }
+
+      .task { position: relative; display: flex; align-items: center; gap: 56px; }
+      .box { position: relative; width: 150px; height: 150px; border: 8px solid var(--line); }
+      .box-fill { position: absolute; inset: 0; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-size: 104px; font-weight: 800; line-height: 1; }
+      .task-text { position: relative; font-size: 124px; font-weight: 800; line-height: 1.3; letter-spacing: -0.03em; }
+      .strike { position: absolute; left: 0; top: 54%; width: 100%; height: 10px; background: var(--ink); transform-origin: left center; }
+      .cursor { position: absolute; left: 52px; top: 52px; width: 46px; height: 46px; border-radius: 50%; background: var(--ink); }
+      .status { margin-top: 36px; margin-left: 206px; }
+
+      #s5 .body { align-items: center; }
+      #s5 .mark { width: 96px; height: 96px; }
+      #s5 .word { font-size: 190px; }
+      .claim { margin-top: 12px; font-size: 76px; font-weight: 800; line-height: 1.3; letter-spacing: -0.02em; }
+      #s5 .mono { margin-top: 36px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="10" data-width="1920" data-height="1080">
+      <!-- 1 lockup: the name is already on screen in frame one -->
+      <section id="s1" class="shot">
+        <div class="body" id="s1-body">
+          <div class="lockup"><div class="mark" id="s1-mark"></div><h1 class="word">Nhịp</h1></div>
+          <div class="rule" data-layout-ignore><div class="rule-fill" id="s1-rule"></div></div>
+          <p class="mono" id="s1-line">lịch làm việc cho nhóm nhỏ</p>
+        </div>
+      </section>
+
+      <!-- 2 entry surface: the product as the viewer first meets it -->
+      <section id="s2" class="shot">
+        <div class="body" id="s2-body">
+          <div class="card">
+            <div class="card-head"><h2 class="card-title">Hôm nay</h2><p class="mono">thứ ba · 4 việc</p></div>
+            <div class="row" id="s2-row-1"><div class="row-dot"></div><p class="row-text">Chốt lịch họp tuần</p><p class="mono">09:00</p></div>
+            <div class="row" id="s2-row-2"><div class="row-dot"></div><p class="row-text">Duyệt bản thiết kế</p><p class="mono">10:30</p></div>
+            <div class="row" id="s2-row-3"><div class="row-hot" id="s2-hot" data-layout-ignore></div><div class="row-dot"></div><p class="row-text">Gửi báo cáo tuần</p><p class="mono">14:00</p></div>
+            <div class="row" id="s2-row-4"><div class="row-dot"></div><p class="row-text">Dọn hộp thư</p><p class="mono">16:30</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 number: one figure, full frame -->
+      <section id="s3" class="shot">
+        <div class="body" id="s3-body">
+          <p class="num" id="s3-num">128</p>
+          <p class="num-label" id="s3-label">việc xong trong tuần này</p>
+        </div>
+      </section>
+
+      <!-- 4 one action and its visible result -->
+      <section id="s4" class="shot">
+        <div class="body" id="s4-body">
+          <div class="task">
+            <div class="box"><div class="box-fill" id="s4-fill">✓</div></div>
+            <p class="task-text">Gửi báo cáo tuần<span class="strike" id="s4-strike" data-layout-ignore></span></p>
+            <div class="cursor" id="s4-cursor" data-layout-ignore></div>
+          </div>
+          <p class="mono status" id="s4-status">xong lúc 13:52</p>
+        </div>
+      </section>
+
+      <!-- 5 endcard: holds, still drifting, to the last frame -->
+      <section id="s5" class="shot">
+        <div class="body" id="s5-body">
+          <div class="lockup"><div class="mark" id="s5-mark"></div><h1 class="word">Nhịp</h1></div>
+          <p class="claim" id="s5-claim">Làm xong, rồi nghỉ.</p>
+          <p class="mono" id="s5-line">bản thử · 2026</p>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        var tl = gsap.timeline({ paused: true });
+        var END = 10;
+        // beat map: 120 BPM, one beat = 0.5 s; shots change on beats 4, 8, 12 and 16
+        var SHOTS = [
+          { body: "#s1-body", start: 0, end: 2 },
+          { body: "#s2-body", start: 2, end: 4 },
+          { body: "#s3-body", start: 4, end: 6 },
+          { body: "#s4-body", start: 6, end: 8 },
+          { body: "#s5-body", start: 8, end: 10 },
+        ];
+        // seam ledger: one line per cut, the axis and the direction the picture travels
+        // through it. The outgoing body leaves accelerating, the incoming one arrives
+        // decelerating from the opposite side, both at about 1600 px/s at the cut
+        // (240 px over 0.3 s on power2.in ends at 2 * 240 / 0.3; 320 px over 0.6 s on
+        // power3.out starts at 3 * 320 / 0.6), so the cut reads as one movement.
+        var SEAMS = [
+          { at: 2, axis: "x", dir: -1 },
+          { at: 4, axis: "y", dir: -1 },
+          { at: 6, axis: "x", dir: 1 },
+          { at: 8, axis: "y", dir: 1 },
+        ];
+
+        // nothing stands still: each shot pushes in slowly for its whole length
+        SHOTS.forEach(function (s, i) {
+          if (i) tl.set("#s" + (i + 1), { opacity: 1 }, s.start).set("#s" + i, { opacity: 0 }, s.start);
+          tl.fromTo(s.body, { scale: 1 }, { scale: 1.05, duration: s.end - s.start, ease: "none" }, s.start);
+        });
+        SEAMS.forEach(function (s, i) {
+          var out = { duration: 0.3, ease: "power2.in" };
+          var from = {};
+          var to = { duration: 0.6, ease: "power3.out" };
+          out[s.axis] = s.dir * 240;
+          from[s.axis] = -s.dir * 320;
+          to[s.axis] = 0;
+          tl.to(SHOTS[i].body, out, s.at - 0.3);
+          tl.fromTo(SHOTS[i + 1].body, from, to, s.at);
+        });
+
+        // 1 lockup
+        tl.fromTo("#s1-mark", { rotation: 0 }, { rotation: 90, duration: 0.8, ease: "power3.inOut" }, 0.2);
+        tl.fromTo("#s1-rule", { scaleX: 0.12 }, { scaleX: 1, duration: 1.3, ease: "power3.out" }, 0.1);
+        tl.fromTo("#s1-line", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 0.5);
+
+        // 2 entry surface: rows land on the half-beats, then the one that matters is marked
+        [1, 2, 3, 4].forEach(function (n, i) {
+          tl.fromTo("#s2-row-" + n, { opacity: 0, x: 70 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 2.1 + i * 0.2);
+        });
+        tl.fromTo("#s2-hot", { scaleY: 0 }, { scaleY: 1, duration: 0.35, ease: "power3.out" }, 3.2);
+
+        // 3 number: a pure function of timeline time, so any frame renders the same
+        var num = document.getElementById("s3-num");
+        var count = { v: 0 };
+        tl.to(count, { v: 128, duration: 1.3, ease: "power3.out", onUpdate: function () { num.textContent = Math.round(count.v); } }, 4.0);
+        tl.fromTo("#s3-label", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 4.5);
+
+        // 4 one action: the cursor arrives on the beat, the press leaves three visible results
+        tl.fromTo("#s4-cursor", { x: 760, y: 330 }, { x: 0, y: 0, duration: 0.7, ease: "power3.inOut" }, 6.3);
+        tl.to("#s4-cursor", { scale: 0.7, duration: 0.1, ease: "power2.in" }, 7.0);
+        tl.to("#s4-cursor", { scale: 1, opacity: 0, duration: 0.25, ease: "power3.out" }, 7.1);
+        tl.fromTo("#s4-fill", { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2)" }, 7.05);
+        tl.fromTo("#s4-strike", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.inOut" }, 7.15);
+        tl.fromTo("#s4-status", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, ease: "power3.out" }, 7.4);
+
+        // 5 endcard
+        tl.fromTo("#s5-mark", { rotation: -90 }, { rotation: 0, duration: 0.7, ease: "power3.out" }, 8.0);
+        tl.fromTo("#s5-claim", { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 8.5);
+        tl.fromTo("#s5-line", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 9.0);
+
+        tl.set({}, {}, END);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>
