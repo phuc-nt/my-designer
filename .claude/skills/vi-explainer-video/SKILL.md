@@ -14,7 +14,7 @@ Skill này là **lớp tiếng Việt** đặt lên quy trình `faceless-explain
 
 Phần lớn các bước là lệnh của HyperFrames, hoặc thao tác mà agent tự làm theo hướng dẫn dưới đây. Skill kèm thêm:
 
-- `scripts/`: bảy script Node, chỉ cần Node và ffmpeg, không cần gói npm hay Python.
+- `scripts/`: tám script Node, chỉ cần Node và ffmpeg, không cần gói npm hay Python.
   - `mix-balance.mjs` đo nhạc nằm dưới giọng đọc bao nhiêu dB, rồi gợi ý `bgm.volume`.
   - `beat-grid.mjs` tìm BPM và nhịp đầu (BEAT0) của bài nhạc.
   - `beat-snap.mjs` kéo điểm cắt khung vào đúng nhịp.
@@ -22,13 +22,14 @@ Phần lớn các bước là lệnh của HyperFrames, hoặc thao tác mà age
   - `clone-voice.mjs` tạo giọng đọc bằng giọng nhân bản của VoiceStudio trên máy: từng câu một, tự thử lại khi thiếu chữ, ghi luôn mốc thời gian theo chữ kịch bản (bước 4).
   - `retime-frames.mjs` kéo các khung đã dựng theo giọng đọc mới, khi đổi giọng cho video đã xong (`references/audio.md` §7).
   - `use-scene-template.mjs` chép một scene template thành tệp khung, đặt sẵn tiền tố, id và thời lượng (bước 8).
+  - `motion-audit.mjs` đo bản render đứng hình bao nhiêu giây ở từng khung (bước 10).
 - `presets/`: ba preset hình cho `build-frame`, đã kèm font tiếng Việt:
   - `glass-keynote`: nền chàm tối, thẻ kính;
   - `comic-multiverse`: truyện tranh, khung viền mực;
   - `win95-pixel`: desktop Windows 95, pixel art, kèm bộ icon pixel và thanh taskbar trong skin phụ đề.
-- `scene-templates/`: năm khung dựng sẵn cho các kiểu hay gặp: số lớn, trước và sau, ngộ nhận và sự thật, ba bước, ba mốc thời gian (`scene-templates/README.md`).
+- `scene-templates/`: tám khung dựng sẵn cho các kiểu hay gặp: số lớn, trước và sau, ngộ nhận và sự thật, ba bước, ba mốc thời gian, cột so sánh, chú thích kéo ra từ một vật, danh sách tích dần (`scene-templates/README.md`).
 
-`mix-balance`, `beat-grid`, `beat-snap`, `glass-keynote` và `comic-multiverse` phỏng theo bestagentkits/motion-video-skill (MIT). `scene-templates` phỏng theo nutllwhy/hyperframes-motion-library (MIT). Ghi công nằm trong từng tệp.
+`mix-balance`, `beat-grid`, `beat-snap`, `glass-keynote` và `comic-multiverse` phỏng theo bestagentkits/motion-video-skill (MIT). Năm scene template đầu phỏng theo nutllwhy/hyperframes-motion-library (MIT); ba khung sau viết riêng cho skill này. Ghi công nằm trong từng tệp.
 
 ## Hai bản HyperFrames
 
@@ -178,6 +179,8 @@ Làm theo `references/audio.md` §4, **sau** khi độ dài lời đọc đã ch
 - `rules-index.md`
 - `storyboard-format.md`
 
+Đọc thêm `references/motion-craft.md`: vốn ý về chuyển động và kiểu cảnh để chọn, không phải danh sách phải làm đủ.
+
 Rồi viết **một** STORYBOARD.md theo `references/storyboard-rules.md`. Trước khi đi tiếp, tự kiểm đủ các điểm sau:
 
 - Số `## Frame N` bằng số `(Frame N)` trong SCRIPT.md.
@@ -191,7 +194,7 @@ Rồi viết **một** STORYBOARD.md theo `references/storyboard-rules.md`. Trư
 
 Nếu bộ skill có `hyperframes-blocks` (bản HyperFrames secure), tra `INDEX.md` của nó trước khi tự nghĩ ra số đếm, biểu đồ hay chữ động. Khi có mục hợp, ghi `block: <tên>` vào dòng Scene. Worker sẽ cài và gắn mục đó theo `_role.md`. Mục có cột VI là `không` phải dùng font `-VN` của dự án cho chữ tiếng Việt.
 
-Khung nào đúng một trong năm kiểu của `scene-templates/` (số lớn, trước và sau, ngộ nhận và sự thật, ba bước, ba mốc thời gian) thì ghi `template: <tên>` ngay đầu dòng Scene 1 của khung đó. Bảng chọn kiểu và giới hạn chữ nằm trong `scene-templates/README.md`. Các dòng Scene vẫn ghi mốc giây thật, vì đó là các mốc `T` của template.
+Khung nào đúng một trong tám kiểu của `scene-templates/` thì ghi `template: <tên>` ngay đầu dòng Scene 1 của khung đó. Bảng chọn kiểu và giới hạn chữ nằm trong `scene-templates/README.md`. Các dòng Scene vẫn ghi mốc giây thật, vì đó là các mốc `T` của template.
 
 ### 7. Chốt âm thanh
 
@@ -301,6 +304,14 @@ Yêu cầu:
 - `Peak` (true peak) ≤ −1 dBFS.
 - Số `black_start` là 0. Nếu khác 0, bỏ `| grep -c black_start` để xem thời điểm, chụp snapshot ở đó, rồi xem `references/pitfalls.md` mục khung đen.
 
+**Đo chỗ đứng hình:**
+
+```bash
+node "$SK"/scripts/motion-audit.mjs
+```
+
+Lệnh in mỗi khung đứng hình bao nhiêu giây và đánh dấu `!` ở khung dừng yên hơn 40% thời lượng tới hết khung, hoặc có một đoạn đứng từ 4 giây. Dấu `!` là chỗ nên xem lại, không phải lỗi: lời đọc dài có thể cần hình đứng. Khung nào sửa được rẻ (rải lại mốc theo lời, thêm một thứ chạy suốt khung, `references/motion-craft.md` §2) thì sửa rồi render lại; còn lại thì ghi vào báo cáo.
+
 **Bản nhẹ để đăng mạng xã hội** (tuỳ chọn, khi người dùng cần):
 
 ```bash
@@ -315,7 +326,7 @@ Báo cáo cho người dùng:
 - **Kết quả:** đường dẫn MP4 (và bản social nếu có), độ phân giải, thời lượng, dung lượng, LUFS, true peak.
 - **Giọng đọc:** giọng đã dùng, và những chỗ whisper nghe khác kịch bản. Với giọng nhân bản: nhắc gửi bản ghép cho chủ giọng duyệt trước khi xuất bản, và video là phi thương mại.
 - **Âm thanh:** nhạc nằm dưới giọng bao nhiêu dB (`mix-balance`), `bgm.volume` đã dùng. Nếu bật khớp nhịp: BPM đo được so với BPM đã yêu cầu.
-- **Đã kiểm:** ảnh tĩnh, lint, check, số đo âm thanh, blackdetect.
+- **Đã kiểm:** ảnh tĩnh, lint, check, số đo âm thanh, blackdetect, tỉ lệ đứng hình (`motion-audit`) và các khung bị đánh dấu.
 - **Chưa kiểm:** giọng thật nghe ra sao, chuyển động, độ khớp hình với lời. Mời người dùng tự xem và nghe.
 - **Lỗi đã chấp nhận:** những lỗi còn lại mà không sửa.
 
@@ -327,7 +338,8 @@ Báo cáo cho người dùng:
 | `references/voices.md` | Chọn giọng (Leda mặc định; Orus, Kore, Aoede, Charon và các giọng khác; giọng nhân bản), prompt phong cách, lỗi phát âm đã biết, điều khoản và cách viết chữ cho giọng nhân bản |
 | `references/audio.md` | Toàn bộ quy trình âm thanh: TTS, giọng nhân bản (§1b), sửa chữ phụ đề, khoảng lặng, nhạc nền, SFX, khớp nhịp (§6), đổi giọng cho video đã dựng (§7) |
 | `presets/<tên>/FRAME.md` | Hệ thiết kế của preset `glass-keynote`, `comic-multiverse` hoặc `win95-pixel` (đã thành `frame.md` sau bước 2) |
-| `scene-templates/README.md` | Khung có kiểu quen thuộc (số lớn, trước và sau, ngộ nhận và sự thật, ba bước, ba mốc): chọn kiểu, cách điền, giới hạn đã thấy |
+| `scene-templates/README.md` | Khung có kiểu quen thuộc (số lớn, trước và sau, ngộ nhận và sự thật, ba bước, ba mốc, cột so sánh, chú thích, danh sách tích): chọn kiểu, cách điền, giới hạn đã thấy |
+| `references/motion-craft.md` | Trước khi viết storyboard: điều làm chuyển động có nghề, cách giữ hình sống khi lời còn đọc, vốn kiểu cảnh |
 | `references/storyboard-rules.md` | Mẫu một khung storyboard và block Video direction |
 | `references/worker-prompt.md` | Mẫu prompt giao việc cho worker dựng khung |
 | `references/fonts.md` | Block `@font-face` tiếng Việt cho frame.md; làm font cho preset khác |

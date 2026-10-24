@@ -1,8 +1,8 @@
 # Scene template: khung dựng sẵn
 
-Năm khung overlay hoàn chỉnh theo đúng định dạng khung của `faceless-explainer` (`<template>`, `#root`, `window.__timelines[id]`, font `-VN`, nội dung nằm trên vùng phụ đề y > 896). Dùng khi một khung trong storyboard đúng một trong năm kiểu dưới đây. Khung cần hình riêng (sơ đồ, minh hoạ, cảnh 3D) vẫn để worker tự dựng.
+Tám khung overlay hoàn chỉnh theo đúng định dạng khung của `faceless-explainer` (`<template>`, `#root`, `window.__timelines[id]`, font `-VN`, nội dung nằm trên vùng phụ đề y > 896). Dùng khi một khung trong storyboard đúng một trong các kiểu dưới đây. Khung cần hình riêng (sơ đồ, minh hoạ, cảnh 3D) vẫn để worker tự dựng.
 
-Phỏng theo `templates/` của nutllwhy/hyperframes-motion-library (MIT, Copyright (c) 2026 栗噔噔). Thông báo giấy phép nằm ở `LICENSE-hyperframes-motion-library.txt`; mỗi tệp giữ dòng ghi công của nó trong comment đầu, khi chép thành khung cũng giữ nguyên.
+Năm khung đầu phỏng theo `templates/` của nutllwhy/hyperframes-motion-library (MIT, Copyright (c) 2026 栗噔噔). Ba khung `bar-compare`, `callout-anchor` và `checklist-tick` viết riêng cho skill này. Thông báo giấy phép nằm ở `LICENSE-hyperframes-motion-library.txt`; mỗi tệp phỏng theo giữ dòng ghi công của nó trong comment đầu, khi chép thành khung cũng giữ nguyên.
 
 ## Chọn kiểu
 
@@ -13,6 +13,9 @@ Phỏng theo `templates/` của nutllwhy/hyperframes-motion-library (MIT, Copyri
 | `myth-fact-swap` | gạch một ngộ nhận rồi nêu sự thật | hai nhãn, ngộ nhận và sự thật (mỗi bên ≤ 3 dòng, khoảng 12 ký tự một dòng), câu kết | `myth`, `turn`, `fact`, `caption` |
 | `three-step-flow` | kể ba bước nối tiếp | tiêu đề, ba tên bước (≤ 18 ký tự), ba mô tả một dòng | `title`, `steps[3]` |
 | `timeline-scan` | kể ba mốc thời gian | tiêu đề, ba mốc (≤ 5 ký tự), ba tên, ba mô tả một dòng | `title`, `nodes[3]` |
+| `bar-compare` | so ba số cùng đơn vị | tiêu đề, ba số nguyên với đơn vị, ba tên (≤ 16 ký tự), ba mô tả một dòng; `H` là chiều cao mỗi cột so với cột cao nhất | `title`, `bars[3]` |
+| `callout-anchor` | chỉ ba chỗ trên một vật | tiêu đề, hình của vật (ảnh, svg hoặc thẻ), ba tên chú thích (≤ 20 ký tự), ba mô tả một dòng | `title`, `subject`, `calls[3]` |
+| `checklist-tick` | điểm lần lượt bốn việc | tiêu đề, bốn mục (≤ 28 ký tự), trạng thái ngắn bên phải (≤ 12 ký tự) | `title`, `list`, `ticks[4]` |
 
 ## Dùng một template
 
@@ -54,10 +57,14 @@ Trong luồng có worker: ghi `template: <tên>` vào đầu dòng Scene 1 của
 - `hyperframes lint`: 0 lỗi, 0 cảnh báo; `hyperframes check`: đạt, tương phản 29/29;
 - ảnh chụp ở đầu, giữa và cuối từng khung: chữ có dấu không bị cắt, không có gì vào vùng phụ đề, nền còn nguyên tới cuối.
 
+Ba khung mới (`bar-compare`, `callout-anchor`, `checklist-tick`) thử cùng cách, khung 8 và 9 giây: lint 0 lỗi, check đạt, tương phản 34/34, ảnh giữa và cuối khung đúng bố cục.
+
 Chưa thử: render ra MP4, xem chuyển động, và ghép với giọng đọc thật. Hãy xem lại khi dùng trong một video thật.
 
 Hạn chế đã thấy:
 - Nội dung nằm nửa trên của khung; nửa dưới để trống ở `myth-fact-swap`, `three-step-flow` và `timeline-scan`. Đó là thiết kế, vì vùng dưới dành cho phụ đề.
 - Mọi cảnh đều dừng yên sau mốc cuối, nên khung dài quá khoảng 12 giây sẽ đứng hình lâu. Chia lời đọc thành hai khung hoặc để worker dựng riêng.
 - Gạch ngang của `myth-fact-swap` đi qua giữa khối chữ; viết ngộ nhận thành ba dòng ngắn để nó rơi đúng dòng giữa.
+- Số của `bar-compare` đếm từ 0 nên phải là số nguyên; số có dấu phẩy cần sửa dòng `Math.round` trong tệp khung.
+- `callout-anchor` đặt vật bên trái và chú thích bên phải; chấm neo nằm trên mép phải của vật. Vật có chi tiết cần chỉ đúng chỗ thì dời `left` và `top` của từng hàng.
 - Không có animation thoát; chuyển khung do `crossfade` của storyboard lo.
