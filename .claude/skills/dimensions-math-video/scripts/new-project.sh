@@ -33,7 +33,7 @@ cp "$SK"/assets/fonts/*.woff2 assets/fonts/
 node "$HF/faceless-explainer/scripts/build-frame.mjs" --preset glass-keynote --preset-dir "$SK/presets" --hyperframes . | tail -1
 # what the series share: the maths of a move, cue reading, assembly and checks
 for f in path stage; do cp "$ENGINE/assets/lib/world/$f.js" assets/lib/world/; done
-for f in assemble.sh build-cues.mjs check-frames.sh frame-times.mjs lock-audio.mjs patch-index.mjs snap.sh; do
+for f in assemble.sh build-cues.mjs check-frames.sh frame-times.mjs lock-audio.mjs patch-index.mjs snap.sh vr-check.sh; do
   cp "$ENGINE/scripts/$f" scripts/
 done
 # the counting bench: places, things, the hand and the pencil, the voice and the checks

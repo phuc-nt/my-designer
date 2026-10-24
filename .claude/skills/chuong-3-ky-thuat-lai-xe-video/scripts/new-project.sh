@@ -34,7 +34,7 @@ node "$HF/faceless-explainer/scripts/build-frame.mjs" --preset glass-keynote --p
 cp -R "$ENGINE/assets/models" assets/
 cp "$ENGINE/assets/lib/three-bundle.js" assets/lib/
 for f in path stage models; do cp "$ENGINE/assets/lib/world/$f.js" assets/lib/world/; done
-for f in assemble.sh build-cues.mjs check-frames.sh check-watermark.sh frame-times.mjs lock-audio.mjs patch-index.mjs snap.sh; do
+for f in assemble.sh build-cues.mjs check-frames.sh check-watermark.sh frame-times.mjs lock-audio.mjs patch-index.mjs snap.sh vr-check.sh; do
   cp "$ENGINE/scripts/$f" scripts/
 done
 # the road stage and the overlay kit of this chapter

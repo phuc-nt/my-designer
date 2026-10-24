@@ -2,12 +2,15 @@
 // (answered right), a tap on something the lesson explains, and three moments of the lesson.
 //   node check.mjs <built-lesson-dir> <screenshot-dir> [desktop,phone,landscape]
 // Prints one JSON line per size. It cannot hear the sound or judge motion; it only proves the parts work.
+// First a static floor of the page with `ui gate` (ease-design, a devDependency of my-designer): accessibility
+// (contrast from the linked CSS included) and layout errors fail the run; taste, tell, content and autofix are
+// printed as advice. Without node_modules/.bin/ui the floor is skipped and says so.
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { join, extname, normalize, resolve } from "node:path";
 import { createRequire } from "node:module";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 
 const repo = execFileSync("git", ["rev-parse", "--show-toplevel"], { cwd: new URL(".", import.meta.url).pathname }).toString().trim();
 const { chromium } = createRequire(join(repo, "package.json"))("playwright");
@@ -15,6 +18,17 @@ const { chromium } = createRequire(join(repo, "package.json"))("playwright");
 const [dist, out, sizes] = process.argv.slice(2);
 if (!dist || !out) throw new Error("usage: node check.mjs <built-lesson-dir> <screenshot-dir> [desktop,phone,landscape]");
 mkdirSync(out, { recursive: true });
+
+const ui = join(repo, "node_modules/.bin/ui");
+if (existsSync(ui)) {
+  const r = spawnSync(ui, ["gate", join(dist, "index.html"), "--json"], { encoding: "utf8" });
+  const fam = JSON.parse(r.stdout || "{}").data?.families ?? {};
+  const list = (k, sev) => (fam[k]?.findings ?? []).filter((f) => sev.includes(f.severity)).map((f) => `${f.checkId}: ${f.message}${f.nodeRef ? ` @ ${f.nodeRef}` : ""}`);
+  const block = [...list("a11y", ["error"]), ...list("layout", ["error"])];
+  const advice = Object.fromEntries(["a11y", "layout", "taste", "tell", "content", "autofix"].map((k) => [k, (fam[k]?.findings ?? []).filter((f) => !(["a11y", "layout"].includes(k) && f.severity === "error")).map((f) => f.checkId)]).filter(([, v]) => v.length));
+  console.log("static", JSON.stringify({ errors: block, advice }));
+  if (block.length) process.exitCode = 1;
+} else console.log("static", JSON.stringify({ skipped: "node_modules/.bin/ui not installed: npm install in my-designer" }));
 
 // a plain static server, like Pages: whole files, no ranges
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".glb": "model/gltf-binary", ".woff2": "font/woff2", ".m4a": "audio/mp4", ".png": "image/png", ".jpg": "image/jpeg", ".json": "application/json" };

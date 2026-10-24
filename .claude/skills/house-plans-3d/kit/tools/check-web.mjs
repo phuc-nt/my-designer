@@ -2,11 +2,15 @@
 // and, where the view has a drawing, in the drawing mode. Prints one line per check, saves screenshots and exits
 // with 1 when a check fails. The checks are about behaviour (labels follow the camera, nothing overflows, every
 // link answers); whether a view looks right is for you to judge on the screenshots.
+// When it serves ../web itself it first reads index.html with `ui gate` (ease-design, a devDependency of the repo):
+// accessibility and layout errors are checks, taste and tell findings are printed as advice. Without the `ui`
+// binary the static floor is skipped and the script says so.
 //   node tools/check-web.mjs [url] [--out <dir>] [--sizes phone,small,landscape,desktop] [--views f1,f2]
 // Without a url the script serves ../web itself.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { dirname, extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -43,6 +47,30 @@ const check = (size, what, ok, detail = '') => {
   ok ? passed++ : failed++;
   if (!ok || process.env.VERBOSE) console.log(`${ok ? 'ok  ' : 'FAIL'} ${size.padEnd(9)} ${what}${detail ? `: ${detail}` : ''}`);
 };
+
+// Findings a static read gets wrong here. Light text on a translucent dark chip over the 3D canvas: the gate drops
+// the alpha and measures the text against the page colour. Judge those chips on the screenshots instead.
+const STATIC_ALLOW = [{ checkId: 'low-contrast', message: /^text #ffffff on /i }];
+if (!/^https?:/.test(source)) {
+  let ui = null;
+  for (let d = PROJECT; ; d = dirname(d)) {
+    if (existsSync(join(d, 'node_modules/.bin/ui'))) { ui = join(d, 'node_modules/.bin/ui'); break; }
+    if (d === dirname(d)) break;
+  }
+  if (!ui) console.log('skip static   ui not installed (npm install in the repo root): accessibility and layout floor not checked');
+  else {
+    const families = JSON.parse(spawnSync(ui, ['gate', join(source, 'index.html'), '--json'], { encoding: 'utf8' }).stdout || '{}').data?.families ?? {};
+    for (const family of ['a11y', 'layout']) {
+      for (const f of (families[family]?.findings ?? []).filter(f => f.severity === 'error')) {
+        const allowed = STATIC_ALLOW.some(a => a.checkId === f.checkId && a.message.test(f.message));
+        if (!allowed) check('static', `${family} ${f.checkId}`, false, `${f.message}${f.nodeRef ? ` @ ${f.nodeRef}` : ''}`);
+      }
+      check('static', `${family} floor`, true);
+    }
+    const advice = ['a11y', 'layout', 'taste', 'tell', 'content', 'autofix'].flatMap(k => (families[k]?.findings ?? []).filter(f => !(['a11y', 'layout'].includes(k) && f.severity === 'error')).map(f => `${k}:${f.checkId}`));
+    if (advice.length) console.log(`note static    ${[...new Set(advice)].join(', ')} (advice; read the gate with "ui gate web/index.html")`);
+  }
+}
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 for (const size of onlySizes ?? Object.keys(SIZES)) {
