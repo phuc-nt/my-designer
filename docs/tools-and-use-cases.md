@@ -43,6 +43,7 @@ case and is only needed for that one.
 | A road-sign lesson video | The same, over a 2D street where the sign is the main character | `chuong-5-bao-hieu-duong-bo-video` | HyperFrames and a canvas kit | the same, plus a lesson brief from `sat-hach-lai-xe` |
 | A traffic-rule lesson video | The same, beside an isometric scale model of the road built clause by clause | `chuong-1-quy-dinh-chung-va-quy-tac-giao-thong-video` | HyperFrames and a canvas kit | the same, plus a lesson brief from `sat-hach-lai-xe` |
 | A grade 1 maths lesson video | 1920×1080 MP4 with voice and music but no text or captions; a child's hand counts things on a 2D canvas | `dimensions-math-video` | HyperFrames and a canvas kit | the same, plus a lesson brief from `sat-hach-lai-xe` |
+| An interactive web lesson | A static site: the video's own sound and its own world drawn live, steps, captions, the lesson's own questions, a contents page | `interactive-lesson-web` | A shared page kit and Node build scripts | a lesson video already rendered; wrangler and a Cloudflare account to publish |
 | A house from its drawings | 3D viewer for phones, CAD sheets at 1:100, a data store, studio pages, re-division variants | `house-plans-3d` | Node and Python scripts; studio optional | uv; wrangler and a Cloudflare account only to publish |
 
 ## What ships in the repository
@@ -106,13 +107,15 @@ depends on the encoder that Chromium build has. For frame-exact output, export
 | [`my-designer`](../.claude/skills/my-designer/SKILL.md) | Core workflow: create, edit with operations, handle a 409, inspect, export, hand over a link | References for web, slides, report, wireframe, layout quality, visual inspection, operations, the CLI flag list, an upstream-MCP to CLI map |
 | [`my-designer-3d`](../.claude/skills/my-designer-3d/SKILL.md) | Scenes, lights, PBR materials, GLB import, mesh editing, rigs | References for scene commands, geometry checks, 3D characters |
 | [`my-designer-motion`](../.claude/skills/my-designer-motion/SKILL.md) | Timeline tracks and keyframes, 2D character rigs, timed inspection, video and frame exports | A reference for video documents |
-| [`vi-explainer-video`](../.claude/skills/vi-explainer-video/SKILL.md) | The Vietnamese layer on HyperFrames' `faceless-explainer` workflow | Vietnamese fonts, three visual presets (`glass-keynote`, `comic-multiverse`, `win95-pixel`), five scene templates, seven Node scripts for mix balance, beat grid, captions, a cloned voice and retiming |
+| [`vi-explainer-video`](../.claude/skills/vi-explainer-video/SKILL.md) | The Vietnamese layer on HyperFrames' `faceless-explainer` workflow | Vietnamese fonts, three visual presets (`glass-keynote`, `comic-multiverse`, `win95-pixel`), eight scene templates, eight Node scripts for mix balance, beat grid, captions, a cloned voice, retiming and a stillness audit of the render |
+| [`short-film-video`](../.claude/skills/short-film-video/SKILL.md) | Short films without narration (sting, logo reveal, launch film), built on HyperFrames and the fonts and scripts of `vi-explainer-video` | A working 10 s single-file starter with a beat grid, a shot table and a ledger of cuts |
 | [`chuong-6-sa-hinh-va-xu-ly-tinh-huong-video`](../.claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/SKILL.md) | Driving-test junction videos, built on `vi-explainer-video` | A kit with 12 GLB models, a bundled three.js, a world engine (paths, stage, ground, lens), build and audit scripts; two worked examples |
 | [`chuong-3-ky-thuat-lai-xe-video`](../.claude/skills/chuong-3-ky-thuat-lai-xe-video/SKILL.md) | Driving-technique lesson videos (Chương III), built on `vi-explainer-video` and the `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video` engine | A road world seen from the driver's seat (road, weather, lamps, instruments, labels), generators for text frames and the storyboard, a word scan for the chapter's rules, a project scaffold script; one worked example (Bài 5) |
 | [`chuong-4-cau-tao-va-sua-chua-video`](../.claude/skills/chuong-4-cau-tao-va-sua-chua-video/SKILL.md) | How-the-car-works lesson videos (Chương IV), built on `vi-explainer-video` and the scripts of the `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video` kit | A 2D canvas bench (cylinder and cylinder bank, see-through car, wheel, brake), a text column that takes each idea through three named steps, generators for text frames and the storyboard, a narration tool (request, batches, alignment, tails), bench checks and contact sheets, a word scan for the chapter's rules, a project scaffold script; one worked example (Bài 1) |
 | [`chuong-5-bao-hieu-duong-bo-video`](../.claude/skills/chuong-5-bao-hieu-duong-bo-video/SKILL.md) | Road-sign lesson videos (Chương V), built on `vi-explainer-video` and the scripts of the `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video` kit | A 2D street bench with vehicles and round prohibition signs, a text column with a sign-reading tracker and Chốt cards, a narration tool, bench checks, a project scaffold script; one worked example (Bài 1) |
 | [`chuong-1-quy-dinh-chung-va-quy-tac-giao-thong-video`](../.claude/skills/chuong-1-quy-dinh-chung-va-quy-tac-giao-thong-video/SKILL.md) | General traffic-rule lesson videos (Chương I), built on `vi-explainer-video` and the scripts of the `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video` kit | An isometric road model on a drafting table, a rule card that grows sentence by sentence with Dễ nhầm, Cách nhớ and Thử áp dụng cards, a narration tool, bench checks, a project scaffold script; one worked example (Bài 1) |
 | [`dimensions-math-video`](../.claude/skills/dimensions-math-video/SKILL.md) | Grade 1 maths lesson videos (after Dimensions Math) with no text on screen, built on `vi-explainer-video` and the scripts of the `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video` kit | A 2D canvas kit (a zoo, a room, a desk, 13 drawn animals and things, a child's hand, a pencil, letterless speech bubbles, rings, digits 0–10 written stroke by stroke), a narration tool with counting-word onsets, bench checks with a fingerprint, a project scaffold script; one worked example (Bài 1) |
+| [`interactive-lesson-web`](../.claude/skills/interactive-lesson-web/SKILL.md) | Interactive web pages from lesson videos that are already rendered (any `chuong-*` skill or `dimensions-math-video`) | A page kit (template, paper style, one app script), a per-lesson `lesson.js` format, build scripts for one lesson and for a site with a contents page, a headless check at three screen sizes, a video-versus-page contact sheet; one worked example (sa hình V02) |
 | [`house-plans-3d`](../.claude/skills/house-plans-3d/SKILL.md) | A house written once as code, with every deliverable rebuilt from it | A kit with a floor-building library, a Python CAD step, a web viewer, a browser check, a studio builder, seven textures; one sample house |
 
 The first three are written in English. The others are written in Vietnamese, because
@@ -230,7 +233,7 @@ export.
 Prepared text becomes a script, a voice, a storyboard, frames, music and sound effects, and
 one MP4. HyperFrames does the storytelling, the frames and the render; `vi-explainer-video`
 adds fonts with diacritics, the voice, captions that follow the script word for word, and
-the fixes for mistakes already made once. Projects live in `videos/`, which is git-ignored.
+the fixes for mistakes already made once. Projects live in `projects/<project>/videos/` for a client project and in `videos/` otherwise; both are git-ignored.
 
 The agent cannot hear audio or watch motion. It checks stills, loudness numbers and a
 whisper transcript, and reports what it could not verify.
@@ -271,8 +274,8 @@ sheets are a reconstruction for reference, not for permits or construction.
 | Path | Holds | In git |
 | --- | --- | --- |
 | `data/` | The SQLite database with every studio project and asset | No, ignored. Never commit it |
-| `videos/<name>/` | Narrated video projects: script, voice, music, frames, renders | No, ignored. `git add -f` there is not allowed |
-| `project/<name>/` | House projects made by `house-plans-3d`: source drawings, model, sheets, store, viewer | No, ignored. A real house is private data: drawings, dimensions, an address. `git add -f` there is not allowed |
+| `projects/<name>/` | One folder per client project. A house made by `house-plans-3d` (`projects/house-hp3-12/`): source drawings, model, sheets, store, viewer. Lesson videos of a series (`projects/sat-hach-lai-xe/videos/<lesson>/`, `projects/dimensions-math/videos/<lesson>/`): script, voice, music, frames, renders | No, ignored. A real house is private data: drawings, dimensions, an address. `git add -f` there is not allowed |
+| `videos/<name>/` | Other narrated video projects | No, ignored. `git add -f` there is not allowed |
 | `.env.local`, `.local/` | Encryption key, local settings, server pid | No, ignored. Never commit or print them |
 
 ## Where to go next

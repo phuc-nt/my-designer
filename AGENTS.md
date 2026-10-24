@@ -33,6 +33,7 @@ you ──bin/dsa──▶ http://localhost:<port> ◀──browser── the hu
 | A road-sign lesson (Chương V · Báo hiệu đường bộ) as a narrated 2D street where the sign is the main character, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-5-bao-hieu-duong-bo-video/SKILL.md` |
 | A general traffic-rule lesson (Chương I · Quy định chung và quy tắc giao thông) as a narrated scale model of the road, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-1-quy-dinh-chung-va-quy-tac-giao-thong-video/SKILL.md` |
 | A grade 1 maths lesson (Toán lớp 1, after Dimensions Math) with no text on screen, for children who cannot read yet, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/dimensions-math-video/SKILL.md` |
+| An interactive web page for a lesson that already has a rendered video: the video's own sound drives its own 3D/2D world live, with a step list, word-lit captions, the lesson's own questions and a contents page, published to Cloudflare Pages | `.claude/skills/interactive-lesson-web/SKILL.md` |
 | A house from its drawings: 3D model per floor, CAD floor-plan sheets at 1:100 (DXF, PDF, SVG), a data store, a phone-friendly web viewer, studio pages, re-division variants | `.claude/skills/house-plans-3d/SKILL.md` |
 
 ### Slides versus narrated video
@@ -85,8 +86,22 @@ installed the upstream way: `npx hyperframes`, with its skills
   cue, assembly and check scripts of `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit`.
   Lesson rules and what each remaining lesson still needs are in
   `references/series.md`.
-- **Projects** live in `videos/`, which is git-ignored: voices, music and
-  renders never go into git, and `git add -f` there is not allowed.
+- **Projects** live in `projects/`, one folder per client project, each with
+  its own sources, assets and renders:
+  - `projects/house-hp3-12/`: the house (`house-plans-3d`; new houses go to
+    `projects/<name>/`);
+  - `projects/sat-hach-lai-xe/videos/<lesson>/`: driving-test lessons (the
+    five `chuong-*` skills);
+  - `projects/dimensions-math/videos/<lesson>/`: grade 1 maths lessons
+    (`dimensions-math-video`).
+  - `projects/<series>/web/<lesson>/lesson.js` and `site.json`: interactive
+    web pages made from those videos (`interactive-lesson-web`).
+
+  Any other video goes to `videos/<name>/`. Each skill's `new-project.sh`
+  creates the folder in the right place. Lesson briefs stay in the
+  `sat-hach-lai-xe` content repo. Both `projects/` and `videos/` are
+  git-ignored: drawings, voices, music and renders never go into git, and
+  `git add -f` there is not allowed.
 
 The secure build lives in its own repo, `hyperframes-secure-sandbox`; never
 copy its skills into this repo, since both sets use the same skill names.
