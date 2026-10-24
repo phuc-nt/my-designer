@@ -38,6 +38,8 @@ dimensions-math-video/
     assets/lib/world/counting.js   việc đếm thành các đường theo thời gian: tay chạm (handTrack), bút
                                    (penTrack, inks), bong bóng bay (bubbleAt), vòng (ringAt), đàn con vật
                                    (herd), mũi tên, pháo giấy, cảnh hoà vào nhau (scene)
+    assets/lib/world/tenframe.js   khung mười ô (thẻ, lưới, ô sáng), chấm đặt hay bay vào đúng thứ tự, vòng
+                                   ôm một tập ô, tấm che cho trò nhìn nhanh, thanh mười khối (từ Bài 2)
     assets/lib/world/bench.js      khung canvas 1920×1080: vis, gate, ba nơi (zoo, room, desk), createBench()
     assets/lib/world/draw.js       bảng màu PAL, rgba, mix, hash, rr, disc, polyline, along
     compositions/world.html        lớp canvas của video
@@ -48,6 +50,9 @@ dimensions-math-video/
     scripts/bench-check.mjs        chạy canvas trong Node cho mọi 0,05 giây: lỗi, NaN, dấu vân tay
     scripts/bench-shots.mjs        ảnh riêng canvas trong vài giây, không cần lắp ráp
   examples/bai-01-dem-de-biet-co-bao-nhieu/       điểm xuất phát mặc định: Bài 1 Chương 1
+  examples/bai-02-khung-muoi-o/                   Bài 2 Chương 1: mẫu cảnh khung mười ô (đếm ô, chấm bay
+                                                  vào, điền lung tung, mười khung nhỏ, đếm tiếp từ năm,
+                                                  tấm che nhìn nhanh, ô trống, thanh mười khối)
     BRIEF.md, SCRIPT.md, .hyperframes/{tts_request,bgm_request}.json
     assets/lib/world/{beats,world}.js
     scripts/build-storyboard.mjs
@@ -65,7 +70,7 @@ Skill không chứa tệp giọng, clip mẫu hay profile giọng nào, và khô
 | **Sửa từ ví dụ** | Ba tệp riêng của bài: `beats.js` (mốc lời đọc, có sẵn `seq` cho dãy tiếng đếm), `world.js` (các cảnh; trong đó có sẵn các mẫu cảnh: đếm đúng, ba cách đếm sai, số cuối ôm cả nhóm, gạt vật đã đếm sang bên, đếm trong tranh theo đường hay bằng vạch, viết chữ số lên thẻ, ba ô "nhóm, tiếng đọc, chữ số", ôn lại), `build-storyboard.mjs`; cùng `BRIEF.md`, `SCRIPT.md` và hai tệp request |
 | **Tạo mới** | Mọi hình mà Bài 1 chưa cần (bảng theo bài ở `references/series.md` §5, cách thêm ở `references/canvas.md` §6): **khung mười ô** và chấm (từ Bài 2 Chương 1 trở đi, dùng suốt hai chương); nhóm rỗng, cái đĩa không còn gì (số 0); khối lập phương, bậc thang khối, đoàn tàu khối; dãy thẻ số và ô "?" còn thiếu; đường nối từng cặp giữa hai nhóm; **sơ đồ tách gộp** (Chương 2); hai màu cho hai phần; các đồ vật mới của từng bài (mèo, táo, hoa, vịt, ếch…) |
 
-Cấu hình đã chạy thật: một video, 23 khung, 583 âm tiết lời đọc, 308,9 giây, giọng Leda, 18 SFX. Chưa bài nào khác được làm bằng skill này.
+Cấu hình đã chạy thật: Bài 1 (23 khung, 583 âm tiết lời đọc, 308,9 giây, 18 SFX) và Bài 2 Chương 1 (30 khung, 347,0 giây, 26 SFX), giọng Leda. Bài có khung mười ô thì tạo dự án với `--example bai-02-khung-muoi-o`.
 
 ## Yêu cầu cố định của bộ bài
 
@@ -101,7 +106,7 @@ SK=$ROOT/.claude/skills/vi-explainer-video
 HF=<thư mục có faceless-explainer; new-project.sh in ra ở dòng "HF:">
 FX=$HF/faceless-explainer/scripts
 ENGINE=$HF/media-use/audio/scripts/audio.mjs
-P=$ROOT/videos/<ten-du-an>
+P=$ROOT/projects/dimensions-math/videos/<ten-du-an>
 BRIEFS=/Users/phucnt/workspace/sat-hach-lai-xe/projects/dimensions-math/video-briefs
 ```
 
@@ -126,7 +131,7 @@ Brief thiếu thứ không suy ra được thì hỏi người dùng một lần
 bash .claude/skills/dimensions-math-video/scripts/new-project.sh toan-1-chuong-<C>-bai-<NN>-<ten-ngan>
 ```
 
-Lệnh tạo `videos/<ten-du-an>` (HyperFrames trống, font tiếng Việt, `glass-keynote` cho vỏ khung), chép phần mượn của `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit`, `kit/` của bộ bài và các tệp của ví dụ Bài 1. Ghi lại dòng `HF:`. `--bare` bỏ phần ví dụ; dự án khi đó chưa chạy được cho tới khi có đủ ba tệp riêng của bài. `videos/` nằm trong `.gitignore`; không `git add -f` gì ở đó.
+Lệnh tạo `projects/dimensions-math/videos/<ten-du-an>` (HyperFrames trống, font tiếng Việt, `glass-keynote` cho vỏ khung), chép phần mượn của `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit`, `kit/` của bộ bài và các tệp của ví dụ Bài 1. Ghi lại dòng `HF:`. `--bare` bỏ phần ví dụ; dự án khi đó chưa chạy được cho tới khi có đủ ba tệp riêng của bài. `projects/dimensions-math/videos/` nằm trong `.gitignore`; không `git add -f` gì ở đó.
 
 ### 3. BRIEF.md và SCRIPT.md
 

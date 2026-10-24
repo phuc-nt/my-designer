@@ -2,7 +2,7 @@
 
 Agent không nghe được âm thanh và không xem được chuyển động. Agent chỉ kiểm được ảnh tĩnh, bản whisper nghe lại, các con số của ffmpeg và kết quả của `bench-check`. Kiểm vừa đủ: người dùng để ý chi phí token, nên không chạy lại các vòng kiểm dài khi chỉ đóng gói việc đã duyệt.
 
-Các lệnh dưới đây chạy trong `videos/<du-an>`.
+Các lệnh dưới đây chạy trong `projects/dimensions-math/videos/<du-an>`.
 
 ## 1. Bàn vẽ: `bench-check` và `bench-shots`
 
@@ -81,7 +81,7 @@ ffmpeg -v error -y -pattern_type glob -i 'snapshots/mp4/*.png' -vf tile=4x3:padd
 ## 4. Mẫu báo cáo
 
 ```markdown
-**Kết quả:** [renders/video.mp4](videos/<du-an>/renders/video.mp4), 1920×1080, <m:ss> (<N> khung), <I> LUFS, peak <P> dBFS, 0 khung đen.
+**Kết quả:** [renders/video.mp4](projects/dimensions-math/videos/<du-an>/renders/video.mp4), 1920×1080, <m:ss> (<N> khung), <I> LUFS, peak <P> dBFS, 0 khung đen.
 
 **Phạm vi:** <Bài, tên bài>: mục <…> (khung <…>), Dễ nhầm <…> (khung <…>); để lại <…> vì <…>.
 
@@ -104,14 +104,14 @@ Sửa `kit/assets/lib/world/` (thêm kind, thêm hàm, đổi hàm dùng chung) 
 
 ```bash
 ROOT=/Users/phucnt/workspace/my-designer
-P="$ROOT/videos/toan-1-chuong-1-bai-01-dem"
+P="$ROOT/projects/dimensions-math/videos/toan-1-chuong-1-bai-01-dem"
 cp "$ROOT"/.claude/skills/dimensions-math-video/kit/assets/lib/world/*.js "$P/assets/lib/world/"
 cd "$P" && node scripts/bench-check.mjs | tail -1      # phải là: fingerprint 550799323e1e7bf7
 ```
 
-- Chỉ chép các tệp của kit (`bench.js`, `counting.js`, `draw.js`, `zoo.js`); `world.js`, `beats.js` và `cues.js` của dự án giữ nguyên.
+- Chỉ chép các tệp của kit (`bench.js`, `counting.js`, `draw.js`, `zoo.js`, `tenframe.js`); `world.js`, `beats.js` và `cues.js` của dự án giữ nguyên.
 - Khác dấu vân tay: chạy `--frames` trên bản cũ và bản mới để biết khung nào đổi, rồi sửa kit cho tới khi trùng. Chỉ chấp nhận dấu vân tay mới khi thay đổi là cố ý (sửa một lỗi vẽ của Bài 1); khi đó ghi dấu mới vào đây và vào bảng "Đã làm" của `series.md` §6.
-- `videos/` không vào git. Máy khác không có dự án Bài 1 thì không kiểm được bằng cách này; ghi điều đó vào báo cáo.
+- `projects/` không vào git. Máy khác không có dự án Bài 1 thì không kiểm được bằng cách này; ghi điều đó vào báo cáo.
 
 ## 6. Những lỗi đã gặp
 

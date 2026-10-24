@@ -11,6 +11,7 @@ export const PAL = {
   ink: "#3B3355", mute: "#8A84A0", white: "#FFFFFF",
   count: "#0EA5A0", countSoft: "#CDEFEC", miss: "#F59E0B", extra: "#E5484D", pencil: "#5E5A70", digit: "#6D28D9",
   table: "#D8B386", tableEdge: "#B88C5E", card: "#FFFFFF", rule: "#BFD7F2", margin: "#F3A6B5",
+  dot: "#2F6FEB", lid: "#9C6B43",
 };
 const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 export const rgba = (h, a = 1) => {

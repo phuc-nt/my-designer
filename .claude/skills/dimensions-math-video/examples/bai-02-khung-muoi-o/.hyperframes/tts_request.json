@@ -1,0 +1,129 @@
+{
+  "provider": "gemini",
+  "tts_model": "gemini-3.8-flash-tts",
+  "voice": "Leda",
+  "lang": "vi",
+  "style": "Speak Vietnamese with a natural Northern (Hanoi) accent. A warm, cheerful kindergarten teacher talking to one six-year-old child sitting next to her: gentle, smiling, slow and very clear. When numbers are separated by full stops ('Một. Hai. Ba.'), say each number on its own, evenly, about one number per second, as if touching one animal per number. When numbers are separated by commas, say them in one quick breath. Questions sound curious and inviting, answers are calm and sure, praise is bright. Never rushed.",
+  "lines": [
+    {
+      "id": "01",
+      "text": "Chào con! Cô có một cái khung, trên đó có những chấm tròn. Con nhìn thật nhanh nhé. Nhìn này! Có mấy chấm nhỉ?"
+    },
+    {
+      "id": "02",
+      "text": "Khó quá phải không? Cái khung này tên là khung mười ô. Hôm nay, cô chỉ cho con cách nhìn khung là biết ngay có bao nhiêu chấm."
+    },
+    {
+      "id": "03",
+      "text": "Mình đếm các ô nhé. Hàng trên: Một. Hai. Ba. Bốn. Năm. Hàng trên có năm ô."
+    },
+    {
+      "id": "04",
+      "text": "Hàng dưới: Một. Hai. Ba. Bốn. Năm. Hàng dưới cũng có năm ô. Ô nào ở hàng trên cũng có một ô ngay bên dưới."
+    },
+    {
+      "id": "05",
+      "text": "Còn cả khung thì sao? Một. Hai. Ba. Bốn. Năm. Sáu. Bảy. Tám. Chín. Mười. Cả khung có mười ô."
+    },
+    {
+      "id": "06",
+      "text": "Khung có hai hàng. Mỗi hàng năm ô. Cả khung là mười ô."
+    },
+    {
+      "id": "07",
+      "text": "Đây là đàn sư tử. Đếm con nào, cô đặt một chấm vào khung. Chấm đầu tiên ở ô bên trái của hàng trên."
+    },
+    {
+      "id": "08",
+      "text": "Một. Hai. Ba. Bốn. Năm. Hàng trên đầy rồi, xuống hàng dưới. Sáu. Bảy."
+    },
+    {
+      "id": "09",
+      "text": "Mỗi con sư tử một chấm. Điền hàng trên trước, đầy rồi mới xuống hàng dưới."
+    },
+    {
+      "id": "10",
+      "text": "Nhóm sư tử, tiếng đọc bảy, chữ số bảy, và khung bảy chấm. Đó là bốn cách nói cùng một số lượng."
+    },
+    {
+      "id": "11",
+      "text": "Nếu điền chấm lung tung thì sao? Bắt đầu từ hàng dưới, rồi xen kẽ hai hàng."
+    },
+    {
+      "id": "12",
+      "text": "Vẫn là bảy chấm, nhưng hình lạ quá, nhìn không biết ngay. Lại phải đếm từng chấm: một, hai, ba, bốn, năm, sáu, bảy."
+    },
+    {
+      "id": "13",
+      "text": "Điền lại cho đúng: hàng trên trước, từ trái sang phải. Bây giờ, nhìn là biết ngay: bảy chấm."
+    },
+    {
+      "id": "14",
+      "text": "Vì luôn điền theo một cách, mỗi số có một hình riêng. Một. Hai. Ba. Bốn. Hàng trên chưa đầy. Năm: đúng một hàng đầy."
+    },
+    {
+      "id": "15",
+      "text": "Sáu. Bảy. Tám: hàng trên đầy, hàng dưới có thêm chấm. Chín: còn đúng một ô trống. Mười: cả khung đầy."
+    },
+    {
+      "id": "16",
+      "text": "Khung này có mấy chấm? Đếm lại từ một cũng được: một, hai, ba, nhưng chậm lắm."
+    },
+    {
+      "id": "17",
+      "text": "Hàng trên đầy là năm. Đếm tiếp: sáu. Bảy. Tám. Có tám chấm."
+    },
+    {
+      "id": "18",
+      "text": "Mình chơi nhìn nhanh nhé. Nhìn này! Có mấy chấm?"
+    },
+    {
+      "id": "19",
+      "text": "Năm chấm! Đúng một hàng đầy. Khung nữa nhé. Nhìn này! Có mấy chấm?"
+    },
+    {
+      "id": "20",
+      "text": "Chín chấm! Còn đúng một ô trống là đầy khung. Con nhìn là biết, giỏi lắm!"
+    },
+    {
+      "id": "21",
+      "text": "Khung này có bảy chấm. Ô không có chấm là ô trống. Mình đếm ô trống nhé: Một. Hai. Ba."
+    },
+    {
+      "id": "22",
+      "text": "Ô trống không có chấm, nhưng vẫn là ô của khung. Đếm hết các ô: một, hai, ba, bốn, năm, sáu, bảy, tám, chín, mười."
+    },
+    {
+      "id": "23",
+      "text": "Khung có bảy chấm và ba ô trống. Cả khung vẫn là mười ô."
+    },
+    {
+      "id": "24",
+      "text": "Thanh mười khối cũng thế. Bảy khối xanh, ba khối trắng. Cả thanh vẫn là mười khối."
+    },
+    {
+      "id": "25",
+      "text": "Tám chấm, thì còn hai ô trống. Chín chấm, còn một ô trống. Mười chấm, không còn ô trống nào. Chấm càng nhiều, ô trống càng ít."
+    },
+    {
+      "id": "26",
+      "text": "Cô hỏi: có mấy chấm? Nếu chạm vào ô trống: Một. Hai. Ba. Bốn. Đó là số ô trống, không phải số chấm."
+    },
+    {
+      "id": "27",
+      "text": "Hỏi chấm thì chạm vào chấm, ô trống không chạm. Hàng trên đầy là năm. Đếm tiếp: sáu. Có sáu chấm."
+    },
+    {
+      "id": "28",
+      "text": "Nhớ nhé: khung mười ô có hai hàng, mỗi hàng năm ô. Điền hàng trên trước, từ trái sang phải."
+    },
+    {
+      "id": "29",
+      "text": "Hàng trên đầy là năm, rồi đếm tiếp. Chấm và ô trống, tính chung là mười ô."
+    },
+    {
+      "id": "30",
+      "text": "Còn cái khung lúc đầu? Hàng trên đầy là năm. Đếm tiếp: sáu. Bảy. Có bảy chấm. Con giỏi lắm!"
+    }
+  ]
+}

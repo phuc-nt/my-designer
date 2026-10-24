@@ -40,10 +40,14 @@ Mười đồ vật trên một hàng: cách nhau ít nhất `2.2 × s × META.r
 | `pencil` | #5E5A70 | vạch đánh dấu, đường đi trên tranh |
 | `digit` | #6D28D9 | chữ số (chỉ chữ số) |
 | `ink`, `mute` | #3B3355, #8A84A0 | viền; bàn tay mờ "không làm thế" |
+| `dot` | #2F6FEB | chấm của khung mười ô; khối "có" của thanh mười khối (từ Chương 1 Bài 2) |
+| `lid` | #9C6B43 | tấm che nâu của trò nhìn nhanh; không mang nghĩa đếm |
 | `paper`, `sky`, `grass`, `grass2`, `soil` | | nền, vườn thú |
 | `table`, `tableEdge`, `card`, `rule`, `margin` | | phòng có bàn, tờ giấy, thẻ, kẻ dòng |
 
-Màu mới cho Chương 2 (hai phần của một nhóm, chấm của khung mười ô) thêm vào `PAL` theo §6.
+Thanh mười khối dùng khối `dot` cho phần "có" và khối trắng (`card`) cho phần "không", như chấm và ô trống. Không dùng xanh lá hay cam như sách: hai màu ấy gần xanh ngọc (đã đếm) và hổ phách (sót). Lời đọc gọi là "khối xanh" và "khối trắng".
+
+Màu mới cho Chương 2 (hai phần của một nhóm) thêm vào `PAL` theo §6.
 
 ## 3. Cue: `beats.js`
 
@@ -97,6 +101,25 @@ Ngoài ra `bumpAt(t, list, d)` (nảy ở mỗi mốc trong `list`) và `fadeOut
 - `boxPoints(x0, y0, x1, y1, r)`: đường viền chữ nhật bo góc thành điểm, để `polyline` vẽ dần. `groupLoop(c, x0, y0, x1, y1, p, { color, fill, w })`: vòng ôm cả nhóm.
 - `numberStrokes(str, cx, cy, h)`: các nét của một số (0–10), theo thứ tự viết. 4 có hai nét; 10 là nét của 1 rồi nét của 0. `writeNumber(c, str, cx, cy, h, p)` vẽ số tới tiến độ `p`.
 - `schoolCard`, `pictureCard`, `tableTop`, `tree`, `star`.
+
+### `tenframe.js`: khung mười ô, chấm, tấm che, thanh mười khối
+
+Có từ Chương 1 Bài 2. Một khung là `f = { x, y, cell, t0, until, bumps, lit }`: tâm khung và cỡ một ô. Ô `k` (0..9) ở hàng `ROW(k)`, cột `COL(k)`.
+
+- `cellXY(f, k)`: tâm ô k. `firstCells(n, from = 0)`: các ô của n chấm đầu. `cellsOutline(f, cells, pad)`: đường viền quanh một tập ô (mỗi hàng một đoạn). `cubeXY(bar, k)`: tâm khối k.
+
+`const TF = createTenFrame(c);`
+
+| Hàm | Dùng |
+|---|---|
+| `TF.board(t, f)` | thẻ trắng, bóng, lưới, viền; `lit: [{ t, until, cells, color, a }]` tô sáng ô. Bật ra ở `f.t0`; trả độ mờ |
+| `TF.dotsAt(t, f, dots)` | chấm bán kính 0,34 ô. `dots: [{ k, t, from: [x, y], d, arc, moves: [[t0, t1, k]], until, color, bumps }]`; có `from` thì bay vào và để lại gợn sóng; `moves` trượt sang ô khác |
+| `TF.dot(x, y, r, { alpha, color })` | một chấm sticker đứng riêng |
+| `TF.cellLoop(t, f, { t, d, cells, color, w, pad, dash, until, bumps, fill })` | vòng ôm một tập ô, vẽ dần trong `d`; `pad` âm thì nằm trong ô |
+| `TF.lid(t, f, { t0, opens: [[t0, t1]], off, until })` | tấm che: nhấc lên trong mỗi khoảng `opens`, bay hẳn đi ở `off` |
+| `TF.bar(t, { x, y, size, t0, stagger, n, steps: [[t, n]], until, bumps: [[t, k0, k1]] })` | mười khối liền; n khối đầu màu `dot`, còn lại trắng; `steps` đổi n theo thời gian |
+
+Thứ tự vẽ một khung: `board`, `dotsAt`, `cellLoop`, `lid`. Mẫu cảnh ở `examples/bai-02-khung-muoi-o/assets/lib/world/world.js`.
 
 ### `draw.js`
 
@@ -167,7 +190,7 @@ Cả cảnh thu nhỏ vào một ô (khung 20): `c.save(); c.translate(lerp(x0, 
 
 ### Một công cụ mới cho nhiều bài
 
-Khung mười ô, khối và bậc thang, thẻ số có ô "?", đường nối từng cặp, sơ đồ tách gộp: mỗi thứ một module mới trong `kit/assets/lib/world/` (`tenframe.js`, `cubes.js`, `partwhole.js`, …), cùng kiểu với `counting.js`:
+Khối và bậc thang, thẻ số có ô "?", đường nối từng cặp, sơ đồ tách gộp: mỗi thứ một module mới trong `kit/assets/lib/world/` (`cubes.js`, `partwhole.js`, …), cùng kiểu với `counting.js` và `tenframe.js` (đã có, §4):
 
 - Một hàm `createX(c)` trả các hàm `xAt(t, spec)` thuần theo thời gian; dữ liệu dựng một lần, vẽ mọi `t`.
 - Toạ độ, cỡ, mốc đều đến từ `spec`, không có số của một bài cụ thể trong module.

@@ -89,7 +89,7 @@ Bài 1: 684 âm tiết phần giảng trong brief, ra 583 âm tiết lời đọ
 | Bài | Tên | Âm tiết | Ước lượng | Các mục | Vẽ mới | Trạng thái |
 |---|---|---|---|---|---|---|
 | 1 | Đếm để biết có bao nhiêu | 684 | 309 s thật | 4 | | **Đã làm** (ví dụ của skill) |
-| 2 | Khung mười ô: nhìn là biết bao nhiêu | 782 | ~350 s | 1 khung 2×5; 2 điền chấm hàng trên trước, trái sang phải; 3 nhìn là biết; 4 chấm và ô trống tính chung là 10 | **Khung mười ô**, chấm (đặt từng chấm bằng bàn tay, đúng thứ tự), ô trống được chỉ ra, chớp hình ngắn cho "nhìn là biết". Màu chấm mới | |
+| 2 | Khung mười ô: nhìn là biết bao nhiêu | 782 | ~350 s | 1 khung 2×5; 2 điền chấm hàng trên trước, trái sang phải; 3 nhìn là biết; 4 chấm và ô trống tính chung là 10 | **Khung mười ô**, chấm (đặt từng chấm bằng bàn tay, đúng thứ tự), ô trống được chỉ ra, chớp hình ngắn cho "nhìn là biết". Màu chấm mới | **Đã làm**, đã duyệt (ví dụ `bai-02-khung-muoi-o`); `tenframe.js` đã vào kit |
 | 3 | Số 0 | 613 | ~275 s | 1 bớt dần tới khi không còn gì; 2 bốn cách thể hiện số 0; 3 số 0 là số của một nhóm cụ thể; 4 đếm ngược 10 về 0 | Đồ vật bớt đi từng cái (bay, được lấy đi), nhóm rỗng (đĩa, giỏ không còn gì), khung mười ô trống, chữ số 0 (đã có trong bảng nét) | |
 | 4 | Thứ tự các số | 721 | ~325 s | 1 bậc thang khối, mỗi số là số trước thêm 1; 2 đi ngược, bớt 1; 3 xếp các số theo thứ tự; 4 tìm số còn thiếu trong dãy | **Khối lập phương**, cột khối, bậc thang 1 đến 10; dãy thẻ số, ô "?" còn thiếu | |
 | 5 | So sánh | 907 | ~410 s, cân nhắc chia | 1 ghép từng cặp; 2 nói cả câu, gọi tên cả hai nhóm; 3 cách xếp đánh lừa mắt; 4 so hai số; 5 lớn nhất, bé nhất | **Đường nối từng cặp** giữa hai nhóm, phần thừa ra được khoanh; cùng một nhóm xếp thưa và xếp dày; hai số trên bậc thang của Bài 4 | |
@@ -114,4 +114,5 @@ Thứ tự nên làm: Chương 1 Bài 2 trước mọi bài khác, vì khung mư
 
 | Bài | Ngày | Dự án | Thời lượng | Khung | Giọng | SFX | Ghi chú |
 |---|---|---|---|---|---|---|---|
-| Chương 1 Bài 1 · Đếm để biết có bao nhiêu | 2026-10-22 | `videos/toan-1-chuong-1-bai-01-dem` | 308,9 s | 23 | Leda | 18 | Bốn mục, bốn Dễ nhầm. Nhạc 0.48 (14,1 dB dưới giọng). Render −13,0 LUFS, hạ 1,5 dB còn −14,5, peak −3,0. Dấu vân tay bench `550799323e1e7bf7` |
+| Chương 1 Bài 1 · Đếm để biết có bao nhiêu | 2026-10-22 | `projects/dimensions-math/videos/toan-1-chuong-1-bai-01-dem` | 308,9 s | 23 | Leda | 18 | Bốn mục, bốn Dễ nhầm. Nhạc 0.48 (14,1 dB dưới giọng). Render −13,0 LUFS, hạ 1,5 dB còn −14,5, peak −3,0. Dấu vân tay bench `550799323e1e7bf7` |
+| Chương 1 Bài 2 · Khung mười ô: nhìn là biết bao nhiêu | 2026-10-22 | `projects/dimensions-math/videos/toan-1-chuong-1-bai-02-khung-muoi-o` | 347,0 s | 30 | Leda | 26 | Bốn mục, bốn Dễ nhầm. Khung mười ô, tấm che, thanh mười khối (khối xanh lam và trắng, không xanh lá và cam). Nhạc 0.31 (14,1 dB dưới giọng). Render −12,0 LUFS, hạ 2,5 dB còn −14,5, peak −4,0. Dấu vân tay bench `4aa8298f53bd3fba`; Bài 1 vẫn `550799323e1e7bf7` với kit mới. Đã duyệt 2026-10-23, chép vào `examples/bai-02-khung-muoi-o` |
