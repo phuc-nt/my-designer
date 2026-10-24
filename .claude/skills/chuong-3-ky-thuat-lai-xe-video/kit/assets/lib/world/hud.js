@@ -22,6 +22,8 @@ const wipeAt = (p) => {
   if (p < 2 * WIPE.up) return (1 + Math.cos((Math.PI * (p - WIPE.up)) / WIPE.up)) / 2;
   return 0;
 };
+// sweeps done since the wipers started: d.wipe when the lesson sets the pace, else a steady beat
+const wipeCycles = (d, wet) => d.wipe ?? (d.t - wet[1]) / WIPE.T;
 
 function roundRect(g, x, y, w, h, r) {
   g.beginPath();
@@ -156,6 +158,33 @@ function fogIcon(g, x, y, tone) {
   g.stroke();
   g.restore();
 }
+// the windscreen and its wiper, as on the stalk
+function wiperIcon(g, x, y, tone) {
+  g.save();
+  g.translate(x, y);
+  g.strokeStyle = rgba(tone, 1);
+  g.lineWidth = 3.2;
+  g.lineCap = "round";
+  g.lineJoin = "round";
+  g.beginPath();
+  g.moveTo(3, 13);
+  g.lineTo(-1, -6);
+  g.quadraticCurveTo(18, -16, 37, -6);
+  g.lineTo(33, 13);
+  g.closePath();
+  g.stroke();
+  g.beginPath();
+  g.moveTo(18, 13);
+  g.lineTo(8, -4);
+  g.stroke();
+  for (const [dx, dy] of [[22, -4], [28, 2], [24, 7]]) {
+    g.beginPath();
+    g.arc(dx, dy, 1.6, 0, Math.PI * 2);
+    g.fillStyle = rgba(tone, 1);
+    g.fill();
+  }
+  g.restore();
+}
 function warnIcon(g, x, y, tone) {
   g.save();
   g.translate(x, y);
@@ -196,14 +225,15 @@ export function createHud(canvas) {
   const STREAKS = Array.from({ length: 240 }, () => ({ x: R(), p: R(), v: 1.5 + R() * 1.1, l: 30 + R() * 56, a: 0.1 + R() * 0.2 }));
   const MOTES = Array.from({ length: 260 }, () => ({ a: R() * Math.PI * 2, p: R(), v: 0.5 + R(), r: 0.8 + R() * 1.8 }));
 
-  function dropAlpha(dr, wet, t) {
-    let since = t - wet[0];
-    const tw = t - wet[1];
-    if (dr.pass && tw > 0) {
-      const cyc = Math.floor(tw / WIPE.T), p = tw / WIPE.T - cyc;
+  function dropAlpha(dr, d) {
+    const wet = d.wet;
+    let since = d.t - wet[0];
+    const cw = wipeCycles(d, wet), per = d.wipeT ?? WIPE.T;
+    if (dr.pass && cw > 0) {
+      const cyc = Math.floor(cw), p = cw - cyc;
       for (const pk of dr.pass) {
-        const at = (p >= pk ? cyc + pk : cyc - 1 + pk) * WIPE.T;
-        if (at >= 0) since = Math.min(since, tw - at);
+        const at = p >= pk ? cyc + pk : cyc - 1 + pk;
+        if (at >= 0) since = Math.min(since, (cw - at) * per);
       }
     }
     return clamp(since / 1.5);
@@ -212,10 +242,9 @@ export function createHud(canvas) {
   function windshield(d) {
     const wet = d.wet;
     if (!wet || d.rain <= 0.01) return;
-    const t = d.t;
     g.save();
     for (const dr of DROPS) {
-      const a = dropAlpha(dr, wet, t) * clamp(d.rain * 1.2);
+      const a = dropAlpha(dr, d) * clamp(d.rain * 1.2);
       if (a <= 0.02) continue;
       g.fillStyle = `rgba(176,196,246,${(0.17 * a).toFixed(3)})`;
       g.beginPath();
@@ -227,8 +256,8 @@ export function createHud(canvas) {
       g.arc(dr.x, dr.y, dr.r * 0.62, Math.PI * 1.05, Math.PI * 1.6);
       g.stroke();
     }
-    const tw = t - wet[1];
-    const e = tw > 0 ? wipeAt(tw / WIPE.T - Math.floor(tw / WIPE.T)) : 0;
+    const cw = wipeCycles(d, wet);
+    const e = cw > 0 ? wipeAt(cw - Math.floor(cw)) : 0;
     const th = ((WIPE.rest - e * (WIPE.rest - WIPE.top)) * Math.PI) / 180;
     g.lineCap = "round";
     for (const [px, py] of WIPE.pivots) {
@@ -365,6 +394,7 @@ export function createHud(canvas) {
     beamHigh: (x, y, tone) => beamIcon(g, x, y, true, tone),
     beamLow: (x, y, tone) => beamIcon(g, x, y, false, tone),
     fog: (x, y, tone) => fogIcon(g, x, y, tone),
+    wiper: (x, y, tone) => wiperIcon(g, x, y, tone),
     warn: (x, y, tone) => warnIcon(g, x + 8, y, tone),
   };
 

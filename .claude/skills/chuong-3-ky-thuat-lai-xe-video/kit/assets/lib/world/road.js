@@ -35,6 +35,14 @@ export const PALETTES = {
     ambient: [[3.4, 3.4, 3.4], [3.0, 3.05, 3.1]],
     lift: 1, pool: 0.12, glow: 0.3,
   },
+  // a grey afternoon under rain clouds: flat light, no shadows to speak of
+  overcast: {
+    horizon: [0.66, 0.69, 0.73], zenith: [0.45, 0.49, 0.55], stars: false,
+    fogLow: [0.64, 0.67, 0.71], fogExt: [0.64, 0.67, 0.71], wall: [0.82, 0.84, 0.87],
+    hemi: [0xdde3ea, 0x6a727c, 1.8], sun: [0xe8ecf2, 0.9],
+    ambient: [[2.5, 2.5, 2.6], [2.3, 2.35, 2.4]],
+    lift: 1, pool: 0.2, glow: 0.45,
+  },
 };
 const BEAM_HIGH = [214, 232, 255], BEAM_LOW = [255, 234, 186];
 const CAR_LAMPS = { head: [{ x: 0.68, y: 0.72, z: 2.36 }, { x: -0.68, y: 0.72, z: 2.36 }], tail: [{ x: 0.7, y: 0.85, z: -2.4 }, { x: -0.7, y: 0.85, z: -2.4 }] };
@@ -118,6 +126,10 @@ const GROUND_FRAG = /* glsl */ `
   uniform vec3 uAmbient;
   uniform vec4 uFog;       // colour, density
   uniform vec2 uBay;       // z of the lay-by centre, and whether there is one
+  uniform vec3 uWet;       // how wet the paving is, how hard it rains, the time (for the ripples)
+  uniform vec4 uPud;       // a puddle: x, z, half width, half length
+  uniform float uPudA;     // its presence
+  uniform vec4 uPudT;      // a tint laid over it: colour and share
   varying vec3 vW;
   varying float vDepth;
 
@@ -167,8 +179,33 @@ const GROUND_FRAG = /* glsl */ `
     alb = mix(alb, vec3(0.86), stripe(vW.x + 3.32, 0.07) * mix(1.0, dashes(p.y, 3.0, 0.5), along));
     alb = mix(alb, vec3(0.86), stripe(vW.x - (xr + 0.22), 0.07) * smoothstep(0.02, 0.15, bay));
 
+    float wet = uWet.x * paved;
+    alb *= 1.0 - 0.38 * wet;
+
     vec3 col = alb * (uAmbient + lamp(uB0, uL0, uReach.x) + lamp(uB1, uL1, uReach.y));
     col = 1.0 - exp(-1.25 * col); // bright pools roll off instead of clipping
+
+    // wet paving mirrors the sky, more so the flatter the eye looks along it
+    vec3 V = normalize(cameraPosition - vW);
+    float graze = pow(1.0 - clamp(V.y, 0.0, 1.0), 4.0);
+    col = mix(col, uFog.rgb, wet * (0.06 + 0.4 * graze) * (0.75 + 0.25 * noise(p * vec2(1.5, 0.12))));
+    // standing water: a dark mirror with a soft, uneven edge and rings where the rain lands
+    if (uPudA > 0.001) {
+      vec2 q = (vW.xz - uPud.xy) / uPud.zw;
+      float r = pow(pow(abs(q.x), 3.0) + pow(abs(q.y), 3.0), 1.0 / 3.0) + 0.16 * (noise(p * 0.8) - 0.5);
+      float inP = uPudA * (1.0 - smoothstep(0.84, 1.0, r));
+      vec2 cp = p * 1.7;
+      vec2 ci = floor(cp);
+      float ph = fract(uWet.z * 1.3 + hash(ci));
+      float rr = length(fract(cp) - 0.5 - (vec2(hash(ci + 3.1), hash(ci + 7.7)) - 0.5) * 0.4);
+      float ring = (1.0 - smoothstep(0.0, 0.035, abs(rr - 0.42 * ph))) * (1.0 - ph) * uWet.y * (1.0 - far);
+      vec3 water = mix(vec3(0.12, 0.15, 0.19), uFog.rgb * 1.06, 0.5 + 0.45 * graze) + 0.18 * ring;
+      // a darker wet rim where the water thins out, so the edge reads from above too
+      float rim = smoothstep(0.62, 0.86, r) * (1.0 - smoothstep(0.9, 1.04, r));
+      water = mix(water, vec3(0.1, 0.11, 0.13), 0.55 * rim);
+      col = mix(col, water, inP);
+      col = mix(col, uPudT.rgb, inP * uPudT.w);
+    }
     float fg = 1.0 - exp(-uFog.w * uFog.w * vDepth * vDepth);
     gl_FragColor = vec4(mix(col, uFog.rgb, fg), 1.0);
   }
@@ -247,6 +284,9 @@ export function createRoad({ canvas, fx, palette = "night", trees: TREES = 34, p
     uAmbient: { value: new THREE.Vector3() },
     uFog: { value: new THREE.Vector4() },
     uBay: { value: new THREE.Vector2() },
+    uWet: { value: new THREE.Vector3() },
+    uPud: { value: new THREE.Vector4(0, 0, 1, 1) },
+    uPudA: { value: 0 }, uPudT: { value: new THREE.Vector4() },
   };
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(760, 800).rotateX(-Math.PI / 2),
@@ -398,6 +438,15 @@ export function createRoad({ canvas, fx, palette = "night", trees: TREES = 34, p
     U.uFog.value.set(fogC[0], fogC[1], fogC[2], density);
     U.uS.value = d.s % 600;
     U.uBay.value.set(d.bay ?? 0, d.bay === null || d.bay === undefined ? 0 : 1);
+    U.uWet.value.set(d.wetRoad ?? 0, d.rain ?? 0, d.t ?? t);
+    // d.puddle: { x, z, hw, hl, a, tint: a TONE, tintA: its share } or null
+    const pd = d.puddle;
+    U.uPudA.value = pd ? pd.a : 0;
+    if (pd) {
+      const tc = pd.tint ?? [0, 0, 0];
+      U.uPud.value.set(pd.x, pd.z, pd.hw, pd.hl);
+      U.uPudT.value.set(tc[0] / 255, tc[1] / 255, tc[2] / 255, pd.tintA ?? 0);
+    }
     for (const m of STRIPS) m.visible = false;
     egoG.position.set(d.x, 0, 0);
     egoG.rotation.y = d.yaw;

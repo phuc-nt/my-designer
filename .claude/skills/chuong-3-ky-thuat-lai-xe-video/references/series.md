@@ -1,6 +1,6 @@
 # Loạt video Chương III · Kỹ thuật lái xe
 
-Brief nằm ở `/Users/phucnt/workspace/sat-hach-lai-xe/video-briefs/chuong-3-ky-thuat-lai-xe/`: `README.md` (luật của chương, bảng thuật ngữ), `BAI-01…BAI-11-*.md` (mỗi bài một tệp), `DOI-CHIEU.md` (bảng đối chiếu nguồn, chỉ để soát). Repo đó chỉ đọc.
+Brief nằm ở `/Users/phucnt/workspace/sat-hach-lai-xe/projects/sat-hach-lai-xe/video-briefs/chuong-3-ky-thuat-lai-xe/`: `README.md` (luật của chương, bảng thuật ngữ), `BAI-01…BAI-11-*.md` (mỗi bài một tệp), `DOI-CHIEU.md` (bảng đối chiếu nguồn, chỉ để soát). Repo đó chỉ đọc.
 
 ## 1. Luật nội dung và cách áp dụng
 
@@ -60,7 +60,7 @@ Cột "âm tiết" ở bảng §4 là độ dài của tệp bài (kể cả câ
 | 2 | Cho xe lăn bánh: khởi hành, phanh tay, đổi số | 4 | 1399 | `BAI-02-cho-xe-lan-banh.md` | chưa làm |
 | 3 | Lên dốc và xuống dốc | 5 | 1448 | `BAI-03-len-doc-xuong-doc.md` | chưa làm |
 | 4 | Mặt đường xấu: trơn, ổ gà, rãnh, ngập nước | 6 | 1567 | `BAI-04-mat-duong-xau.md` | chưa làm |
-| 5 | Khi không nhìn rõ: ban đêm, đèn chói, mưa, sương mù | 4 | 1204 | `BAI-05-khi-khong-nhin-ro.md` | ý 1–3 xong; ý 4 còn |
+| 5 | Khi không nhìn rõ: ban đêm, đèn chói, mưa, sương mù | 4 | 1204 | `BAI-05-khi-khong-nhin-ro.md` | xong (hai video: ý 1–3, ý 4) |
 | 6 | Đổi hướng: đường vòng, rẽ, quay đầu, lùi, ra đường chính | 6 | 1545 | `BAI-06-doi-huong.md` | chưa làm |
 | 7 | Qua đường sắt | 3 | 1275 | `BAI-07-qua-duong-sat.md` | chưa làm |
 | 8 | Đường cao tốc và vượt xe dài | 4 | 1645 | `BAI-08-duong-cao-toc-va-vuot-xe-dai.md` | chưa làm |
@@ -76,7 +76,6 @@ Cột "đã có" là thứ `kit/` làm được ngay. Cột "phải dựng" là 
 
 | Bài | Đã có | Phải dựng |
 |---|---|---|
-| 5 ý 4 (mưa, đường trơn) | Gần như tất cả: mưa, gạt nước, mặt đường ướt, dải dừng xe, xe tải phía trước, khoảng cách | Cách cho thấy quãng dừng dài ra trên đường ướt (đổi `decel` của `stopDist`), nếu bài nói vậy |
 | 4 Mặt đường xấu | Đường, mưa, mặt ướt, dải dừng xe, ghế lái | Ổ gà, rãnh cắt ngang, đoạn ngập nước trên mặt đường; xe trượt ngang (thêm góc lệch vào `drive.js`) |
 | 8 Cao tốc, vượt xe dài | Ghế lái, xe tải, khoảng cách, đèn dừng khẩn cấp, chỗ dừng xe | Đường nhiều làn một chiều có dải phân cách, làn tăng tốc và giảm tốc, làn dừng khẩn cấp; xe kéo rơ moóc (ghép từ mô hình xe tải, hoặc mô hình mới) |
 | 3 Lên dốc, xuống dốc | Ghế lái, xe tải, bảng đồng hồ có thanh | Mặt đường dốc (nghiêng cả sân khấu hay nghiêng máy quay và đường chân trời); chỉ báo số đang gài và phanh động cơ trên bảng đồng hồ |
@@ -88,10 +87,11 @@ Cột "đã có" là thứ `kit/` làm được ngay. Cột "phải dựng" là 
 | 10 Xe mô tô hai bánh | Mô hình mô tô (`moto.glb`), đường, dốc nếu Bài 3 đã dựng | Góc nhìn người lái mô tô (tay lái, gương), tay ga và hai phanh cận cảnh; `road.vehicle` chưa được thử với mô tô |
 | 11 Xe tự đổ, nhiên liệu, tiết kiệm | Xe tải, đường | Thùng xe nâng lên (mô hình xe ben mới); hai ý sau thiên về sơ đồ hơn là cảnh lái, có thể chủ yếu là cột chữ và hình 2D |
 
-Thứ tự gợi ý theo lượng dùng lại: Bài 5 ý 4 → Bài 4 → Bài 8 → Bài 3 → Bài 6 → Bài 7 → Bài 9 → Bài 2 → Bài 1 → Bài 10 → Bài 11. Người dùng chọn bài nào thì làm bài đó.
+Thứ tự gợi ý theo lượng dùng lại: Bài 4 → Bài 8 → Bài 3 → Bài 6 → Bài 7 → Bài 9 → Bài 2 → Bài 1 → Bài 10 → Bài 11. Người dùng chọn bài nào thì làm bài đó.
 
 ## 6. Đã làm
 
 | Video | Dự án | Nội dung | Số đo | Ghi chú |
 |---|---|---|---|---|
-| Bài 5 · Khi không nhìn rõ (ý 1–3) | `videos/chuong-3-bai-05-khi-khong-nhin-ro` | Đêm gặp xe ngược chiều, bị chói mắt, sương mù và mưa to | 16 khung, 873 âm tiết, 306,3 s, 1920×1080, 30 fps, giọng Leda | Video thử nghiệm của chương, người dùng đã duyệt. Thành ví dụ `bai-05-khi-khong-nhin-ro`. Ý 4 chưa làm |
+| Bài 5 · Khi không nhìn rõ (ý 1–3) | `projects/sat-hach-lai-xe/videos/chuong-3-bai-05-khi-khong-nhin-ro` | Đêm gặp xe ngược chiều, bị chói mắt, sương mù và mưa to | 16 khung, 873 âm tiết, 306,3 s, 1920×1080, 30 fps, giọng Leda | Video thử nghiệm của chương, người dùng đã duyệt. Thành ví dụ `bai-05-khi-khong-nhin-ro` |
+| Bài 5 · Trời mưa (ý 4) | `projects/sat-hach-lai-xe/videos/chuong-3-bai-05-p2-troi-mua` | Chiều âm u có mưa: nhìn kém và đường trơn, bốn việc cần làm, đi qua vũng nước | 13 khung, 422 âm tiết, 157,1 s, 1920×1080, 30 fps, giọng Leda | Video ban ngày đầu tiên của chương, người dùng đã duyệt. Thêm vào kit: bảng màu `overcast`, mặt đường ướt và vũng nước (`wetRoad`, `puddle`), nhịp gạt nước (`wipe`, `wipeT`), icon `wiper`. Thành ví dụ `bai-05-p2-troi-mua` |

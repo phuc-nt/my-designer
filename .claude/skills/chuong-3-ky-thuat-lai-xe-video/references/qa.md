@@ -65,7 +65,7 @@ Không bỏ qua: `content_overlap` kéo dài hàng chục giây (một khung rò
 Sửa bất kỳ tệp nào của `kit/` hay của `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/kit/` thì ví dụ Bài 5 phải ra hình giống hệt trước khi sửa. Dựng lại ví dụ trong một dự án tạm, mượn phần âm thanh của video đã làm để không tạo lại giọng:
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel); T=$ROOT/videos/chuong-3-bai-05-khi-khong-nhin-ro; P=$ROOT/videos/chuong-3-kit-check
+ROOT=$(git rev-parse --show-toplevel); T=$ROOT/projects/sat-hach-lai-xe/videos/chuong-3-bai-05-khi-khong-nhin-ro; P=$ROOT/projects/sat-hach-lai-xe/videos/chuong-3-kit-check
 rm -rf "$P" && bash "$ROOT"/.claude/skills/chuong-3-ky-thuat-lai-xe-video/scripts/new-project.sh chuong-3-kit-check     # ghi lại dòng HF:
 for f in assets/voice assets/bgm assets/sfx; do rm -rf "$P/$f"; cp -R "$T/$f" "$P/$f"; done
 for f in assets/lib/world/cues.js audio_meta.json audio_engine_meta.json audio_request.json caption-overrides.json .hyperframes/whisper_words.json .hyperframes/bgm_status.json; do cp "$T/$f" "$P/$f"; done
@@ -85,9 +85,9 @@ for f in "$P"/snapshots/cmp/contact-sheet-*.jpg; do ffmpeg -hide_banner -nostats
 
 - Sửa không nhằm đổi hình: `diff` không in gì và SSIM `All:1.000000` ở mọi tờ. Lần đóng gói skill đạt đúng như vậy.
 - Sửa có chủ ý đổi hình (ví dụ đổi màu vạch): khung vẫn phải giống từng byte nếu không đụng `frames.*`; đọc các tờ `cmp` của hai bên để xác nhận chỉ thứ muốn đổi đã đổi.
-- Thiếu `videos/chuong-3-bai-05-khi-khong-nhin-ro` (máy khác): tạo lại giọng cho ví dụ theo bước 4–8 của `SKILL.md`, rồi chỉ so được bằng mắt.
+- Thiếu `projects/sat-hach-lai-xe/videos/chuong-3-bai-05-khi-khong-nhin-ro` (máy khác): tạo lại giọng cho ví dụ theo bước 4–8 của `SKILL.md`, rồi chỉ so được bằng mắt.
 
-Xong thì xoá `videos/chuong-3-kit-check`. Bảng màu `day` của `road.js` mới được chụp thử trên cảnh của Bài 5 (đổi `palette: "day"` trong `world.js`), chưa dùng trong video nào: video đầu tiên dùng ban ngày phải kiểm màu chữ nhãn 3D và độ nổi của vạch đường.
+Xong thì xoá `projects/sat-hach-lai-xe/videos/chuong-3-kit-check`. Bảng màu `day` của `road.js` mới được chụp thử trên cảnh của Bài 5 (đổi `palette: "day"` trong `world.js`), chưa dùng trong video nào: video đầu tiên dùng ban ngày phải kiểm màu chữ nhãn 3D và độ nổi của vạch đường.
 
 ## 5. Bản gửi qua kênh giới hạn dung lượng
 
@@ -106,7 +106,7 @@ Video dài khác thì tính lại: `b:v ≈ (dung lượng đích tính bằng k
 Viết bằng tiếng Việt, cho người dùng.
 
 ```markdown
-**Kết quả:** videos/<tên dự án>/renders/video.mp4 — 1920×1080, 30 fps, <thời lượng>, <dung lượng>.
+**Kết quả:** projects/sat-hach-lai-xe/videos/<tên dự án>/renders/video.mp4 — 1920×1080, 30 fps, <thời lượng>, <dung lượng>.
 Bài <N> · <tên bài>, ý <…>. <Số> khung, <số> âm tiết lời đọc. Ý để lại cho video sau: <…> vì <…>.
 
 **Giọng đọc:** Gemini <tên giọng>, <số> đoạn; chỗ whisper nghe khác kịch bản: <…>.

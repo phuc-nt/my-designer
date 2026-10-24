@@ -1,0 +1,64 @@
+{
+  "provider": "gemini",
+  "tts_model": "gemini-3.8-flash-tts",
+  "voice": "Leda",
+  "lang": "vi",
+  "style": "Speak Vietnamese with a natural Northern (Hanoi) accent. Calm, warm and clear, like a patient driving instructor talking to a learner during a rainy afternoon drive. Unhurried pace, a short pause after each sentence. Slow down a little on the name of the lamp and on each action the driver must take.",
+  "lines": [
+    {
+      "id": "01",
+      "text": "Trời đổ mưa to. Có người nghĩ: mưa to thì chạy nhanh cho mau qua. Vì sao người lái cẩn thận lại làm điều ngược lại?"
+    },
+    {
+      "id": "02",
+      "text": "Từ lúc mắt thấy nguy hiểm đến lúc xe dừng hẳn, xe vẫn đi thêm một quãng đường. Đó là quãng đi trong lúc người lái kịp phản ứng, cộng với quãng xe còn lăn tới trong lúc phanh."
+    },
+    {
+      "id": "03",
+      "text": "Bởi vậy có một quy tắc bao trùm: chỉ chạy nhanh tới mức dừng được xe trong đoạn đường mình đang nhìn thấy rõ. Nhìn được càng ngắn thì phải chạy càng chậm."
+    },
+    {
+      "id": "04",
+      "text": "Mưa gây ra hai chuyện cùng lúc. Chuyện thứ nhất là nhìn kém: tầm nhìn bị hạn chế, đoạn đường nhìn thấy rõ ngắn lại."
+    },
+    {
+      "id": "05",
+      "text": "Chuyện thứ hai là mặt đường trơn. Giữa lốp và mặt đường có thêm một lớp nước, lực bám giảm đi, và quãng đường phanh dài ra. Mưa làm nhìn kém và làm đường trơn cùng lúc, nên tốc độ phải giảm, chứ không tăng."
+    },
+    {
+      "id": "06",
+      "text": "Khi xe chạy nhanh qua chỗ đọng nước, lốp có thể không kịp ép nước ra hai bên. Nó cưỡi lên trên mặt nước, và lúc ấy, cả vô lăng lẫn phanh đều gần như mất tác dụng."
+    },
+    {
+      "id": "07",
+      "text": "Vì vậy, lái xe trong trời mưa cần bốn việc. Thứ nhất, giảm tốc độ và tăng cường quan sát."
+    },
+    {
+      "id": "08",
+      "text": "Thứ hai, không phanh gấp, không tăng ga đột ngột, và không đánh vô lăng đột ngột. Lực bám đã ít, mà thao tác đột ngột nào cũng đòi một lực bám lớn."
+    },
+    {
+      "id": "09",
+      "text": "Thứ ba, bật đèn chiếu gần, thường gọi là đèn cốt, để mình thấy đường, và để người khác thấy mình. Thứ tư, mở gạt nước ở chế độ phù hợp với độ lớn của mưa, bảo đảm quan sát được."
+    },
+    {
+      "id": "10",
+      "text": "Gặp vũng nước thì phải giảm tốc độ từ trước khi tới, rồi giữ thẳng tay lái mà đi qua."
+    },
+    {
+      "id": "11",
+      "text": "Còn phanh gấp khi xe đã ở trong vũng nước, rồi tăng ga ngay sau khi ra khỏi vũng nước, chính là hai thao tác đột ngột, đúng ở chỗ trơn nhất."
+    },
+    {
+      "id": "12",
+      "text": "Lái xe trong trời mưa: giảm tốc độ, tăng cường quan sát. Không phanh gấp, không tăng ga hay đánh vô lăng đột ngột. Bật đèn chiếu gần, mở gạt nước ở chế độ phù hợp để bảo đảm quan sát."
+    },
+    {
+      "id": "13",
+      "text": "Và luôn nhớ: chỉ chạy nhanh tới mức dừng được xe trong đoạn đường mình đang nhìn thấy rõ. Trời mưa thì tốc độ phải giảm, chứ không tăng."
+    }
+  ],
+  "bgm": {
+    "mode": "none"
+  }
+}

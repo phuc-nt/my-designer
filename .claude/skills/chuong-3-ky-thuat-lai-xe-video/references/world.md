@@ -73,7 +73,10 @@ Dựng từ các đường theo thời gian của `timeline.js`:
 | `fog`, `fogAmt` | road | mật độ sương (0.0075 là trời quang) và mức sương 0..1 để đổi màu trời |
 | `bay` | road | z của tâm chỗ dừng xe so với xe, hoặc `null` |
 | `low`, `high`, `fogLamp` | road | đèn chiếu gần, chiếu xa, đèn sương mù, mỗi cái 0..1 |
+| `wetRoad`, `rain`, `t` | road | mặt đường ướt 0..1 (tối đi và phản chiếu trời, rõ hơn khi nhìn sát mặt đường); mưa (vòng gợn trên vũng nước); thời gian |
+| `puddle` | road | vũng nước trên mặt đường `{ x, z, hw, hl, a, tint, tintA }` (tâm, nửa rộng, nửa dài theo mét so với xe; `tint` là một `TONE` phủ lên với tỉ lệ `tintA`), hoặc `null` |
 | `t`, `rain`, `wet`, `motes`, `dazzle`, `blind`, `dip` | hud | thời gian; mưa; mặt đường ướt; hạt sương bay trong chùm đèn; mức chói; mức "không thấy gì"; tối ở điểm cắt |
+| `wipe`, `wipeT` | hud | số lần gạt đã xong kể từ khi bật gạt nước, và giây mỗi lần gạt: để bài đổi nhịp gạt (chậm, nhanh, tắt). Không có thì gạt đều theo `WIPE.T` |
 
 Mọi trường khác là của riêng bài, `world.js` của bài tự đọc: ví dụ Bài 5 có `kind, shot, v, acc, kappa, hazard, vis, stop, ok, onc, lead, band, edge, guides, reticle, label, hud, recover`. Bài mới thêm trường của mình (độ dốc, số đang gài, làn đang đi…), không cần sửa kit trừ khi sân khấu phải vẽ nó.
 
@@ -89,7 +92,7 @@ Sau khi sửa `drive.js`, thử nhanh bằng Node (cần `cues.js`):
 const road = createRoad({ canvas, fx, palette: "day", trees: 34, posts: 26 });
 ```
 
-`palette` là `"night"` hoặc `"day"` (`PALETTES` trong tệp; thêm bảng màu mới ở đó). Hằng xuất ra: `W, H` (1920, 1080), `FOCAL` (tiêu cự tính bằng pixel), `PITCH` (góc nhìn xuống của người lái).
+`palette` là `"night"`, `"day"` hoặc `"overcast"` (chiều âm u có mưa, ánh sáng dẹt; Bài 5 ý 4) (`PALETTES` trong tệp; thêm bảng màu mới ở đó). Hằng xuất ra: `W, H` (1920, 1080), `FOCAL` (tiêu cự tính bằng pixel), `PITCH` (góc nhìn xuống của người lái).
 
 Một khung hình vẽ theo đúng thứ tự này (xem `world.js` của ví dụ):
 
@@ -137,6 +140,7 @@ Tên mô hình (từ `models.js`): `carPurple`, `carRed`, `truckTeal`, `truckDar
 | `duel` | nhìn ngang, ống kính khép dần theo hai xe | hai xe lao về phía nhau |
 | `chase` | trên cao phía sau xe | thấy dải dừng xe so với đoạn nhìn rõ |
 | `front`, `rear` | sát đầu xe, hoặc phía sau xe đang đỗ | chi tiết ở ngoài xe: đèn sương mù, đèn dừng khẩn cấp |
+| `pond`, `puddle` | đứng yên bên lề, nhìn xe chạy vào vũng nước (ví dụ `bai-05-p2-troi-mua`) | xe đi vào nước đọng; dấu trên đường đứng yên tại chỗ việc xảy ra |
 
 Cảnh ngoài xe: truyền `exterior: true` cho `finish` (không vẽ ca-pô), `driver: false` cho `begin` (cảnh được nâng sáng theo `palette.lift`), và `hideRight: true` cho `side` nếu máy quay ở lề phải. Chữ ở cột trái che x 64–620, nên đặt vật chính ở nửa phải khung hình (ví dụ lùi tâm ngắm về −z một đoạn `80 / ppm`).
 
@@ -161,7 +165,7 @@ panel = {
 progress = { u, text, tone };         // thanh đầy dần 0..1 kèm dòng chữ; u < 0 thì ẩn
 ```
 
-Icon có sẵn: `beamHigh`, `beamLow`, `fog`, `warn`. `m` tính bằng mét trên thang `SCALE_MAX`; thanh không in số. Bảng nằm góc trên phải (x 1366, y 34, rộng 520). Bài khác đổi nhãn và ý nghĩa của hai thanh (ví dụ "KHOẢNG CÁCH" so với "QUÃNG DỪNG XE") mà không sửa `hud.js`.
+Icon có sẵn: `beamHigh`, `beamLow`, `fog`, `warn`, `wiper`. `m` tính bằng mét trên thang `SCALE_MAX`; thanh không in số. Bảng nằm góc trên phải (x 1366, y 34, rộng 520). Bài khác đổi nhãn và ý nghĩa của hai thanh (ví dụ "KHOẢNG CÁCH" so với "QUÃNG DỪNG XE") mà không sửa `hud.js`.
 
 Các mục khác của `finish`: `steer` (góc vô lăng), `reticle { x, y, a, g }` (dấu ngắm "mắt đang nhìn đâu"), `veil { x, y }` (tâm quầng chói), `haze` 0..1 (quầng sương trước mũi xe).
 
@@ -174,7 +178,7 @@ Làm trong dự án trước, trong `world.js` của bài; khi chạy đúng và
 - **Vật có mô hình** (nón, cọc, cột biển, cột đèn): `road.prop(T, tên, scale)` trong `road.start`, rồi mỗi khung đặt `visible` và `position`. Vị trí z tính theo `d.s` để vật đứng yên trên đường trong khi xe chạy (xem các nón của cảnh `side`).
 - **Xe thứ ba, xe đi cùng chiều**: `road.vehicle(…)`, đường đi của nó là một hàm thuần trong `drive.js` (như `onc`, `lead`, `pass` của ví dụ).
 - **Vật chưa có mô hình** (thanh chắn, ray, tàu, rơ moóc, thùng xe ben): dựng bằng hình khối three.js qua `road.THREE` và `road.scene` cho thứ đơn giản; thứ cần đẹp thì làm mô hình bằng `my-designer-3d`, xuất GLB theo `chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/references/new-cases.md`, đặt vào `assets/models/` và đăng ký trong `models.js` của dự án.
-- **Mặt đường khác** (nhiều làn, làn dừng khẩn cấp, ổ gà, vũng nước, vạch mới): mặt đường được vẽ bằng shader trong `road.js` theo `x` và quãng đã đi. Thứ phẳng và tạm thời thì dùng `road.strip()` + `put()`. Thứ thuộc về con đường (số làn, dải phân cách) thì thêm tham số cho `createRoad` và giữ mặc định cũ.
+- **Mặt đường khác** (nhiều làn, làn dừng khẩn cấp, ổ gà, vạch mới; mặt ướt và vũng nước đã có qua `wetRoad`, `puddle`): mặt đường được vẽ bằng shader trong `road.js` theo `x` và quãng đã đi. Thứ phẳng và tạm thời thì dùng `road.strip()` + `put()`. Thứ thuộc về con đường (số làn, dải phân cách) thì thêm tham số cho `createRoad` và giữ mặc định cũ.
 - **Dốc**: chưa có. Hướng ít rủi ro nhất là giữ đường phẳng trong toạ độ của nó và nghiêng máy quay cùng đường chân trời, vì mọi phép chiếu nhãn đi qua `road.proj`. Thử trên một cảnh trước khi viết cả bài.
 - **Hình 2D trong ca-bin** (bàn đạp, cần số, đèn báo): vẽ trong `hud.js` như `cockpit()` và `panel()`, điều khiển bằng một mục mới của `finish`.
 - **Bảng màu**: thêm một mục vào `PALETTES`.

@@ -34,7 +34,8 @@ chuong-3-ky-thuat-lai-xe-video/
     assets/lib/world/geom.js       số đo của đường và xe; stopDist()
     assets/lib/world/timeline.js   đường tốc độ, bảng cảnh quay, quãng đã đi, tấp vào lề
     assets/lib/world/road.js       sân khấu: đường, lề, cây, cọc tiêu, trời, sương, đèn xe, máy quay,
-                                   dải dừng xe, vạch mép, nhãn bám theo vật; bảng màu night và day
+                                   dải dừng xe, vạch mép, nhãn bám theo vật; mặt đường ướt, vũng nước;
+                                   bảng màu night, day và overcast
     assets/lib/world/hud.js        lớp 2D: kính chắn gió, mưa, gạt nước, quầng chói, ca-pô và vô lăng,
                                    bảng đồng hồ góc trên phải, dấu ngắm, thanh chờ
     compositions/world.html        lớp 3D của video
@@ -44,6 +45,8 @@ chuong-3-ky-thuat-lai-xe-video/
     scripts/storyboard.lib.mjs     ghi STORYBOARD.md từ SCRIPT.md và mốc thật
     scripts/scan-words.mjs         quét chữ bị cấm của chương
   examples/bai-05-khi-khong-nhin-ro/  điểm xuất phát mặc định: Bài 5, ý 1–3, đêm, sương mù, mưa to
+  examples/bai-05-p2-troi-mua/        Bài 5 ý 4: chiều âm u, mưa, đường ướt, vũng nước, nhịp gạt nước
+                                      (new-project.sh <tên> --example bai-05-p2-troi-mua)
     BRIEF.md, SCRIPT.md, .hyperframes/{tts_request,bgm_request}.json
     assets/lib/world/{beats,drive,world}.js
     scripts/{build-frames,build-storyboard}.mjs
@@ -57,11 +60,11 @@ Skill không chứa tệp giọng, clip mẫu hay profile giọng nào, và khô
 
 | Mức | Thứ |
 |---|---|
-| **Dùng nguyên** | Toàn bộ `kit/`: đường hai làn có lề và chỗ dừng xe, cây, cọc tiêu, trời đêm hoặc ngày, sương, mưa, gạt nước, đèn chiếu xa, chiếu gần, đèn sương mù, đèn dừng khẩn cấp, đèn phanh; ghế lái có ca-pô và vô lăng; bảy kiểu cảnh quay; dải dừng xe và bảng "tầm nhìn so với quãng dừng xe"; bộ khối cột chữ; các script; hệ thiết kế `glass-keynote`; cách làm giọng, nhạc, phụ đề |
+| **Dùng nguyên** | Toàn bộ `kit/`: đường hai làn có lề và chỗ dừng xe, cây, cọc tiêu, trời đêm, ngày hoặc âm u, sương, mưa, gạt nước có nhịp chậm và nhanh, mặt đường ướt, vũng nước, đèn chiếu xa, chiếu gần, đèn sương mù, đèn dừng khẩn cấp, đèn phanh; ghế lái có ca-pô và vô lăng; bảy kiểu cảnh quay; dải dừng xe và bảng "tầm nhìn so với quãng dừng xe"; bộ khối cột chữ; các script; hệ thiết kế `glass-keynote`; cách làm giọng, nhạc, phụ đề |
 | **Sửa từ ví dụ** | Năm tệp riêng của bài: `beats.js` (mốc lời đọc), `drive.js` (chuyến xe theo thời gian), `world.js` (đạo diễn: xe, máy quay, nhãn, bảng đồng hồ), `build-frames.mjs` (cột chữ), `build-storyboard.mjs` |
 | **Tạo mới** | Thứ sân khấu chưa có: dốc, mặt đường trơn hay ngập, khúc cua và quay đầu, đường ngang đường sắt, đường cao tốc nhiều làn, bàn đạp và cần số trong ca-bin, cửa xe mở, xe tự đổ nâng thùng, hình cận cảnh mô tô. Bảng theo từng bài ở `references/series.md` §5; cách thêm ở `references/world.md` §7 |
 
-Cấu hình đã chạy thật: một video, 16 khung, 873 âm tiết lời đọc, 5:06, bối cảnh đêm. Bảng màu `day` mới chỉ được chụp thử trên cảnh của Bài 5 (đọc được, chưa dùng trong video nào): bài đầu tiên dùng ban ngày phải soát kỹ ảnh và chỉnh `PALETTES.day` trong `road.js`.
+Cấu hình đã chạy thật: hai video. Bài 5 ý 1–3: 16 khung, 873 âm tiết, 5:06, ban đêm. Bài 5 ý 4: 13 khung, 422 âm tiết, 2:37, chiều âm u có mưa (`palette: "overcast"`). Bảng màu `day` (trời quang) mới chỉ được chụp thử, chưa dùng trong video nào: bài đầu tiên dùng nó phải soát kỹ ảnh và chỉnh `PALETTES.day` trong `road.js`.
 
 ## Yêu cầu cố định của video chương này
 
@@ -97,8 +100,8 @@ SK=$ROOT/.claude/skills/vi-explainer-video
 HF=<thư mục có faceless-explainer; new-project.sh in ra ở dòng "HF:">
 FX=$HF/faceless-explainer/scripts
 ENGINE=$HF/media-use/audio/scripts/audio.mjs
-P=$ROOT/videos/<ten-du-an>
-BRIEFS=/Users/phucnt/workspace/sat-hach-lai-xe/video-briefs/chuong-3-ky-thuat-lai-xe
+P=$ROOT/projects/sat-hach-lai-xe/videos/<ten-du-an>
+BRIEFS=/Users/phucnt/workspace/sat-hach-lai-xe/projects/sat-hach-lai-xe/video-briefs/chuong-3-ky-thuat-lai-xe
 ```
 
 Mỗi lệnh Bash là một shell mới: khai báo lại biến trong cùng lệnh, và dùng `(cd "$P" && …)`. Lệnh CLI viết `hyperframes …`; máy không có lệnh đó thì thay bằng `npx -y hyperframes …` (viết thẳng, không cất vào biến).
@@ -121,7 +124,7 @@ Brief thiếu thứ không suy ra được thì hỏi người dùng một lần
 bash .claude/skills/chuong-3-ky-thuat-lai-xe-video/scripts/new-project.sh chuong-3-bai-<NN>-<ten-ngan>
 ```
 
-Lệnh tạo `videos/<ten-du-an>` (HyperFrames trống, font tiếng Việt, `glass-keynote`), chép engine dùng chung, `kit/` của chương và các tệp của ví dụ Bài 5. Ghi lại dòng `HF:`. `--bare` bỏ phần ví dụ; dự án khi đó chưa chạy được cho tới khi có đủ năm tệp riêng của bài. `videos/` nằm trong `.gitignore`; không `git add -f` gì ở đó.
+Lệnh tạo `projects/sat-hach-lai-xe/videos/<ten-du-an>` (HyperFrames trống, font tiếng Việt, `glass-keynote`), chép engine dùng chung, `kit/` của chương và các tệp của ví dụ Bài 5. Ghi lại dòng `HF:`. `--bare` bỏ phần ví dụ; dự án khi đó chưa chạy được cho tới khi có đủ năm tệp riêng của bài. `projects/sat-hach-lai-xe/videos/` nằm trong `.gitignore`; không `git add -f` gì ở đó.
 
 ### 3. BRIEF.md và SCRIPT.md
 

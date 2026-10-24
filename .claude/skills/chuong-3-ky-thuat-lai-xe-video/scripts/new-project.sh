@@ -1,9 +1,9 @@
 #!/bin/bash
-# Start a video of the "Kỹ thuật lái xe" chapter in videos/<name>: a HyperFrames project, the
+# Start a video of the "Kỹ thuật lái xe" chapter in projects/sat-hach-lai-xe/videos/<name>: a HyperFrames project, the
 # Vietnamese fonts, the glass-keynote design, the shared 3D engine and models (taken from the
 # chuong-6-sa-hinh-va-xu-ly-tinh-huong-video kit), the road stage and overlay kit of this skill, and the per-lesson files of a
 # finished lesson as the starting point.
-#   bash .claude/skills/chuong-3-ky-thuat-lai-xe-video/scripts/new-project.sh <name> [--example bai-05-khi-khong-nhin-ro | --bare]
+#   bash .claude/skills/chuong-3-ky-thuat-lai-xe-video/scripts/new-project.sh <name> [--example bai-05-khi-khong-nhin-ro | --example bai-05-p2-troi-mua | --bare]
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 ROOT="$(git -C "$HERE" rev-parse --show-toplevel)"
@@ -13,8 +13,8 @@ name="${1:-}"; example="bai-05-khi-khong-nhin-ro"
 [ "${2:-}" = "--example" ] && example="${3:-}"
 [ "${2:-}" = "--bare" ] && example=""
 case "$name" in ""|*/*|.*|-*) echo "usage: new-project.sh <name> [--example <example> | --bare]" >&2; exit 2 ;; esac
-P="$ROOT/videos/$name"
-[ -e "$P" ] && { echo "videos/$name already exists" >&2; exit 1; }
+P="$ROOT/projects/sat-hach-lai-xe/videos/$name"
+[ -e "$P" ] && { echo "projects/sat-hach-lai-xe/videos/$name already exists" >&2; exit 1; }
 if [ -n "$example" ] && [ ! -d "$HERE/examples/$example" ]; then
   echo "no such example: $example (have: $(ls "$HERE/examples" | tr '\n' ' '))" >&2; exit 1
 fi
@@ -24,8 +24,8 @@ for d in "$ROOT/.kiro/skills" "$ROOT/.claude/skills" "$HOME/.claude/skills"; do 
 [ -n "$HF" ] || { echo "the HyperFrames skills (faceless-explainer) are not installed; see vi-explainer-video/references/install.md" >&2; exit 1; }
 hf() { if command -v hyperframes >/dev/null; then hyperframes "$@"; else npx -y hyperframes "$@"; fi; }
 
-mkdir -p "$ROOT/videos"
-(cd "$ROOT/videos" && hf init "$name" --non-interactive --example=blank --skill=faceless-explainer) | tail -2
+mkdir -p "$ROOT/projects/sat-hach-lai-xe/videos"
+(cd "$ROOT/projects/sat-hach-lai-xe/videos" && hf init "$name" --non-interactive --example=blank --skill=faceless-explainer) | tail -2
 cd "$P"
 mkdir -p assets/fonts assets/lib/world scripts
 cp "$SK"/assets/fonts/*.woff2 assets/fonts/
@@ -42,7 +42,7 @@ cp -R "$HERE/kit/." .
 if [ -n "$example" ]; then
   cp -R "$HERE/examples/$example/." .
 fi
-echo "project: videos/$name"
+echo "project: projects/sat-hach-lai-xe/videos/$name"
 echo "HF: $HF"
 [ -n "$example" ] && echo "example: $example (BRIEF.md, SCRIPT.md, requests, beats/drive/world, build-frames, build-storyboard)"
 echo "next: SKILL.md step 3"
