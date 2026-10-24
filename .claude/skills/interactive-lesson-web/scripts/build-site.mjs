@@ -71,7 +71,7 @@ const head = (extra = "") => `<!doctype html>
     <title>${esc(site.title)}</title>
     <meta name="description" content="${esc(site.intro ?? site.title)}" />
     <meta name="theme-color" content="#f6eddd" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2313807e'/%3E%3Cpath d='M12 9l12 7-12 7z' fill='%23fffaf0'/%3E%3C/svg%3E" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e6f6d'/%3E%3Cpath d='M12 9l12 7-12 7z' fill='%23fffaf0'/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="style.css" />${extra}
   </head>`;
 

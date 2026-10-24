@@ -30,7 +30,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 .primary small { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; }
 .primary b { font-size: 17px; line-height: 1.3; }
 .primary::after { content: "→"; position: absolute; right: 18px; top: 50%; translate: 0 -50%; font-size: 22px; font-weight: 800; }
-.primary:hover, .primary:focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.primary:focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+@media (hover: hover) { .primary:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); } }
 
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 28px 0 0; }
 .stats div { padding: 12px 14px; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--card); }
@@ -51,7 +52,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 .chip span { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .chip.has { border-color: var(--ink); background: var(--card); color: var(--ink); }
 .chip.has span { color: var(--teal); }
-.chip:hover { border-color: var(--teal); }
+@media (hover: hover) { .chip:hover { border-color: var(--teal); } }
 
 .unit { padding: 26px 0 6px; border-top: 1.5px solid var(--line); margin-top: 18px; }
 .unit-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
@@ -70,7 +71,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 72px; }
   background: var(--card); color: var(--ink); text-decoration: none;
   box-shadow: 4px 4px 0 var(--ink); transition: transform 0.12s, box-shadow 0.12s;
 }
-.lesson:hover, .lesson:focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.lesson:focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+@media (hover: hover) { .lesson:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); } }
 .lesson .num { padding-top: 2px; color: var(--teal); font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
 .lesson .body { display: grid; gap: 4px; }
 .lesson b { font-size: 18px; line-height: 1.3; }
@@ -86,7 +88,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 
 .later { margin-top: 12px; }
 .later summary { cursor: pointer; width: fit-content; color: var(--mute); font-weight: 700; font-size: 14px; padding: 4px 0; }
-.later summary:hover { color: var(--ink); }
+@media (hover: hover) { .later summary:hover { color: var(--ink); } }
 .later ol { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 0 24px; }
 .later li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; padding: 8px 0; border-bottom: 1px dashed var(--line); color: var(--mute); font-size: 14px; line-height: 1.4; }
 .later .num { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding-top: 1px; }

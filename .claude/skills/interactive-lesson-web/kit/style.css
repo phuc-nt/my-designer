@@ -10,7 +10,7 @@
   --ink: #18213d;
   --mute: #5c6078;
   --line: #d3bea3;
-  --teal: #13807e;
+  --teal: #0e6f6d;
   --teal-hi: #1aa3a1;
   --amber: #f5b42a;
   --pos: #146b47;
@@ -30,7 +30,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .top { max-width: 1440px; margin: 0 auto; padding: 18px 16px 10px; }
 .back { display: inline-block; margin-bottom: 4px; color: var(--mute); font-weight: 700; font-size: 14px; text-decoration: none; }
-.back:hover { color: var(--ink); }
+@media (hover: hover) { .back:hover { color: var(--ink); } }
 .kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); }
 h1 { margin: 2px 0 0; font-size: clamp(22px, 3.2vw, 32px); line-height: 1.2; font-weight: 800; }
 
@@ -94,7 +94,7 @@ h1 { margin: 2px 0 0; font-size: clamp(22px, 3.2vw, 32px); line-height: 1.2; fon
   font-size: 14px;
   min-height: 40px;
 }
-.chip-btn:hover { background: #fff; }
+@media (hover: hover) { .chip-btn:hover { background: #fff; } }
 .labels { position: absolute; top: 10px; right: 10px; }
 
 .veil {
@@ -118,7 +118,7 @@ h1 { margin: 2px 0 0; font-size: clamp(22px, 3.2vw, 32px); line-height: 1.2; fon
   font-weight: 800;
   box-shadow: 0 6px 0 var(--ink);
 }
-.big-play:disabled { background: #9aa0b4; box-shadow: none; cursor: wait; }
+.big-play:disabled { background: #e4ddd0; color: #4a4f66; box-shadow: none; cursor: wait; }
 
 /* a vehicle's card, anchored to the vehicle on wide screens */
 .pop {
@@ -195,7 +195,7 @@ h1 { margin: 2px 0 0; font-size: clamp(22px, 3.2vw, 32px); line-height: 1.2; fon
   font-size: clamp(17px, 2vw, 21px);
   font-weight: 700;
   line-height: 1.45;
-  color: #8a8697;
+  color: #6f6b7d;
 }
 .caption .on { color: var(--ink); }
 .caption .now { color: var(--teal); }
@@ -273,7 +273,7 @@ h1 { margin: 2px 0 0; font-size: clamp(22px, 3.2vw, 32px); line-height: 1.2; fon
 .next-lesson small { color: var(--teal); font-weight: 800; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
 .next-lesson b { font-size: 15px; line-height: 1.3; }
 .next-lesson::after { content: "→"; position: absolute; right: 16px; top: 50%; translate: 0 -50%; font-size: 20px; font-weight: 800; color: var(--teal); }
-.next-lesson:hover { border-color: var(--teal); }
+@media (hover: hover) { .next-lesson:hover { border-color: var(--teal); } }
 
 :focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 
@@ -284,7 +284,7 @@ h1 { margin: 2px 0 0; font-size: clamp(22px, 3.2vw, 32px); line-height: 1.2; fon
   h1 { font-size: 18px; }
   .layout { grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; }
   .stage { max-height: 82vh; }
-  .pop { width: min(250px, 46%); font-size: 13px; padding: 8px 10px; }
+  .pop { width: min(250px, 46%); font-size: 14px; padding: 8px 10px; }
   .why-head b { font-size: 15px; }
 }
 
@@ -292,7 +292,8 @@ h1 { margin: 2px 0 0; font-size: clamp(22px, 3.2vw, 32px); line-height: 1.2; fon
 .intro { max-width: 60ch; margin: 6px 0 0; color: var(--mute); line-height: 1.5; }
 .lessons { list-style: none; max-width: 1440px; margin: 0 auto; padding: 8px 16px 40px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
 .lessons a { position: relative; display: flex; flex-direction: column; gap: 6px; height: 100%; padding: 16px 18px 18px; border: 2px solid var(--ink); border-radius: var(--radius); background: var(--card); color: var(--ink); text-decoration: none; box-shadow: 4px 4px 0 var(--ink); transition: transform 0.12s, box-shadow 0.12s; }
-.lessons a:hover, .lessons a:focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.lessons a:focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+@media (hover: hover) { .lessons a:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); } }
 .lessons .kicker { padding-right: 48px; }
 .lessons b { font-size: 19px; line-height: 1.25; padding-right: 48px; }
 .lessons small { color: var(--mute); font-size: 14px; line-height: 1.45; }
