@@ -27,6 +27,7 @@ you ──bin/dsa──▶ http://localhost:<port> ◀──browser── the hu
 | 3D scenes: primitives, lights, PBR materials, GLB import, mesh editing (`dsa scene command`), rigs | `.claude/skills/my-designer-3d/SKILL.md` |
 | Animation: document timeline, keyframes, 2D character rigs, video / frame exports | `.claude/skills/my-designer-motion/SKILL.md` |
 | Vietnamese narrated explainer video from prepared text (HyperFrames; Gemini voice or a locally cloned voice) | `.claude/skills/vi-explainer-video/SKILL.md` |
+| An app promo or feature video: app screens redrawn in HTML/CSS from the app's source and measured in Chrome, a CSS 3D camera, the product's real audio spliced into the narration | `.claude/skills/app-promo-video/SKILL.md` |
 | Driving-test junction ("sa hình") questions as a narrated 3D video, from a brief written in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-6-sa-hinh-va-xu-ly-tinh-huong-video/SKILL.md` |
 | A driving-technique lesson (Chương III · Kỹ thuật lái xe) as a narrated first-person 3D drive, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-3-ky-thuat-lai-xe-video/SKILL.md` |
 | A how-the-car-works lesson (Chương IV · Cấu tạo và sửa chữa) as a narrated 2D diagram bench, from a lesson brief in the `sat-hach-lai-xe` repo | `.claude/skills/chuong-4-cau-tao-va-sua-chua-video/SKILL.md` |
@@ -61,6 +62,10 @@ installed the upstream way: `npx hyperframes`, with its skills
 - **`vi-explainer-video`** is the Vietnamese layer, maintained here: fonts with
   diacritics, voice, captions that follow the script, three presets and five
   scene templates (`scene-templates/`).
+- **`app-promo-video`** sits on top of it for app promos: a UI kit drawn from the
+  app's source (`ui-kit.mjs` measures, previews and hands it to the frame workers),
+  a CSS 3D camera rig, and scripts that splice the app's own audio into the voice
+  and duck the music under it. `docs/app-promo-video-practice.md` is the worked case.
 - **`chuong-6-sa-hinh-va-xu-ly-tinh-huong-video`** sits on top of it for driving-test junction questions: a
   three.js layer under the frames, with its engine, models and one worked
   example in the skill. Briefs come from the `sat-hach-lai-xe` repo; what a

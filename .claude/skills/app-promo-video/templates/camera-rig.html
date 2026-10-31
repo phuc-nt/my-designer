@@ -1,0 +1,71 @@
+<!-- CSS 3D camera rig for one frame. Rename fNN to the frame prefix (f06), paste the CSS into the frame's <style>,
+     the markup inside #root (above the content that stays flat), and the script inside the frame's IIFE after `tl`.
+     One lens (static perspective), one world (preserve-3d), one cam object, one writer. No WebGL. -->
+
+<style>
+  /* the stage stops above the caption zone; its lower edge melts into the ground */
+  #fNN-vp { position: absolute; left: 0; top: 0; width: 1920px; height: 888px; overflow: hidden; }
+  #fNN-floor { position: absolute; left: 0; right: 0; top: 808px; height: 80px; background: linear-gradient(rgba(7,8,23,0), #070817); }
+  /* lens: perspective is set once and never tweened */
+  #fNN-stage3d { position: absolute; inset: 0; perspective: 1000px; perspective-origin: 960px 444px; }
+  /* world: only applyCamera() writes its transform. No filter, opacity or overflow on the stage or the world:
+     any of them flattens preserve-3d. Glows and blurs live outside, in the flat background layer. */
+  #fNN-world { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 960px 444px 0; will-change: transform; }
+  /* an object: its own place in the world; the device wrapper sits here, the scaled device inside it */
+  #fNN-dev { position: absolute; left: 760px; top: 26px; width: 399px; height: 843px; transform-origin: 50% 50%; }
+  /* pop-out copy: lives in the world, outside the device (the screen clips); starts exactly over the original */
+  #fNN-pop { position: absolute; transform-origin: 50% 50%; opacity: 0; }
+</style>
+
+<div id="fNN-vp">
+  <div id="fNN-stage3d">
+    <div id="fNN-world">
+      <div id="fNN-dev"><!-- <div class="fNN-phone" style="left:0;top:0;transform:scale(0.86)">…</div> --></div>
+      <div id="fNN-pop"><!-- copy of the card, scale 0.86, left/top from `ui-kit.mjs point … --anchor tl` --></div>
+    </div>
+  </div>
+  <div id="fNN-floor"></div>
+</div>
+
+<script>
+  // inside the frame's IIFE, after: const tl = gsap.timeline({ paused: true });
+  const world = document.querySelector("#fNN-world");
+  // translate outside, rotate inside: the camera moves through the world, then turns its head
+  const cam = { x: 0, y: 0, z: 0, rx: 0, ry: 0 };
+  // objects near the lens fade by their effective depth: visible until n0, gone at n1 (perspective 1000)
+  const near = [
+    // { el: document.querySelector("#fNN-card3"), z: 400, n0: 560, n1: 820 },
+  ];
+  function applyCamera() {
+    world.style.transform = "translate3d(" + cam.x + "px," + cam.y + "px," + cam.z + "px) rotateX(" + cam.rx + "deg) rotateY(" + cam.ry + "deg)";
+    for (const n of near) {
+      const eff = cam.z + n.z;
+      n.el.style.opacity = String(Math.max(0, Math.min(1, (n.n1 - eff) / (n.n1 - n.n0))));
+    }
+  }
+  applyCamera();
+  // one leg = one tween of the cam object; immediateRender: false written out (the linter cannot see it through a helper)
+  function leg(from, to, dur, ease, at) {
+    tl.fromTo(cam, Object.assign({}, from), Object.assign({ duration: dur, ease: ease, onUpdate: applyCamera, immediateRender: false }, to), at);
+  }
+  // poses: name them after what the viewer reads there
+  const WIDE = { x: 0, y: 0, z: -60, rx: 6, ry: 14 };   // device turned a little, settling in
+  const FLAT = { x: 0, y: 0, z: 0, rx: 0, ry: 0 };       // readable: hold >= 1 s
+  const DIVE = { x: -10, y: -20, z: 230, rx: 0, ry: 0 }; // ~x1.3 onto a detail (scale = 1000 / (1000 - z))
+  leg(WIDE, FLAT, 0.9, "power2.inOut", 0);              // reposition: power2.inOut, 0.9-1.4 s
+  leg(FLAT, DIVE, 0.9, "power4.out", 6.2);              // dive onto what the narration names: power4.out
+  // limits: |rx| <= 65, |ry| <= 30; fly, stop to read, fly on
+
+  // touch on a measured point (kit §3)
+  function tap(dot, t) {
+    tl.fromTo(dot, { scale: 0, opacity: 1 }, { scale: 1, duration: 0.12, ease: "power2.out", immediateRender: false }, t);
+    tl.fromTo(dot, { scale: 1, opacity: 1 }, { scale: 1.35, opacity: 0, duration: 0.28, ease: "power2.out", immediateRender: false }, t + 0.14);
+  }
+  // burst out: hide the in-screen original with a short opacity tween (a later tl.set of visibility hides it from frame start),
+  // show the world copy in the same instant, then bring it toward the viewer
+  function burst(orig, copy, t) {
+    tl.fromTo(orig, { opacity: 1 }, { opacity: 0, duration: 0.02, ease: "none", immediateRender: false }, t);
+    tl.fromTo(copy, { opacity: 0 }, { opacity: 1, duration: 0.02, ease: "none", immediateRender: false }, t);
+    tl.fromTo(copy, { z: 0, y: 0, scale: 1 }, { z: 160, y: -40, scale: 1.06, duration: 0.6, ease: "power4.out", immediateRender: false }, t);
+  }
+</script>

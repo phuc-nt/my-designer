@@ -28,6 +28,7 @@ for agents *designing* with it.
 | See what was ported from upstream and the generators, and what comes next | [Roadmap](roadmap.md) |
 | Read about the multi-user sharing surface this kit leaves switched off | [Community](community.md) |
 | See what one real narrated-video run used, how long it took and what it left unchecked (Vietnamese) | [Narrated video practice](narrated-video-practice.md) |
+| Make an app promo video: app screens redrawn in HTML/CSS, a CSS 3D camera, the product's real audio (Vietnamese) | [App promo video practice](app-promo-video-practice.md) |
 
 There is no deployment guide: this kit runs on one machine through
 [`bootstrap.mjs`](../bootstrap.mjs), which the root README documents. Upstream's hosting,
